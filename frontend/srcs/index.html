@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ft_transcendence - Game Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .game-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .game-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .play-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .play-button:hover {
+            background: #45a049;
+        }
+        
+        .auth-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .auth-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .auth-button:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 ft_transcendence</h1>
+            <p>The Ultimate Gaming Portal</p>
+        </div>
+        
+        <div class="games-grid">
+            <div class="game-card" onclick="playGame('pong')">
+                <h3>🏓 Pong Classic</h3>
+                <p>Experience the classic Pong game with modern TypeScript implementation</p>
+                <button class="play-button">Play Now</button>
+            </div>
+            
+            <div class="game-card" onclick="alert('Coming Soon!')">
+                <h3>🎯 Tournament Mode</h3>
+                <p>Compete with other players in exciting tournaments</p>
+                <button class="play-button">Coming Soon</button>
+            </div>
+            
+            <div class="game-card" onclick="alert('Coming Soon!')">
+                <h3>🤖 AI Challenge</h3>
+                <p>Test your skills against advanced AI opponents</p>
+                <button class="play-button">Coming Soon</button>
+            </div>
+        </div>
+        
+        <div class="auth-section">
+            <a href="#" class="auth-button" onclick="showLogin()">Login</a>
+            <a href="#" class="auth-button" onclick="showSignup()">Sign Up</a>
+            <a href="#" class="auth-button" onclick="googleAuth()">
+                🔍 Login with Google
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        function playGame(game) {
+            if (game === 'pong') {
+                window.location.href = 'pong.html';
+            }
+        }
+        
+        function showLogin() {
+            // 将来的にログインモーダル表示
+            alert('Login page coming soon!');
+        }
+        
+        function showSignup() {
+            // 将来的にサインアップモーダル表示
+            alert('Signup page coming soon!');
+        }
+        
+        function googleAuth() {
+            // 将来的にGoogle認証
+            alert('Google Auth coming soon!');
+        }
+        
+        // グローバルに関数を公開
+        window.playGame = playGame;
+        window.showLogin = showLogin;
+        window.showSignup = showSignup;
+        window.googleAuth = googleAuth;
+    </script>
+</body>
+</html>
