@@ -25,6 +25,12 @@ networks:
 ####
   
 services:
+  frontend:
+    init: true
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
   backend:
     init: true
     build:

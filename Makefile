@@ -1,3 +1,7 @@
+NAME 	:= ft_transcendence
+UNAME	= $(uname -a)
+APP		:= containers/application
+OPS		:= containers/operation
 
 
 .PHONEY: up
