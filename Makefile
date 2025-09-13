@@ -30,14 +30,14 @@ ops-fclean: # TODO: Implementation pending
 
 # --- Development Helpers ---
 app-logs:
-	@docker compose -f $(APP) logs -f
+	@docker compose -f $(APP)/compose.yml logs -f
 
 ops-logs:
-	@docker compose -f $(OPS) logs -f
+	@docker compose -f $(OPS)/compose.yml logs -f
 
 shell-backend:
-	@docker compose -f $(APP) exec backend sh
+	@docker compose -f $(APP)/compose.yml exec backend sh
 
 shell-frontend:
-	@docker compose -f $(APP) exec frontend sh
+	@docker compose -f $(APP)/compose.yml exec frontend sh
 

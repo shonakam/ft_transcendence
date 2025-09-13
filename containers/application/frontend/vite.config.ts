@@ -10,8 +10,9 @@ export default defineConfig(({ mode }) => {
     define: {
         __APP_ENV__: JSON.stringify(env.APP_ENV),
     },
-    server: {
-        port: env.APP_PORT ? Number(env.APP_PORT) : 5173,
-    },
+  server: {
+    port: env.APP_PORT ? Number(env.APP_PORT) : 5173,
+    host: "0.0.0.0",
+  },
   }
 })
