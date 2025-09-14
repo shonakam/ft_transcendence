@@ -9,12 +9,12 @@ networks:
   transcendence-network:
     name: transcendence-network
 
-# volumes:
-#   backend:
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: ${PWD}
+volumes:
+  storage:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_DIR}
 
 # secrets:
 #   nginx_certificate:
@@ -50,7 +50,22 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/app
+      - storage:/var/lib/sqlite
       - "/app/node_modules"
     networks:
       - transcendence-network
+    restart: unless-stopped
     <<: *logging
+
+  database:
+    init: true
+    build:
+      context: ./sqlite
+      dockerfile: Dockerfile
+    container_name: ft-database
+    # ports: Planned update to PSQL
+    #   - "5432:5432" 
+    volumes:
+      - storage:/var/lib/sqlite
+    restart: unless-stopped
+

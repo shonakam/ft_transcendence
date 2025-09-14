@@ -1,7 +1,9 @@
-NAME 	:= ft_transcendence
-UNAME	= $(uname -a)
-APP		:= containers/application
-OPS		:= containers/operation
+NAME 			:= ft_transcendence
+UNAME			= $(uname -a)
+APP				:= containers/application
+OPS				:= containers/operation
+export DATA_DIR := $(PWD)/$(APP)/sqlite/data
+
 
 # Orthodox recipes
 all: app-up ops-up
