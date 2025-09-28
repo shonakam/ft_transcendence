@@ -1,6 +1,6 @@
 import fastify from 'fastify';
 import { registRouters } from './adapter/router/index.ts';
-import { container } from './container/index.js'; 
+import { container } from './container/index.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const HOST = process.env.HOST || '0.0.0.0';

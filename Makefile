@@ -8,27 +8,27 @@ export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 # Orthodox recipes
 all: app-up ops-up
 
-app-up:
+up-app:
 	@docker compose -f $(APP)/compose.yml up --build
 
-app-down:
+down-app:
 	@docker compose -f $(APP)/compose.yml down
 
-app-clean: # TODO: Implementation pending 
+clean-app: # TODO: Implementation pending 
 
-app-fclean:
+fclean-app:
 	@docker compose -f $(APP)/compose.yml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
 
-ops-up: # TODO: Implementation pending 
+up-ops: # TODO: Implementation pending 
 
-ops-down: # TODO: Implementation pending 
+down-ops: # TODO: Implementation pending 
 
-ops-clean: # TODO: Implementation pending 
+clean-ops: # TODO: Implementation pending 
 
-ops-fclean: # TODO: Implementation pending 
+fclean-ops: # TODO: Implementation pending 
 
-.PHONEY: app-up app-down app-clean app-fclean ops-up ops-down ops-clean ops-fclean
+.PHONEY:
 
 # --- Development Helpers ---
 app-logs:

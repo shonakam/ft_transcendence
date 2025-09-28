@@ -1,0 +1,18 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": false,
+
+  "[typescript]": {
+    "editor.insertSpaces": false
+  },
+  "[javascript]": {
+    "editor.insertSpaces": false
+  },
+  "[html]": {
+    "editor.insertSpaces": false
+  },
+  "[makefile]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 8
+  }
+}
