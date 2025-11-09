@@ -1,31 +1,12 @@
-// src/router/router.ts
-import { routes } from './routes';
+import { Routes } from '../interface/Route';
 
-const rootElement = document.getElementById('app') as HTMLElement;
+import { HomePage } from '../pages/HomePage';
+import { AboutPage } from '../pages/AboutPage';
+// import { NotFoundPage } from '../pages/NotFoundPage';
 
-export function navigateTo(url: string) {
-  history.pushState(null, '', url);
-  renderContent();
-}
-
-export function renderContent() {
-  const path = window.location.pathname;
-  const pageComponent = routes[path] || routes['/'];
-
-  if (rootElement) {
-    rootElement.innerHTML = '';
-    rootElement.appendChild(pageComponent());
-  }
-}
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.addEventListener('click', e => {
-      const target = e.target as HTMLAnchorElement;
-      if (target && target.matches('a')) {
-        e.preventDefault();
-        navigateTo(target.href);
-      }
-    });
-    window.addEventListener('popstate', renderContent);
-    renderContent();
-});
+export const routes: Routes = {
+  '/': () => new HomePage(),
+  '/home': () => new HomePage(),
+  '/about': () => new AboutPage(),
+  // '/404': () => new NotFoundPage(),
+};

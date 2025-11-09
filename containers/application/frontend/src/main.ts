@@ -1,6 +1,5 @@
-import { Header } from './components/organisms/header';
+import { Router } from "./router/router";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const headerComponent = new Header();
-    document.body.prepend(headerComponent.getElement());
+  new Router();
 });

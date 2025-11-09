@@ -54,26 +54,27 @@ export class SqliteUserRepository implements UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE id = ?`, [id]);
+    const row = await this.db.get(`SELECT * FROM users WHERE id = ? AND withdrawnAt IS NULL`, [id]);
     return row ?? null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE email = ?`, [
-      email,
-    ]);
+    const row = await this.db.get(`SELECT * FROM users WHERE email = ? AND withdrawnAt IS NULL`, [email]);
     return row ?? null;
   }
 
-  async delete(id: string): Promise<void> {
-    await this.db.run(`DELETE FROM users WHERE id = ?`, [id]);
+  /* physical delete */
+  // async delete(id: string): Promise<void> {
+  //   await this.db.run(`DELETE FROM users WHERE id = ?`, [id]);
+  // }
+
+  /* logical delete */
+  async delete(id: string, deletedEmail: string, withdrawnAt: number): Promise<void> {
+    await this.db.run(`UPDATE users SET withdrawnAt = ?, email = ? WHERE id = ?`, [withdrawnAt, deletedEmail, id])
   }
 
   async list(offset = 0, limit = 10): Promise<User[]> {
-    const rows = await this.db.all(
-      `SELECT * FROM users ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
-      [limit, offset],
-    );
+    const rows = await this.db.all(`SELECT * FROM users ORDER BY createdAt DESC LIMIT ? OFFSET ?`, [limit, offset]);
     return rows;
   }
 }

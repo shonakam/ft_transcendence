@@ -1,4 +1,5 @@
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
+import { Buffer } from 'node:buffer';
 
 export default class Password {
   private constructor(private readonly hash: string) {}
@@ -28,10 +29,17 @@ export default class Password {
     return new Password(`${salt}:${key}`);
   }
 
-  compare(raw: string, stored: string): boolean {
-    const [salt, key] = stored.split(':') as [string, string];
-    const hash = scryptSync(raw, salt, 64).toString('hex');
-    return hash === key;
+  static compare(raw: string, stored: string): boolean {
+    const [salt, keyHex] = stored.split(':') as [string, string];
+  
+    const hashBuffer = scryptSync(raw, salt, 64); // 生パスワードからハッシュを生成 (Buffer 形式)
+    const keyBuffer = Buffer.from(keyHex, 'hex'); // 保存されたハッシュ（Hex文字列）を Buffer に戻す
+
+    // 長さが違うと timingSafeEqual が throw する可能性があるため、バッファの長さが異なる場合、timingSafeEqual の前に弾く
+    // タイミング攻撃耐性のある比較を実行 (比較にかかる時間がデータの内容によって変化しないことが保証される)
+    return (hashBuffer.length !== keyBuffer.length) 
+      ? false 
+      : timingSafeEqual(hashBuffer, keyBuffer);
   }
 
   getHash(): string {

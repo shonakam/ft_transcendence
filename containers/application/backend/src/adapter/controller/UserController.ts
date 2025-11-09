@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { authenticate } from '../auth/authPreHandler.ts'
 import type {
   CreateUserForm,
   UpdateUserForm,
@@ -37,11 +38,17 @@ export default async function UserController(
 
   // UPDATE
   server.put(
-    '/:id',
+    '/me',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
+        const trustedUserId = req.authUserId;
+        if (trustedUserId === undefined) {
+          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+        }
+
         const form = req.body as UpdateUserForm;
-        const user = await updateUser.execute(form);
+        const user = await updateUser.execute(trustedUserId, form);
         reply.status(200).send(user);
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -96,8 +103,13 @@ export default async function UserController(
     '/:id',
     async (req, reply) => {
       try {
+        const trustedUserId = req.authUserId;
+        if (trustedUserId === undefined) {
+          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+        }
+
         const form = req.body as DeleteUserForm;
-        const user = await deleteUser.execute(form);
+        const user = await deleteUser.execute(trustedUserId, form);
         reply.status(204).send(user);
       } catch (err: unknown) {
         if (err instanceof Error) {
