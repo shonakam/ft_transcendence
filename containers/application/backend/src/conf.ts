@@ -1,4 +1,7 @@
 export const config = {
+  auth :{
+      jwtSecret: process.env.JWT_SECRET || 'FQJH1Fh/yGZuqYyRkTK4pemzZF1pEX0hjbAnWcvxOLA='
+    },
   api: {
     user: {
       path: 'users',

@@ -1,15 +1,14 @@
-// src/components/molecules/headerNav.ts
-
 import { NavLink } from '../atoms/NavLink';
+import { Component } from '../../interface/Component';
 
-export class HeaderNav {
+export class HeaderNav implements Component {
   private el: HTMLElement;
 
   constructor() {
     this.el = document.createElement('nav');
     this.el.className = 'space-x-4';
 
-    const homeLink = new NavLink('Home', '/').getElement();
+    const homeLink = new NavLink('Home', '/home').getElement();
     const aboutLink = new NavLink('About', '/about').getElement();
 
     this.el.appendChild(homeLink);

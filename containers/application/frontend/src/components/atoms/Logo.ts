@@ -1,4 +1,6 @@
-export class Logo {
+import { Component } from "../../interface/Component";
+
+export class Logo implements Component {
   private el: HTMLAnchorElement;
 
   constructor(text: string, href: string) {

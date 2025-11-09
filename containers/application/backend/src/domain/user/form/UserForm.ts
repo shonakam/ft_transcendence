@@ -6,10 +6,16 @@ export interface CreateUserForm {
 }
 
 export interface UpdateUserForm {
-  username: string | null;
-  email: string | null;
-  password: string;
-  imagePath: string | null;
+  username?: string;
+  email?: string;
+  imagePath?: string | null;
+  currentPassword: string;
+  newPassword?: string;
+}
+
+export interface ChangePasswordForm {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface DeleteUserForm {

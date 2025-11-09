@@ -1,4 +1,6 @@
-export class NavLink {
+import { Component } from "../../interface/Component";
+
+export class NavLink implements Component {
   private el: HTMLAnchorElement;
 
   constructor(text: string, href: string) {

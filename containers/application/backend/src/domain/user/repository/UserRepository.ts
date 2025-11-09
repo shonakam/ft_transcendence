@@ -5,5 +5,5 @@ export interface UserRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   list(offset: number, limit: number): Promise<User[] | null>;
-  delete(id: string): Promise<void>;
+  delete(id: string, deletedEmail: string, withdrawnAt: number): Promise<void>;
 }
