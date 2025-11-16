@@ -3,6 +3,10 @@ export const config = {
       jwtSecret: process.env.JWT_SECRET || 'FQJH1Fh/yGZuqYyRkTK4pemzZF1pEX0hjbAnWcvxOLA='
     },
   api: {
+    auth: {
+      path: 'auth',
+      version: 'v1',
+    },
     user: {
       path: 'users',
       version: 'v1',
