@@ -14,7 +14,7 @@ export interface UserUseCases {
   deleteUser: DeleteUserUseCase;
 }
 
-export async function createUserUseCases() {
+export async function initUserUseCases() {
   const userRepository = new SqliteUserRepository();
   await userRepository.init();
 

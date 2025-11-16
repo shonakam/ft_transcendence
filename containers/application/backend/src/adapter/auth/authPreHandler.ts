@@ -22,7 +22,7 @@ export async function authenticate(
   }
 
   const token = authHeader.substring(7);
-  const secret = config.auth.jwtSecret; 
+  const secret = config.auth.jwtAccessSecret; 
 
   try {
     const decodedUnknown = jwt.verify(token, secret); 

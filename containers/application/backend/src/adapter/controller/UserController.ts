@@ -15,8 +15,6 @@ export default async function UserController(
 ) {
   const { createUser, getUser, listUsers, updateUser, deleteUser } =
     opts.useCases;
-  const DEFAULT_OFFSET = 0;
-  const DEFAULT_LIMIT = 20;
 
   // CREATE
   server.post(
