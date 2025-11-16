@@ -1,11 +1,11 @@
-import { Session } from './Session.ts';
+// import { Session } from './TokenService.ts';
 
-export class GameSession extends Session {
-  static create(token: string, ttlMs: number): GameSession {
-    return new GameSession(token, Date.now() + ttlMs);
-  }
+// export class GameSession extends Session {
+//   static create(token: string, ttlMs: number): GameSession {
+//     return new GameSession(token, Date.now() + ttlMs);
+//   }
 
-  isInGame(): boolean {
-    return this.isValid();
-  }
-}
+//   isInGame(): boolean {
+//     return this.isValid();
+//   }
+// }
