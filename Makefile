@@ -1,7 +1,9 @@
 NAME 			:= ft_transcendence
 UNAME			= $(uname -a)
+PROJECT_ROOT	:= $(PWD)
 APP				:= containers/application
 OPS				:= containers/operation
+DOCKER_APP_ENV	:= $(APP)/.env.example # Please change it to '.env.local'
 export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 
 
@@ -9,15 +11,15 @@ export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 all: app-up ops-up
 
 up-app:
-	@docker compose -f $(APP)/compose.yml up --build
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build
 
 down-app:
-	@docker compose -f $(APP)/compose.yml down
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down
 
 clean-app: # TODO: Implementation pending 
 
 fclean-app:
-	@docker compose -f $(APP)/compose.yml down --rmi local -v
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
 
 up-ops: # TODO: Implementation pending 
