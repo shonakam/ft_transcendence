@@ -34,4 +34,9 @@ export const config = {
         ? 'file:memdb1?mode=memory&cache=shared'
         : process.env.DB_PATH || '/var/lib/sqlite/transcendence.sqlite',
   },
+  redis: {
+    host: process.env.REDIS_HOST || 'ft-redis',
+    port: process.env.REDIS_HOST || '6379',
+    retries: process.env.REDIS_HOST || '3',
+  },
 };
