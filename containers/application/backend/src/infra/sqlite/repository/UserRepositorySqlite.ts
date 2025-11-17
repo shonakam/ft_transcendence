@@ -4,8 +4,6 @@ import type { UserRepository } from '../../../domain/user/repository/UserReposit
 import type { User } from '../../../domain/user/entity/User.ts';
 
 export class SqliteUserRepository implements UserRepository {
-  constructor() {}
-
   private get db(): Database {
     return getDb();
   }
