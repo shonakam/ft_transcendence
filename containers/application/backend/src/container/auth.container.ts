@@ -13,10 +13,7 @@ export interface authUseCases {
 
 export async function initAuthUsecases() {
   const userRepository = new SqliteUserRepository();
-  await userRepository.init();
-  
   const tokenService = new TokenService()
-
   const login = new LoginUseCase(userRepository, tokenService);
 //   const logout = new LogoutUseCase(userRepository);
 //   const refresh = new RefreshUsecase(userRepository);

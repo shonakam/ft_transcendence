@@ -98,7 +98,8 @@ export default async function UserController(
 
   // DELETE
   server.delete(
-    '/:id',
+    '/me',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const trustedUserId = req.authUserId;
@@ -108,7 +109,7 @@ export default async function UserController(
 
         const form = req.body as DeleteUserForm;
         const user = await deleteUser.execute(trustedUserId, form);
-        reply.status(204).send(user);
+        reply.status(204);
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });

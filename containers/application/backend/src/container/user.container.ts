@@ -16,7 +16,6 @@ export interface UserUseCases {
 
 export async function initUserUseCases() {
   const userRepository = new SqliteUserRepository();
-  await userRepository.init();
 
   const createUser = new CreateUserUseCase(userRepository);
   const getUser = new GetUserUseCase(userRepository);
