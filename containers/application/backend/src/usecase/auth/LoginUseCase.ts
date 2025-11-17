@@ -13,7 +13,6 @@ export class LoginUseCase {
 
   async execute(form: LoginForm): Promise<{accessToken: string, refreshToken: string}> {
     const user = await this.userRepo.findByEmail(form.email)
-    console.log("hello")
     if (!user) {
       console.warn("LoginUseCase: findByEmail is failed.")
       throw new Error("Invalid email or password.")
