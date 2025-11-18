@@ -1,31 +1,11 @@
-import sqlite3 from 'sqlite3';
-import { open, Database } from 'sqlite';
-import type { User } from '../../../domain/user/entity/User.ts';
+import { getDb } from '../db.ts';
+import type { Database } from 'sqlite';
 import type { UserRepository } from '../../../domain/user/repository/UserRepository.ts';
-import { config } from '../../../conf.ts';
+import type { User } from '../../../domain/user/entity/User.ts';
 
 export class SqliteUserRepository implements UserRepository {
-  private db!: Database<sqlite3.Database, sqlite3.Statement>;
-  constructor(private dbPath: string = config.db.path) {}
-
-  async init(): Promise<void> {
-    this.db = await open({
-      filename: this.dbPath,
-      driver: sqlite3.Database,
-    });
-
-    await this.db.exec(`
-      CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        email TEXT NOT NULL UNIQUE,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL,
-        imagePath TEXT,
-        createdAt INTEGER NOT NULL,
-        updatedAt INTEGER NOT NULL,
-        withdrawnAt INTEGER
-      )
-    `);
+  private get db(): Database {
+    return getDb();
   }
 
   async save(user: User): Promise<void> {
@@ -74,7 +54,9 @@ export class SqliteUserRepository implements UserRepository {
   }
 
   async list(offset = 0, limit = 10): Promise<User[]> {
-    const rows = await this.db.all(`SELECT * FROM users ORDER BY createdAt DESC LIMIT ? OFFSET ?`, [limit, offset]);
+    const rows = await this.db.all(`
+      SELECT * FROM users WHERE withdrawnAt IS NULL ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+      [limit, offset]);
     return rows;
   }
 }

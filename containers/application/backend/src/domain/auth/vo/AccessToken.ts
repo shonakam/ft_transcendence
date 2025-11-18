@@ -1,5 +1,3 @@
-import { TokenService } from "./TokenService.ts";
-
 export class AccessToken {
   private constructor(
     public readonly token: string,

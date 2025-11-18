@@ -61,6 +61,7 @@ export default async function UserController(
   // GET user detail
   server.get<{ Params: { id: string }}>(
     '/:id',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const target = UserId.from(req.params.id);
@@ -81,6 +82,7 @@ export default async function UserController(
   // GET user list 
   server.get<{ Querystring: { offset?: number; limit?: number }}>(
     '/',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const page = Pagination.from(req.query.offset, req.query.limit);
@@ -98,7 +100,8 @@ export default async function UserController(
 
   // DELETE
   server.delete(
-    '/:id',
+    '/me',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const trustedUserId = req.authUserId;
@@ -108,7 +111,7 @@ export default async function UserController(
 
         const form = req.body as DeleteUserForm;
         const user = await deleteUser.execute(trustedUserId, form);
-        reply.status(204).send(user);
+        reply.status(204);
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
