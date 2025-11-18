@@ -1,15 +1,16 @@
 import { LoginForm } from "../../domain/auth/form/LoginForm.ts";
-import { TokenService } from "../../domain/auth/vo/TokenService.ts";
+import { TokenService } from "./TokenService.ts";
 import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
 import Password from "../../domain/user/vo/Password.ts";
-import UserId from "../../domain/user/vo/UserId.ts";
+import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
+import { getUnixTimeMs } from "../../utils/unixtime.ts";
 
 export class LoginUseCase {
   constructor(
+    private volatileDataRepositoryRedis: VolatileDataRepositoryRedis,
     private userRepo: UserRepository,
     private tokenService: TokenService,
-    // private authRepo: AuthRepository
-  ) {} // using redis
+  ) {}
 
   async execute(form: LoginForm): Promise<{accessToken: string, refreshToken: string}> {
     const user = await this.userRepo.findByEmail(form.email)
@@ -23,8 +24,16 @@ export class LoginUseCase {
       throw new Error("Invalid email or password.")
     }
 
-    const access = this.tokenService.generateAccessToken(UserId.from(user.id))
-    const refresh = this.tokenService.generateRefreshToken(UserId.from(user.id))
+    const payload = { id: user.id } // TODO: Define VO
+    const access = this.tokenService.generateAccessToken(payload)
+    const refresh = this.tokenService.generateRefreshToken(payload)
+
+    const key = `login-session:${user.id}`
+    const ttl = refresh.expiredAt - getUnixTimeMs()
+    if (!await this.volatileDataRepositoryRedis.setNx(key, refresh.token, ttl)) {
+      console.warn("LoginUseCase - redis: Login session registration is failed.")
+      throw new Error("Login session registration is failed.")
+    }
     return {
       accessToken: access.token,
       refreshToken: refresh.token,

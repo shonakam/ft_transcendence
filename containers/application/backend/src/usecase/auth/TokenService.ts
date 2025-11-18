@@ -22,4 +22,12 @@ export class TokenService {
 
     return RefreshToken.create(tokenString, getUnixTimeMs() + ttlMs);
   }
+
+  public verifyToken(token: string, secret: string): jwt.JwtPayload | string {
+    try {
+      return jwt.verify(token, secret);
+    } catch (e) {
+      throw new Error("Invalid token.");
+    }
+  }
 }
