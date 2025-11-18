@@ -4,6 +4,8 @@ export const config = {
       jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'lOhCGrbX6haACZZfzERYyia6conx7VhbNiphITO52GY=',
       accessTokenTtlMs: 900000, // 15min (15 * 60 * 1000)
       refreshTokenTtlMs: 86400000,  // 1day (24 * 60 * 60 * 1000)
+      // accessTokenTtlMs: 1000, // 1sec
+      // refreshTokenTtlMs: 1000,  // 1sec
     },
   api: {
     auth: {

@@ -61,6 +61,7 @@ export default async function UserController(
   // GET user detail
   server.get<{ Params: { id: string }}>(
     '/:id',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const target = UserId.from(req.params.id);
@@ -81,6 +82,7 @@ export default async function UserController(
   // GET user list 
   server.get<{ Querystring: { offset?: number; limit?: number }}>(
     '/',
+    { preHandler: authenticate },
     async (req, reply) => {
       try {
         const page = Pagination.from(req.query.offset, req.query.limit);

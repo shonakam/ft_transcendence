@@ -30,10 +30,7 @@ export class LoginUseCase {
 
     const key = `login-session:${user.id}`
     const ttl = refresh.expiredAt - getUnixTimeMs()
-    if (!await this.volatileDataRepositoryRedis.setNx(key, refresh.token, ttl)) {
-      console.warn("LoginUseCase - redis: Login session registration is failed.")
-      throw new Error("Login session registration is failed.")
-    }
+    await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl)
     return {
       accessToken: access.token,
       refreshToken: refresh.token,

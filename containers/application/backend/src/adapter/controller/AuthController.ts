@@ -64,6 +64,7 @@ export default async function UserController(
     '/refresh',
     async (req, reply) => {
       try {
+        console.log("HERE", req.body)
         const token = req.body as { refreshToken: string }
         const tokens = await refresh.execute(token.refreshToken)
         reply.status(200).send(tokens)
