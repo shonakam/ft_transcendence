@@ -1,6 +1,6 @@
 data/transcendence.sqlite
-data/*.db
-data/*.db-wal
-data/*.db-shm
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
 data/*.sqlite
 data/*.sqlite3

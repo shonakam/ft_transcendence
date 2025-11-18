@@ -47,8 +47,16 @@ export default async function UserController(
     '/logout',
     async (req, reply) => {
       try {
-        const token = req.body as { accessToken: string }
-        await logout.execute(token.accessToken)
+        console.log("HERE", req.headers)
+        const authHeader = req.headers.authorization
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          console.warn('Missing or invalid Authorization header.');
+          reply.code(401).send({ error: 'Unauthorized: Token not provided.' });
+          return;
+        }
+
+        const token = authHeader.substring(7);
+        await logout.execute(token)
         reply.status(200)
       } catch (err: unknown) {
         if (err instanceof Error) {
