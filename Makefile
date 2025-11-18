@@ -3,24 +3,31 @@ UNAME			= $(uname -a)
 PROJECT_ROOT	:= $(PWD)
 APP				:= containers/application
 OPS				:= containers/operation
-DOCKER_APP_ENV	:= $(APP)/.env.example # Please change it to '.env.local'
+DOCKER_APP_ENV	:= $(APP)/.env.local
 export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 
 
 # Orthodox recipes
-all: app-up ops-up
+all: init app-up ops-up
 
-up-app:
+init:
+	@cp -n $(APP)/.env.example $(APP)/.env.local || true
+
+up-app: init
+	@bash $(APP)/tools/certs.sh
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build
+	@bash $(APP)/tools/hosts.sh create
 
 down-app:
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down
+	@bash $(APP)/tools/hosts.sh delete
 
 clean-app: # TODO: Implementation pending 
 
 fclean-app:
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
+	@bash $(APP)/tools/hosts.sh delete
 
 up-ops: # TODO: Implementation pending 
 
