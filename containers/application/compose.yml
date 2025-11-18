@@ -16,11 +16,11 @@ volumes:
       o: bind
       device: ${DATA_DIR}
 
-# secrets:
-#   nginx_certificate:
-#     file: .secrets/certs/shonakam.42.fr.crt
-#   nginx_private_key:
-#     file: .secrets/certs/shonakam.42.fr.key
+secrets:
+  nginx_certificate:
+    file: .secrets/certs/transcenders.42.fr.crt
+  nginx_private_key:
+    file: .secrets/certs/stranscenders.42.fr.key
 
 ####
 
