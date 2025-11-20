@@ -5,16 +5,30 @@ import { RefreshToken } from '../../domain/auth/vo/RefreshToken.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 
 export class TokenService {
-  public generateAccessToken(payload: {}): AccessToken {
+  // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+  private payloadConfigure(payload: jwt.JwtPayload): jwt.JwtPayload {
+    return payload = {
+      iss: config.auth.issure,
+      sub: payload.id,
+      aud: config.auth.audience,
+      // exp: number | undefined;
+      // nbf: number | undefined;
+      // iat: number | undefined;
+      // jti: string | undefined;
+    }
+  }
+
+  public generateAccessToken(payload: jwt.JwtPayload): AccessToken {
     const ttlMs = config.auth.accessTokenTtlMs;
     const secret = config.auth.jwtAccessSecret;
 
+    payload = this.payloadConfigure(payload)
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
 
     return AccessToken.create(tokenString, getUnixTimeMs() + ttlMs); 
   }
 
-  public generateRefreshToken(payload: {}): RefreshToken {
+  public generateRefreshToken(payload: jwt.JwtPayload): RefreshToken {
     const ttlMs = config.auth.refreshTokenTtlMs;
     const secret = config.auth.jwtRefreshSecret;
 

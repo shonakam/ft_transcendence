@@ -5,9 +5,11 @@ import { LogoutUseCase } from '../usecase/auth/LogoutUseCase.ts';
 import { RefreshUseCase } from '../usecase/auth/RefreshUseCase.ts';
 import { TokenService } from "../usecase/auth/TokenService.ts";
 import { VolatileDataRepositoryRedis } from '../infra/redis/repository/VolatileDataRepositoryRedis.ts';
+import { LoginWithOIDCUseCase } from '../usecase/auth/LoginWithOIDCUseCase.ts';
 
 export interface authUseCases {
     login: LoginUseCase;
+    loginWithOIDC: LoginWithOIDCUseCase,
     logout: LogoutUseCase;
     refresh: RefreshUseCase;
 }
@@ -18,8 +20,9 @@ export async function initAuthUsecases() {
   const tokenService = new TokenService()
 
   const login = new LoginUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
+  const loginWithOIDC = new LoginWithOIDCUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
   const logout = new LogoutUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
   const refresh = new RefreshUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
 
-  return { login, logout, refresh };
+  return { login, loginWithOIDC, logout, refresh };
 }

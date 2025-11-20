@@ -1,13 +1,13 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { authUseCases } from '../../container/auth.container.ts';
 import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
 
-export default async function UserController(
+export default async function AuthController(
   server: FastifyInstance,
   opts: { useCases: authUseCases },
 ) {
-  const { login, logout, refresh } = opts.useCases
+  const { login, loginWithOIDC, logout, refresh } = opts.useCases
 
   server.post(
     '/login',
@@ -26,22 +26,22 @@ export default async function UserController(
     },
   );
 
-  // server.post(
-  //   '/login/github',
-  //   async (req, reply) => {
-  //     try {
-  //       const form = req.body as LoginForm | OIDCForm
-  //       const tokens
-  //       reply.status().send(tokens)
-  //     } catch (err: unknown) {
-  //       if (err instanceof Error) {
-  //         reply.status(400).send({ error: err.message });
-  //       } else {
-  //         reply.status(500).send({ message: 'Internal Server Error' });
-  //       }
-  //     }
-  //   },
-  // );
+  server.post(
+    '/login/oidc/:provider',
+    async (req: FastifyRequest<{ Params: { provider: string } }>, reply) => {
+      try {
+        const form = req.body as OIDCForm
+        const token = await loginWithOIDC.execute(form, req.params.provider)
+        reply.status(200).send(token)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
+      }
+    },
+  );
 
   server.post(
     '/logout',
