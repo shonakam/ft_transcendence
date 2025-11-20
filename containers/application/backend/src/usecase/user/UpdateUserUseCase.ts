@@ -17,12 +17,12 @@ export class UpdateUserUseCase {
     if (!Password.compare(form.currentPassword, user.password)) {
       throw new Error("invalid password")
     }
-    
+
     const now = getUnixTimeMs();
     user.username = form.username ?? user.username;
     user.email = form.email ?? user.email;
-    user.password = (form.newPassword && Password.create(form.newPassword).getHash()) ?? user.password; 
-    user.imagePath = form.imagePath ?? user.imagePath; 
+    user.password = (form.newPassword && Password.create(form.newPassword).getHash()) ?? user.password;
+    user.imagePath = form.imagePath ?? user.imagePath;
     user.updatedAt = now;
 
     await this.repo.save(user);

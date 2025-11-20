@@ -11,7 +11,7 @@ export class Header implements Component {
 
     const logo = new Logo('ft_transcendence', '/').getElement();
     const nav = new HeaderNav().getElement();
-    
+
     this.el.appendChild(logo);
     this.el.appendChild(nav);
   }
