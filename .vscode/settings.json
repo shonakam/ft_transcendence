@@ -1,7 +1,9 @@
 {
-  "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": false,
-
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
   "[typescript]": {
     "editor.insertSpaces": false
   },
@@ -12,7 +14,7 @@
     "editor.insertSpaces": false
   },
   "[makefile]": {
-    "editor.insertSpaces": false,
-    "editor.tabSize": 8
+    "editor.tabSize": 8,
+    "editor.insertSpaces": false
   }
 }
