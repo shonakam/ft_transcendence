@@ -67,6 +67,8 @@ services:
     #   - "5432:5432" 
     volumes:
       - storage:/var/lib/sqlite
+    networks:
+      - transcendence-network
     restart: unless-stopped
 
   redis:
