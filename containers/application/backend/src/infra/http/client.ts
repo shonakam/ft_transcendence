@@ -1,5 +1,3 @@
-import { URL } from 'url';
-
 export class FetchError extends Error {
   public status: number;
   public data: any; 
