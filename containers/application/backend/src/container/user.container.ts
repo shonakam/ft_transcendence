@@ -1,4 +1,4 @@
-import { SqliteUserRepository } from '../infra/sqlite/repository/UserRepositorySqlite.ts';
+import { UserRepositorySqlite } from '../infra/sqlite/repository/UserRepositorySqlite.ts';
 
 import { CreateUserUseCase } from '../usecase/user/CreateUserUseCase.ts';
 import { GetUserUseCase } from '../usecase/user/GetUserUseCase.ts';
@@ -15,7 +15,7 @@ export interface UserUseCases {
 }
 
 export async function initUserUseCases() {
-  const userRepository = new SqliteUserRepository();
+  const userRepository = new UserRepositorySqlite();
 
   const createUser = new CreateUserUseCase(userRepository);
   const getUser = new GetUserUseCase(userRepository);

@@ -1,10 +1,10 @@
 export interface UserIdp {
   id: string;
-  user_id: string;
+  userId: string;
   provider: string;
-  provider_user_id: string;
+  providerUserId: string;
+  imagePath: string | null;
   createdAt: number;
   updatedAt: number;
-  imagePath: string | null;
   withdrawnAt: null | number;
 }
