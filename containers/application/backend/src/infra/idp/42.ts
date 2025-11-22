@@ -48,7 +48,7 @@ export class IdP42Service {
     
     const rawUserInfo = await this.httpClient.get('/v2/me', config);
     const userInfo = {
-      login: rawUserInfo.login,
+      name: rawUserInfo.login,
       email: rawUserInfo.email,
       imagePath: rawUserInfo.image.link,
       providerUserId: rawUserInfo.id.toString(),

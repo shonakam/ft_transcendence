@@ -30,6 +30,7 @@ export default class Password {
   }
 
   static compare(raw: string, stored: string): boolean {
+    if (!raw || !stored) { return false }
     const [salt, keyHex] = stored.split(':') as [string, string];
   
     const hashBuffer = scryptSync(raw, salt, 64); // 生パスワードからハッシュを生成 (Buffer 形式)
