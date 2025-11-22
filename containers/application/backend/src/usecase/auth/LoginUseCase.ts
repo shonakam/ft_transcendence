@@ -19,7 +19,7 @@ export class LoginUseCase {
       throw new Error("Invalid email or password.")
     }
 
-    if (!Password.compare(form.password, user.password)) {
+    if (!Password.compare(form.password, user.password!)) {
       console.warn("LoginUseCase: Password compare is failed.")
       throw new Error("Invalid email or password.")
     }
