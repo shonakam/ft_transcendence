@@ -5,7 +5,7 @@ import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/Volati
 import { OIDCForm } from "../../domain/auth/form/OIDCForm.ts";
 import { AuthCode } from "../../domain/auth/vo/AuthCode.ts";
 import { HttpClient } from "../../infra/http/client.ts";
-import { UserIdpRepository } from "../../domain/user/repository/UserIdpRepository.ts";
+import { UserIdpRepository } from "../../domain/user/repository/UserIdPRepository.ts";
 import { transaction } from "../../infra/sqlite/db.ts";
 import UserId from "../../domain/user/vo/UserId.ts";
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
@@ -44,9 +44,9 @@ export class LoginWithOIDCUseCase {
   private async syncProfileData(id: string, userInfo: any): Promise<void> {
     let user = await this.userRepo.findById(id)
     if (user) {
-      user.username !== userInfo.name
-      user.email !== userInfo.email
-      user.imagePath !== userInfo.imagePath
+      user.username = userInfo.name
+      user.email = userInfo.email
+      user.imagePath = userInfo.imagePath
       await this.userRepo.save(user)
     }
   }
@@ -78,6 +78,7 @@ export class LoginWithOIDCUseCase {
           withdrawnAt: null,
         })
 
+        console.log("now: ", now)
         await this.userIdpRepo.save({
           id: UserIdpId.create().get(),
           userId: userId.get(),
