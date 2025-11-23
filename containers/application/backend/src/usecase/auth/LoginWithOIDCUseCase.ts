@@ -4,13 +4,13 @@ import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
 import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
 import { OIDCForm } from "../../domain/auth/form/OIDCForm.ts";
 import { AuthCode } from "../../domain/auth/vo/AuthCode.ts";
-import { IdP42Service } from "../../infra/idp/42.ts";
 import { HttpClient } from "../../infra/http/client.ts";
 import { UserIdpRepository } from "../../domain/user/repository/UserIdpRepository.ts";
 import { transaction } from "../../infra/sqlite/db.ts";
 import UserId from "../../domain/user/vo/UserId.ts";
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
 import UserIdpId from "../../domain/user/vo/UserIdpId.ts";
+import { IdP } from "../../infra/idp/IdP.ts";
 
 interface IdpConfig {
   redirect_uri: string;
@@ -38,14 +38,7 @@ export class LoginWithOIDCUseCase {
       throw new Error(`switchIdP: IdP configuration or endpoint not found for provider: ${provider}`)
     }
 
-    const cient = new HttpClient(providerEndpoint.endpoint)
-    
-    switch (provider) {
-      case 'ft': return new IdP42Service(cient)
-      // case 'google':
-      // case 'github':
-      default: throw new Error(`switchIdP: Unsupported provider: ${provider}`)
-    }
+    return IdP.getProviderService(provider, new HttpClient(providerEndpoint.endpoint))
   }
 
   private async syncProfileData(id: string, userInfo: any): Promise<void> {
@@ -62,6 +55,9 @@ export class LoginWithOIDCUseCase {
     const code = AuthCode.from(form.code)
 
     const idp = this.switchIdP(provider)
+    if (!idp) {
+      throw new Error(`switchIdP: IdP not found`);
+    }
     const res = await idp.trade(code)
     const userInfo = await idp.getUserInfo(res.access_token)
 
@@ -73,7 +69,7 @@ export class LoginWithOIDCUseCase {
         userId = UserId.create()
         await this.userRepo.save({
           id: userId.get(),
-          username: userInfo.username,
+          username: userInfo.name,
           email: userInfo.email,
           password: null,
           imagePath: userInfo.imagePath,

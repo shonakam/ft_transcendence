@@ -10,16 +10,16 @@ export class UserRepositorySqlite implements UserRepository {
 
   async save(user: User): Promise<void> {
     await this.db.run(
-      `INSERT INTO users (id, email, username, password, imagePath, createdAt, updatedAt, withdrawnAt)
+      `INSERT INTO users (id, email, username, password, image_path, created_at, updated_at, withdrawn_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          email = excluded.email,
          username = excluded.username,
          password = excluded.password,
-         imagePath = excluded.imagePath,
-         createdAt = excluded.createdAt,
-         updatedAt = excluded.updatedAt,
-         withdrawnAt = excluded.withdrawnAt`,
+         image_path = excluded.image_path,
+         created_at = excluded.created_at,
+         updated_at = excluded.updated_at,
+         withdrawn_at = excluded.withdrawn_at`,
       [
         user.id,
         user.email,
@@ -34,12 +34,12 @@ export class UserRepositorySqlite implements UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE id = ? AND withdrawnAt IS NULL`, [id]);
+    const row = await this.db.get(`SELECT * FROM users WHERE id = ? AND withdrawn_at IS NULL`, [id]);
     return row ?? null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE email = ? AND withdrawnAt IS NULL`, [email]);
+    const row = await this.db.get(`SELECT * FROM users WHERE email = ? AND withdrawn_at IS NULL`, [email]);
     return row ?? null;
   }
 
@@ -50,12 +50,12 @@ export class UserRepositorySqlite implements UserRepository {
 
   /* logical delete */
   async delete(id: string, deletedEmail: string, withdrawnAt: number): Promise<void> {
-    await this.db.run(`UPDATE users SET withdrawnAt = ?, email = ? WHERE id = ?`, [withdrawnAt, deletedEmail, id])
+    await this.db.run(`UPDATE users SET withdrawn_at = ?, email = ? WHERE id = ?`, [withdrawnAt, deletedEmail, id])
   }
 
   async list(offset = 0, limit = 10): Promise<User[]> {
     const rows = await this.db.all(`
-      SELECT * FROM users WHERE withdrawnAt IS NULL ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+      SELECT * FROM users WHERE withdrawn_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [limit, offset]);
     return rows;
   }

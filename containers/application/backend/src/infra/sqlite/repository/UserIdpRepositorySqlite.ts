@@ -10,15 +10,16 @@ export class UserIdpRepositorySqlite implements UserIdpRepository {
 
   async save(userIdp: UserIdp): Promise<void> {
     await this.db.run(
-      `INSERT INTO user_idp (id, provider, providerUserId, imagePath, createdAt, updatedAt, withdrawnAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO user_idps (id, userId, provider, provider_user_id, image_path, created_at, updated_at, withdrawn_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
+         user_id = excluded.user_id,
          provider = excluded.provider,
          provider_user_id = excluded.provider_user_id,
-         imagePath = excluded.imagePath,
-         createdAt = excluded.createdAt,
-         updatedAt = excluded.updatedAt,
-         withdrawnAt = excluded.withdrawnAt`,
+         image_path = excluded.image_path,
+         created_at = excluded.created_at,
+         updated_at = excluded.updated_at,
+         withdrawn_at = excluded.withdrawn_at`,
       [
         userIdp.id,
         userIdp.provider,
@@ -36,7 +37,7 @@ export class UserIdpRepositorySqlite implements UserIdpRepository {
       `SELECT * FROM user_idps 
        WHERE id = ?
        AND provider = ?
-       AND withdrawnAt IS NULL`, 
+       AND withdrawn_at IS NULL`, 
     [id, provider]);
     return row ?? null;
   }
