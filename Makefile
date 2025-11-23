@@ -8,7 +8,7 @@ export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 
 
 # Orthodox recipes
-all: init app-up ops-up
+all: init up-app up-ops
 
 init:
 	@cp -n $(APP)/.env.example $(APP)/.env.local || true
