@@ -19,6 +19,7 @@ export class UserForm {
       email: Email.create(form.email).get(),
       password: Password.create(form.password).getHash(),
       imagePath: form.imagePath,
+      is2faEnabled: (form.is2faEnabled) ? 1 : 0,
       createdAt: now,
       updatedAt: now,
       withdrawnAt: null,

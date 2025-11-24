@@ -10,13 +10,14 @@ export class UserRepositorySqlite implements UserRepository {
 
   async save(user: User): Promise<void> {
     await this.db.run(
-      `INSERT INTO users (id, email, username, password, image_path, created_at, updated_at, withdrawn_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO users (id, email, username, password, image_path, is_2fa_enabled, created_at, updated_at, withdrawn_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          email = excluded.email,
          username = excluded.username,
          password = excluded.password,
          image_path = excluded.image_path,
+         is_2fa_enabled = excluded.is_2fa_enabled,
          created_at = excluded.created_at,
          updated_at = excluded.updated_at,
          withdrawn_at = excluded.withdrawn_at`,
@@ -26,6 +27,7 @@ export class UserRepositorySqlite implements UserRepository {
         user.username,
         user.password,
         user.imagePath,
+        user.is2faEnabled,
         user.createdAt,
         user.updatedAt,
         user.withdrawnAt,

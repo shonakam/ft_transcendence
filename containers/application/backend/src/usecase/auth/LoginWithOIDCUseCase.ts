@@ -73,12 +73,12 @@ export class LoginWithOIDCUseCase {
           email: userInfo.email,
           password: null,
           imagePath: userInfo.imagePath,
+          is2faEnabled: 0,
           createdAt: now,
           updatedAt: now,
           withdrawnAt: null,
         })
 
-        console.log("now: ", now)
         await this.userIdpRepo.save({
           id: UserIdpId.create().get(),
           userId: userId.get(),
