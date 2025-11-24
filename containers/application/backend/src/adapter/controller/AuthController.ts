@@ -8,7 +8,13 @@ export default async function AuthController(
   server: FastifyInstance,
   opts: { useCases: authUseCases },
 ) {
-  const { login, loginWithOIDC, logout, refresh, verify2fa } = opts.useCases
+  const { 
+    login,
+    loginWithOIDC,
+    logout,
+    refresh,
+    verifyTOTP
+  } = opts.useCases
 
   server.post(
     '/login',
@@ -62,12 +68,31 @@ export default async function AuthController(
     },
   );
 
-  server.post(
-    '/verify-2fa/:factor',
+  server.get(
+    // '/setup-mfa/:factor',
+    '/setup-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
         const form = req.body as VerifyTOTPForm
-        const token = await verify2fa.execute(form, req.params.factor)
+        const token = await verifyTOTP.execute(form, req.params.factor)
+        reply.status(200).send(token)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
+      }
+    },
+  );
+
+  server.post(
+    // '/verify-mfa/:factor',
+    '/verify-mfa/totp',
+    async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
+      try {
+        const form = req.body as VerifyTOTPForm
+        const token = await verifyTOTP.execute(form, req.params.factor)
         reply.status(200).send(token)
       } catch (err: unknown) {
         if (err instanceof Error) {

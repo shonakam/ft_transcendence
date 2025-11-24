@@ -7,14 +7,16 @@ import { TokenService } from "../usecase/auth/TokenService.ts";
 import { VolatileDataRepositoryRedis } from '../infra/redis/repository/VolatileDataRepositoryRedis.ts';
 import { LoginWithOIDCUseCase } from '../usecase/auth/LoginWithOIDCUseCase.ts';
 import { UserIdpRepositorySqlite } from '../infra/sqlite/repository/user/UserIdpRepositorySqlite.ts';
-import { Verify2faUseCase } from '../usecase/auth/VerifyTOTPUseCase.ts';
+import { VerifyTOTPUseCase } from '../usecase/auth/VerifyTOTPUseCase.ts';
+import { User2faRepositorySqlite } from '../infra/sqlite/repository/user/User2faRepositorySqlite.ts';
+import { SetupTOTPUseCase } from '../usecase/auth/SetupTOTPUseCase.ts';
 
 export interface authUseCases {
     login: LoginUseCase;
     loginWithOIDC: LoginWithOIDCUseCase,
     logout: LogoutUseCase;
     refresh: RefreshUseCase;
-    verify2fa: Verify2faUseCase;
+    verifyTOTP: VerifyTOTPUseCase;
 }
 
 export async function initAuthUsecases() {
@@ -22,12 +24,14 @@ export async function initAuthUsecases() {
   const userIdpRepo = new UserIdpRepositorySqlite();
   const volatileDataRepositoryRedis = new VolatileDataRepositoryRedis();
   const tokenService = new TokenService();
+  const user2faRepository = new User2faRepositorySqlite()
 
   const login = new LoginUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
   const loginWithOIDC = new LoginWithOIDCUseCase(volatileDataRepositoryRedis, userRepository, userIdpRepo, tokenService);
   const logout = new LogoutUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
   const refresh = new RefreshUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
-  const verify2fa = new Verify2faUseCase(volatileDataRepositoryRedis, userRepository, tokenService)
+  const SetupTOTP = new SetupTOTPUseCase(userRepository, tokenService, user2faRepository);
+  const verifyTOTP = new VerifyTOTPUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
 
-  return { login, loginWithOIDC, logout, refresh, verify2fa };
+  return { login, loginWithOIDC, logout, refresh, verifyTOTP };
 }

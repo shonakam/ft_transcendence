@@ -19,7 +19,7 @@ export class CreateUserUseCase {
       await this.user2faRepo.save({
         userId: user.id,
         totpSeceret: null,
-        totp: 0,
+        isTotpEnabled: 0,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       });

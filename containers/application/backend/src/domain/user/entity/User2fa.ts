@@ -1,7 +1,7 @@
 export interface User2fa {
   userId: string;
   totpSeceret: string | null;
-  totp: number;
+  isTotpEnabled: number;
   createdAt: number;
   updatedAt: number;
 }

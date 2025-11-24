@@ -9,27 +9,19 @@ export class User2faRepositorySqlite implements User2faRepository {
     return getDb();
   }
 
-//   CREATE TABLE IF NOT EXISTS user_2fa (
-//     user_id TEXT PRIMARY,
-//     totp_secret TEXT,
-//     totp INTEGER NOT NULL DEFAULT 0,
-//     created_at INTEGER NOT NULL,
-//     updated_at INTEGER NOT NULL,
-// );
-
   async save(user2fa: User2fa): Promise<void> {
     await this.db.run(
-      `INSERT INTO user_2fa (user_id, totp_secret, totp, created_at, updated_at)
+      `INSERT INTO user_2fa (user_id, totp_secret, is_totp_enabled, created_at, updated_at)
        VALUES (?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
-         totp_secret = excluded.provider,
-         totp = excluded.provider_user_id,
+         totp_secret = excluded.totp_secret,
+         is_totp_enabled = excluded.is_totp_enabled,
          created_at = excluded.created_at,
          updated_at = excluded.updated_at,`,
       [
         user2fa.userId,
         user2fa.totpSeceret,
-        user2fa.totp,
+        user2fa.isTotpEnabled,
         user2fa.createdAt,
         user2fa.updatedAt,
       ],
