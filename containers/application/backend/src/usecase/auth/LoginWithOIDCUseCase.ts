@@ -51,6 +51,23 @@ export class LoginWithOIDCUseCase {
     }
   }
 
+  private async issueTokenAndSotoreToken(
+    userId: string,
+    provider: string
+  ): Promise<{accessToken: string, refreshToken: string}> {
+    const payload = { id: userId, idp: provider }
+    const access = this.tokenService.generateAccessToken(payload)
+    const refresh = this.tokenService.generateRefreshToken(payload)
+
+    const key = `session:refresh:${userId}`
+    const ttl = refresh.expiredAt - getUnixTimeMs()
+    await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl)
+    return {
+      accessToken: access.token,
+      refreshToken: refresh.token,
+    }
+  }
+
   async execute(form: OIDCForm, provider: string): Promise<{accessToken: string, refreshToken: string}> {
     const code = AuthCode.from(form.code)
 
@@ -62,7 +79,7 @@ export class LoginWithOIDCUseCase {
     const userInfo = await idp.getUserInfo(res.access_token)
 
     const now = getUnixTimeMs()
-    const {access, refresh} = await transaction(async (db) => {
+    const tokens = await transaction(async (db) => {
       let userId
       let user = await this.userIdpRepo.findById(userInfo.id, provider)
       if (!user) {
@@ -94,20 +111,12 @@ export class LoginWithOIDCUseCase {
         await this.syncProfileData(userId, userInfo)
       }
 
-      const payload = { id: userId, idp: provider }
-      const access = this.tokenService.generateAccessToken(payload)
-      const refresh = this.tokenService.generateRefreshToken(payload)
-
-      const key = `login-session:${userId}`
-      const ttl = refresh.expiredAt - now
-      await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl)
-
-      return {access, refresh}
+      return await this.issueTokenAndSotoreToken(userId as string, provider)
     })
 
     return {
-      accessToken: access.token,
-      refreshToken: refresh.token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 }

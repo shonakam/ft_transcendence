@@ -3,6 +3,7 @@ import { config } from '../../conf.ts';
 import { AccessToken } from '../../domain/auth/vo/AccessToken.ts';
 import { RefreshToken } from '../../domain/auth/vo/RefreshToken.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
+import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
 
 export class TokenService {
   // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1

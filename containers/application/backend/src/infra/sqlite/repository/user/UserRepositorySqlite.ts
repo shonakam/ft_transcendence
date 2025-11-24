@@ -1,7 +1,7 @@
-import { getDb } from '../db.ts';
+import { getDb } from '../../db.ts';
 import type { Database } from 'sqlite';
-import type { UserRepository } from '../../../domain/user/repository/UserRepository.ts';
-import { User } from '../../../domain/user/entity/User.ts';
+import type { UserRepository } from '../../../../domain/user/repository/UserRepository.ts';
+import { User } from '../../../../domain/user/entity/User.ts';
 
 export class UserRepositorySqlite implements UserRepository {
   private get db(): Database {

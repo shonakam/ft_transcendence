@@ -23,7 +23,7 @@ export class LogoutUseCase {
       throw new Error("User not found.")
     }
 
-    const key = `login-session:${user.id}`
+    const key = `session:refresh:${user.id}`
     await this.volatileDataRepositoryRedis.delete(key)
   }
 }

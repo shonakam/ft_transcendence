@@ -1,4 +1,4 @@
-import { UserRepositorySqlite } from '../infra/sqlite/repository/UserRepositorySqlite.ts';
+import { UserRepositorySqlite } from '../infra/sqlite/repository/user/UserRepositorySqlite.ts';
 
 import { CreateUserUseCase } from '../usecase/user/CreateUserUseCase.ts';
 import { GetUserUseCase } from '../usecase/user/GetUserUseCase.ts';

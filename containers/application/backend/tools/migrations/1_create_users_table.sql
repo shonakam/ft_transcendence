@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `users` (
+CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     username TEXT NOT NULL,
@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS `users` (
 );
 
 -- RollBack
--- DROP TABLE `users`
+-- DROP TABLE users;

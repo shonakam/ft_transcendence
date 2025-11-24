@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `user_idps` (
+CREATE TABLE IF NOT EXISTS user_idps (
     id TEXT PRIMARY KEY, 
     user_id TEXT NOT NULL, 
     provider TEXT NOT NULL, 
@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS `user_idps` (
 );
 
 -- Rollback
--- DROP TABLE `user_idps`
+-- DROP TABLE user_idps;
