@@ -42,7 +42,7 @@ export class LoginUseCase {
       throw new Error("Invalid email or password.")
     }
 
-    if (user.is2faEnabled == 1) {
+    if (user.is2faEnabled) {
       throw new Error()
       // return this.generateTmpToken()
     } else {

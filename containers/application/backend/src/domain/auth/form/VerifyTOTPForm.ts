@@ -1,4 +1,4 @@
-export interface Verify2faForm {
+export interface VerifyTOTPForm {
   tmpToken: string
   code: string
 }

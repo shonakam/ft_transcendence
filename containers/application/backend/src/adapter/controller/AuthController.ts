@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { authUseCases } from '../../container/auth.container.ts';
 import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
-import { Verify2faForm } from '../../domain/auth/form/Verify2faForm.ts';
+import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 
 export default async function AuthController(
   server: FastifyInstance,
@@ -66,7 +66,7 @@ export default async function AuthController(
     '/verify-2fa/:factor',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
-        const form = req.body as Verify2faForm
+        const form = req.body as VerifyTOTPForm
         const token = await verify2fa.execute(form, req.params.factor)
         reply.status(200).send(token)
       } catch (err: unknown) {

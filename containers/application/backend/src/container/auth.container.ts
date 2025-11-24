@@ -7,7 +7,7 @@ import { TokenService } from "../usecase/auth/TokenService.ts";
 import { VolatileDataRepositoryRedis } from '../infra/redis/repository/VolatileDataRepositoryRedis.ts';
 import { LoginWithOIDCUseCase } from '../usecase/auth/LoginWithOIDCUseCase.ts';
 import { UserIdpRepositorySqlite } from '../infra/sqlite/repository/user/UserIdpRepositorySqlite.ts';
-import { Verify2faUseCase } from '../usecase/auth/Verify2faUseCase.ts';
+import { Verify2faUseCase } from '../usecase/auth/VerifyTOTPUseCase.ts';
 
 export interface authUseCases {
     login: LoginUseCase;
