@@ -3,7 +3,7 @@ import { config } from '../../conf.ts';
 import { AccessToken } from '../../domain/auth/vo/AccessToken.ts';
 import { RefreshToken } from '../../domain/auth/vo/RefreshToken.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
-import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
+import { TmpAuthToken } from '../../domain/auth/vo/TmpAuthToken.ts';
 
 export class TokenService {
   // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
@@ -36,6 +36,15 @@ export class TokenService {
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
 
     return RefreshToken.create(tokenString, getUnixTimeMs() + ttlMs);
+  }
+
+  public generateTmpAuthToken(payload: jwt.JwtPayload): TmpAuthToken {
+    const ttlMs = config.auth.accessTokenTtlMs; // 期限はアクセストークンと同じ値を使用
+    const secret = config.auth.jwtTmpAuthSecret;
+
+    payload = this.payloadConfigure(payload)
+    const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
+    return TmpAuthToken.create(tokenString, getUnixTimeMs() + ttlMs)
   }
 
   public verifyToken(token: string, secret: string): jwt.JwtPayload | string {

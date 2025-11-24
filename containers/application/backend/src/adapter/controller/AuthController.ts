@@ -3,6 +3,7 @@ import { authUseCases } from '../../container/auth.container.ts';
 import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
+import { SetupTOTPForm } from '../../domain/auth/form/SetupTOTPForm.ts';
 
 export default async function AuthController(
   server: FastifyInstance,
@@ -13,7 +14,8 @@ export default async function AuthController(
     loginWithOIDC,
     logout,
     refresh,
-    verifyTOTP
+    setupTOTP,
+    verifyTOTP,
   } = opts.useCases
 
   server.post(
@@ -21,8 +23,9 @@ export default async function AuthController(
     async (req, reply) => {
       try {
         const form = req.body as LoginForm;
-        const tokens = await login.execute(form)
-        reply.status(200).send(tokens)
+        const response = await login.execute(form)
+        const code = (!response.tmpAuthToken) ? 200 : 202
+        reply.status(code).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -39,8 +42,8 @@ export default async function AuthController(
       try {
         console.log("HERE", req.body)
         const token = req.body as { refreshToken: string }
-        const tokens = await refresh.execute(token.refreshToken)
-        reply.status(200).send(tokens)
+        const response = await refresh.execute(token.refreshToken)
+        reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -56,8 +59,8 @@ export default async function AuthController(
     async (req: FastifyRequest<{ Params: { provider: string } }>, reply) => {
       try {
         const form = req.body as OIDCForm
-        const token = await loginWithOIDC.execute(form, req.params.provider)
-        reply.status(200).send(token)
+        const response = await loginWithOIDC.execute(form, req.params.provider)
+        reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -68,14 +71,14 @@ export default async function AuthController(
     },
   );
 
-  server.get(
+  server.post(
     // '/setup-mfa/:factor',
     '/setup-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
-        const form = req.body as VerifyTOTPForm
-        const token = await verifyTOTP.execute(form, req.params.factor)
-        reply.status(200).send(token)
+        const form = req.body as SetupTOTPForm
+        const response = await setupTOTP.execute(form)
+        reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -92,8 +95,8 @@ export default async function AuthController(
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
         const form = req.body as VerifyTOTPForm
-        const token = await verifyTOTP.execute(form, req.params.factor)
-        reply.status(200).send(token)
+        const response = await verifyTOTP.execute(form, req.params.factor)
+        reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });

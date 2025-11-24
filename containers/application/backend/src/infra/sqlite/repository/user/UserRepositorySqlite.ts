@@ -2,10 +2,25 @@ import { getDb } from '../../db.ts';
 import type { Database } from 'sqlite';
 import type { UserRepository } from '../../../../domain/user/repository/UserRepository.ts';
 import { User } from '../../../../domain/user/entity/User.ts';
+import { userInfo } from 'os';
 
 export class UserRepositorySqlite implements UserRepository {
   private get db(): Database {
     return getDb();
+  }
+
+  private scan(row: any): User {
+    return {
+      id: row.id,
+      email: row.email,
+      username: row.username,
+      password: row.password,
+      imagePath: row.image_path,
+      is2faEnabled: row.is_2fa_enabled,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      withdrawnAt: row.withdrawn_at,
+    } as User
   }
 
   async save(user: User): Promise<void> {
@@ -37,12 +52,12 @@ export class UserRepositorySqlite implements UserRepository {
 
   async findById(id: string): Promise<User | null> {
     const row = await this.db.get(`SELECT * FROM users WHERE id = ? AND withdrawn_at IS NULL`, [id]);
-    return row ?? null;
+    return this.scan(row) ?? null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
     const row = await this.db.get(`SELECT * FROM users WHERE email = ? AND withdrawn_at IS NULL`, [email]);
-    return row ?? null;
+    return this.scan(row) ?? null;
   }
 
   /* physical delete */
@@ -59,6 +74,6 @@ export class UserRepositorySqlite implements UserRepository {
     const rows = await this.db.all(`
       SELECT * FROM users WHERE withdrawn_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [limit, offset]);
-    return rows;
+    return rows.map(row => this.scan(row));;
   }
 }

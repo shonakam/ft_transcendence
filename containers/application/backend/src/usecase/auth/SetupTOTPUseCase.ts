@@ -3,7 +3,13 @@ import { TokenService } from "./TokenService.ts";
 import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
 import { SetupTOTPForm } from "../../domain/auth/form/SetupTOTPForm.ts";
 import { User2faRepository } from "../../domain/user/repository/User2faRepository.ts";
+import { User2fa } from "../../domain/user/entity/User2fa.ts";
+import { getUnixTimeMs } from "../../utils/unixtime.ts";
+import speakeasy from 'speakeasy';
 
+export interface SetupTOTPResponse {
+  uri: string
+}
 export class SetupTOTPUseCase {
   constructor(
     private userRepo: UserRepository,
@@ -11,29 +17,42 @@ export class SetupTOTPUseCase {
     private user2faRepository: User2faRepository,
   ) {}
 
-  async execute(form: SetupTOTPForm): Promise<{}> {
+  private async setTotpSecrete(user2fa: User2fa, secret: string) {
+    const now = getUnixTimeMs()
+    
+    user2fa.updatedAt = now
+    user2fa.totpSeceret = secret
+    await this.user2faRepository.save(user2fa)
+  }
+
+  async execute(form: SetupTOTPForm): Promise<SetupTOTPResponse> {
     const payload = this.tokenService.verifyToken(form.tmpAuthToken, config.auth.jwtTmpAuthSecret)
-    if (typeof payload === "string" || !('id' in payload)) {
+    if (typeof payload === "string" || !('sub' in payload) || !payload.sub) {
       console.warn("SetupTOTPUseCase: invald payload")
-      throw new Error("Invalid refresh token.")
+      throw new Error("Invalid tmp auth token.")
     }
 
-    const user = await this.userRepo.findById(payload.id)
+    const user = await this.userRepo.findById(payload.sub)
     if (!user) {
       console.warn("SetupTOTPUseCase: findById is failed.")
       throw new Error("User not found.")
     }
 
-    const user_2fa = await this.user2faRepository.findById(user.id)
-    if (!user_2fa || user_2fa.isTotpEnabled) {
+    const user2fa = await this.user2faRepository.findById(user.id)
+    if (!user2fa || user2fa.isTotpEnabled) {
       console.warn("SetupTOTPUseCase: findById is failed or already registered.")
       throw new Error("execute failed.")
     }
     
-    // TOTP用秘密鍵の生成
+    // TOTP用秘密鍵及びurlの生成
+    // https://tex2e.github.io/rfc-translater/html/rfc6238.html
+    const authUrl = speakeasy.generateSecret({
+      length: 20,
+      otpauth_url: true, 
+      issuer: config.auth.issure
+    })
+    await this.setTotpSecrete(user2fa, authUrl.base32)
 
-
-    // QRの生成
-    throw new Error("")
+    return { uri: authUrl.otpauth_url }
   }
 }

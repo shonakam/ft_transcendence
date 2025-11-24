@@ -5,6 +5,12 @@ import Password from "../../domain/user/vo/Password.ts";
 import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
 
+export interface LoginResponse {
+  accessToken: string | null
+  refreshToken: string | null
+  tmpAuthToken: string | null
+}
+
 export class LoginUseCase {
   constructor(
     private volatileDataRepositoryRedis: VolatileDataRepositoryRedis,
@@ -12,11 +18,17 @@ export class LoginUseCase {
     private tokenService: TokenService,
   ) {}
 
-  private async generateTmpToken() {
-
+  private async generateTmpToken(id: string): Promise<LoginResponse> {
+    const payload = { id: id }
+    const tmpAuth = this.tokenService.generateTmpAuthToken(payload)
+    return {
+      accessToken: null,
+      refreshToken: null,
+      tmpAuthToken: tmpAuth.token
+    }
   }
 
-  private async issueTokenAndSotoreToken(id: string) {
+  private async issueTokenAndSotoreToken(id: string): Promise<LoginResponse> {
     const payload = { id: id } // TODO: Define VO
     const access = this.tokenService.generateAccessToken(payload)
     const refresh = this.tokenService.generateRefreshToken(payload)
@@ -27,10 +39,11 @@ export class LoginUseCase {
     return {
       accessToken: access.token,
       refreshToken: refresh.token,
+      tmpAuthToken: null
     }
   }
 
-  async execute(form: LoginForm): Promise<{accessToken: string, refreshToken: string} | string> {
+  async execute(form: LoginForm): Promise<LoginResponse> {
     const user = await this.userRepo.findByEmail(form.email)
     if (!user) {
       console.warn("LoginUseCase: findByEmail is failed.")
@@ -42,11 +55,9 @@ export class LoginUseCase {
       throw new Error("Invalid email or password.")
     }
 
-    if (user.is2faEnabled) {
-      throw new Error()
-      // return this.generateTmpToken()
-    } else {
-      return this.issueTokenAndSotoreToken(user.id)
-    }
+    console.log("user: ", user)
+    return (user.is2faEnabled == 1)
+      ? this.generateTmpToken(user.id)
+      : this.issueTokenAndSotoreToken(user.id)
   }
 }

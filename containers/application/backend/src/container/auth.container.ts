@@ -16,6 +16,7 @@ export interface authUseCases {
     loginWithOIDC: LoginWithOIDCUseCase,
     logout: LogoutUseCase;
     refresh: RefreshUseCase;
+    setupTOTP: SetupTOTPUseCase;
     verifyTOTP: VerifyTOTPUseCase;
 }
 
@@ -30,8 +31,8 @@ export async function initAuthUsecases() {
   const loginWithOIDC = new LoginWithOIDCUseCase(volatileDataRepositoryRedis, userRepository, userIdpRepo, tokenService);
   const logout = new LogoutUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
   const refresh = new RefreshUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
-  const SetupTOTP = new SetupTOTPUseCase(userRepository, tokenService, user2faRepository);
+  const setupTOTP = new SetupTOTPUseCase(userRepository, tokenService, user2faRepository);
   const verifyTOTP = new VerifyTOTPUseCase(volatileDataRepositoryRedis, userRepository, tokenService);
 
-  return { login, loginWithOIDC, logout, refresh, verifyTOTP };
+  return { login, loginWithOIDC, logout, refresh, setupTOTP, verifyTOTP };
 }

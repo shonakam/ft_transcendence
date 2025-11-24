@@ -19,12 +19,11 @@ export class CreateUserUseCase {
       await this.user2faRepo.save({
         userId: user.id,
         totpSeceret: null,
-        isTotpEnabled: 0,
+        isTotpEnabled: 0, // 検証完了時に true
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       });
     })
-    
     return user;
   }
 }
