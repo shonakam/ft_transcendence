@@ -22,20 +22,20 @@ down-app:
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down
 	@bash $(APP)/tools/hosts.sh delete
 
-clean-app: # TODO: Implementation pending 
+clean-app: # TODO: Implementation pending
 
 fclean-app:
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
-up-ops: # TODO: Implementation pending 
+up-ops: # TODO: Implementation pending
 
-down-ops: # TODO: Implementation pending 
+down-ops: # TODO: Implementation pending
 
-clean-ops: # TODO: Implementation pending 
+clean-ops: # TODO: Implementation pending
 
-fclean-ops: # TODO: Implementation pending 
+fclean-ops: # TODO: Implementation pending
 
 .PHONEY:
 

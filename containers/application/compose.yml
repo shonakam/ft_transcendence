@@ -64,7 +64,7 @@ services:
       dockerfile: Dockerfile
     container_name: ft-database
     # ports: Planned update to PSQL
-    #   - "5432:5432" 
+    #   - "5432:5432"
     volumes:
       - storage:/var/lib/sqlite
     networks:

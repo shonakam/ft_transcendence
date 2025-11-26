@@ -25,11 +25,11 @@ export class RefreshUseCase {
 
     const key = `login-session:${user.id}`
     const value = await this.volatileDataRepositoryRedis.get(key)
-    
+
     if (!value) {
       throw new Error("Session expired or invalid.")
     }
-  
+
     const rePayload = { id: user.id } // TODO: Define VO
     const access = this.tokenService.generateAccessToken(rePayload)
 

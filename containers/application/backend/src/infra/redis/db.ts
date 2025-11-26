@@ -5,7 +5,7 @@ let redis: Redis;
 
 export async function initializeRedis(): Promise<void> {
   const redisOptions = {
-    host: config.redis.host, 
+    host: config.redis.host,
     port: parseInt(config.redis.port, 10),
     maxRetriesPerRequest: parseInt(config.redis.retries, 10),
   };

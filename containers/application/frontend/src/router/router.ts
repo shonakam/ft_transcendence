@@ -1,4 +1,4 @@
-import { routes } from './routes'; 
+import { routes } from './routes';
 import { Header } from '../components/organisms/Header';
 
 // アプリケーションがマウントされるルート要素を特定
@@ -9,7 +9,7 @@ export class Router {
 
     constructor() {
         const root = document.getElementById(APP_ROOT_ID);
-        if (!root) 
+        if (!root)
             throw new Error(`Root element with ID '${APP_ROOT_ID}' not found.`);
         this.appRoot = root;
         this.initListeners();

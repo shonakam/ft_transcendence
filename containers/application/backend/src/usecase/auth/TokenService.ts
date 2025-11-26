@@ -11,7 +11,7 @@ export class TokenService {
 
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
 
-    return AccessToken.create(tokenString, getUnixTimeMs() + ttlMs); 
+    return AccessToken.create(tokenString, getUnixTimeMs() + ttlMs);
   }
 
   public generateRefreshToken(payload: {}): RefreshToken {
