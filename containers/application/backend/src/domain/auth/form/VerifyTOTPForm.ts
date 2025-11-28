@@ -1,4 +1,4 @@
 export interface VerifyTOTPForm {
-  tmpToken: string
+  tmpAuthToken: string
   code: string
 }

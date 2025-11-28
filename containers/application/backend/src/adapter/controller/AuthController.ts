@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { authenticate } from '../auth/authPreHandler.ts'
 import { authUseCases } from '../../container/auth.container.ts';
 import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
@@ -16,6 +17,7 @@ export default async function AuthController(
     refresh,
     setupTOTP,
     verifyTOTP,
+    revokeTOTP,
   } = opts.useCases
 
   server.post(
@@ -95,8 +97,31 @@ export default async function AuthController(
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
         const form = req.body as VerifyTOTPForm
-        const response = await verifyTOTP.execute(form, req.params.factor)
+        const response = await verifyTOTP.execute(form)
         reply.status(200).send(response)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
+      }
+    },
+  );
+
+  server.delete(
+    // '/verify-mfa/:factor',
+    '/revoke-mfa/totp',
+    { preHandler: authenticate },
+    async (req, reply) => {
+      try {
+        const trustedUserId = req.authUserId;
+        if (trustedUserId === undefined) {
+          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+        }
+
+        await revokeTOTP.execute(trustedUserId)
+        reply.status(200)
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
