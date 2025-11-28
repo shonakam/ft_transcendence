@@ -5,7 +5,7 @@ import UserId from '../../domain/user/vo/UserId.ts';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    authUserId?: UserId; 
+    authUserId?: UserId;
   }
 }
 
@@ -22,16 +22,16 @@ export async function authenticate(
   }
 
   const token = authHeader.substring(7);
-  const secret = config.auth.jwtAccessSecret; 
+  const secret = config.auth.jwtAccessSecret;
 
   try {
-    const decoded = jwt.verify(token, secret); 
+    const decoded = jwt.verify(token, secret);
     if (typeof decoded !== 'object' || decoded === null || !decoded.sub) {
         request.log.warn('JWT payload missing user ID.');
         reply.code(401).send({ error: 'Unauthorized: Invalid token payload.' });
         return;
     }
-    request.authUserId = UserId.from(decoded.sub); 
+    request.authUserId = UserId.from(decoded.sub);
 
   } catch (err: unknown) {
     request.log.warn(`JWT verification failed: ${err}`);

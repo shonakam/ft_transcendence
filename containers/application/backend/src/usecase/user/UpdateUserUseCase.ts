@@ -16,7 +16,7 @@ export class UpdateUserUseCase {
     if (!Password.compare(form.currentPassword, user.password!)) {
       throw new Error("invalid password")
     }
-    
+
     const updateUser = UserForm.update(user, form)
 
     await this.repo.save(updateUser);

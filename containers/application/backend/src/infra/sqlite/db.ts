@@ -17,7 +17,7 @@ export async function initializeDatabase(): Promise<void> {
 
   try {
     const schemaSql = await fs.readFile('/app/tools/initialize_schema.sql', 'utf8');
-    await db.exec(schemaSql);   
+    await db.exec(schemaSql);
   } catch (err) {
     console.error(`スキーマファイルの読み込みまたは実行に失敗しました:`, err);
     throw err;

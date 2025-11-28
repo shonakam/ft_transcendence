@@ -5,11 +5,12 @@
     "allowImportingTsExtensions": true,
     "moduleResolution": "NodeNext",
     "noEmit": true,
-    
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },

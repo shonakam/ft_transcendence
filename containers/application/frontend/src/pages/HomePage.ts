@@ -7,8 +7,8 @@ export class HomePage implements Component {
 
   constructor() {
     this.rootElement = document.createElement('section');
-    this.authModal = new AuthModal(); 
-    
+    this.authModal = new AuthModal();
+
     this.render();
     this.initEventListeners();
   }

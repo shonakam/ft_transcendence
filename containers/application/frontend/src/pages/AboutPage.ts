@@ -2,7 +2,7 @@ import { Component } from "../interface/Component";
 
 export class AboutPage implements Component {
   private el: HTMLElement
-  
+
   constructor() {
     this.el = document.createElement('main')
     this.el.className = ""

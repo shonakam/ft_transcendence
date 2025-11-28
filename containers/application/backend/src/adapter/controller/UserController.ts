@@ -42,7 +42,7 @@ export default async function UserController(
       try {
         const trustedUserId = req.authUserId;
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+          return reply.status(500).send({ message: 'Authentication data missing.' });
         }
 
         const form = req.body as UpdateUserForm;
@@ -66,8 +66,8 @@ export default async function UserController(
       try {
         const target = UserId.from(req.params.id);
         const user = await getUser.execute(target);
-        user 
-          ? reply.send(user) 
+        user
+          ? reply.send(user)
           : reply.status(404).send({ message: 'User not found' });
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -79,7 +79,7 @@ export default async function UserController(
     },
   );
 
-  // GET user list 
+  // GET user list
   server.get<{ Querystring: { offset?: number; limit?: number }}>(
     '/',
     { preHandler: authenticate },
@@ -106,7 +106,7 @@ export default async function UserController(
       try {
         const trustedUserId = req.authUserId;
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+          return reply.status(500).send({ message: 'Authentication data missing.' });
         }
 
         const form = req.body as DeleteUserForm;

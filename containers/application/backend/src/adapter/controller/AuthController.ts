@@ -10,7 +10,7 @@ export default async function AuthController(
   server: FastifyInstance,
   opts: { useCases: authUseCases },
 ) {
-  const { 
+  const {
     login,
     loginWithOIDC,
     logout,
@@ -117,7 +117,7 @@ export default async function AuthController(
       try {
         const trustedUserId = req.authUserId;
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' }); 
+          return reply.status(500).send({ message: 'Authentication data missing.' });
         }
 
         await revokeTOTP.execute(trustedUserId)
