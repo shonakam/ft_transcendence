@@ -18,13 +18,34 @@ volumes:
 
 secrets:
   nginx_certificate:
-    file: .secrets/certs/transcenders.42.fr.crt
+    file: ./.secrets/certs/transcendence.42.fr.crt
   nginx_private_key:
-    file: .secrets/certs/stranscenders.42.fr.key
+    file: ./.secrets/certs/transcendence.42.fr.key
 
 ####
 
 services:
+  nginx:
+    init: true
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ft-nginx
+    ports:
+      - "80:80" # REDIRECT TO HTTPS
+      - "443:443"
+    volumes:
+      - "./nginx/conf.d/:/etc/nginx/conf.d/"
+      - ./modsecurity.d/main.conf:/etc/nginx/modsecurity.d/main.conf"
+      # - "./nginx/modsecurity.d/:/etc/modsecurity.d/"
+      - "./frontend/dist:/usr/share/nginx/html:ro"
+    networks:
+      - transcendence-network
+    secrets:
+      - nginx_certificate
+      - nginx_private_key
+    <<: *logging
+
   frontend:
     init: true
     build:
