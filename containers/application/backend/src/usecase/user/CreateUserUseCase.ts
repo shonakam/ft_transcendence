@@ -1,29 +1,29 @@
 import type { UserRepository } from '../../domain/user/repository/UserRepository.ts';
 import type { User } from '../../domain/user/entity/User.ts';
-import type { CreateUserForm } from '../../domain/user/form/UserForm.ts';
-import { getUnixTimeMs } from '../../utils/unixtime.ts';
-import UserId from '../../domain/user/vo/UserId.ts';
-import Email from '../../domain/user/vo/Email.ts';
-import UserName from '../../domain/user/vo/UserName.ts';
-import Password from '../../domain/user/vo/Password.ts';
+import { UserForm } from '../../domain/user/form/UserForm.ts';
+import type { CreateUserForm } from '../../domain/user/form/request/UserForm.ts';
+import { transaction } from '../../infra/sqlite/db.ts';
+import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
 
 export class CreateUserUseCase {
-  constructor(private repo: UserRepository) {}
+  constructor(
+    private repo: UserRepository,
+    private user2faRepo: User2faRepository
+  ) {}
 
   async execute(form: CreateUserForm): Promise<User> {
-    const now = getUnixTimeMs();
+    const user = UserForm.create(form)
 
-    const user: User = {
-      id: UserId.create().get(),
-      username: UserName.create(form.username).get(),
-      email: Email.create(form.email).get(),
-      password: Password.create(form.password).getHash(),
-      imagePath: form.imagePath,
-      createdAt: now,
-      updatedAt: now,
-      withdrawnAt: null,
-    };
-    await this.repo.save(user);
+    await transaction(async (db) => {
+      await this.repo.save(user);
+      await this.user2faRepo.save({
+        userId: user.id,
+        totpSeceret: null,
+        isTotpEnabled: 0, // 検証完了時に true
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      });
+    })
     return user;
   }
 }

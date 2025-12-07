@@ -4,7 +4,7 @@ import type {
   CreateUserForm,
   UpdateUserForm,
   DeleteUserForm,
-} from '../../domain/user/form/UserForm.ts';
+} from '../../domain/user/form/request/UserForm.ts';
 import { UserUseCases } from '../../container/user.container.ts';
 import UserId from '../../domain/user/vo/UserId.ts';
 import { Pagination } from '../../domain/user/vo/Pagination.ts';

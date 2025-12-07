@@ -12,7 +12,7 @@ export class LogoutUseCase {
 
   async execute(access: string): Promise<void> {
     const payload = this.tokenService.verifyToken(access, config.auth.jwtAccessSecret);
-    if (typeof payload === "string" || !('id' in payload)) {
+    if (typeof payload === "string" || !('sub' in payload) || !payload.sub) {
       console.warn("LogoutUseCase: invald payload")
       throw new Error("Invalid refresh token.")
     }
@@ -23,7 +23,7 @@ export class LogoutUseCase {
       throw new Error("User not found.")
     }
 
-    const key = `login-session:${user.id}`
+    const key = `session:refresh:${user.id}`
     await this.volatileDataRepositoryRedis.delete(key)
   }
 }

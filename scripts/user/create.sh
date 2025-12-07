@@ -15,5 +15,17 @@ curl -s -X POST "http://localhost:8080/api/v1/users" \
     "email": "alice@example.com",
     "username": "alice",
     "password": "StrongPassword123!",
-    "imagePath": null
+    "imagePath": null,
+    "is2faEnabled": "true"
+  }'
+
+# mfaなし
+curl -s -X POST "http://localhost:8080/api/v1/users" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "bob@example.com",
+    "username": "bob",
+    "password": "StrongPassword123!",
+    "imagePath": null,
+    "is2faEnabled": "false"
   }'
