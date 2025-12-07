@@ -70,6 +70,8 @@ services:
       - ./backend:/app
       - storage:/var/lib/sqlite
       - "/app/node_modules"
+    env_file:
+      - ./.env.local # TODO: 環境変数管理ファイルを分離
     networks:
       - transcendence-network
     restart: unless-stopped

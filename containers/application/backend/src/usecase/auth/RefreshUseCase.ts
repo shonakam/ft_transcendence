@@ -23,7 +23,7 @@ export class RefreshUseCase {
       throw new Error("User not found.")
     }
 
-    const key = `login-session:${user.id}`
+    const key = `session:refresh:${user.id}`
     const value = await this.volatileDataRepositoryRedis.get(key)
 
     if (!value) {

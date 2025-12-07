@@ -25,16 +25,13 @@ export async function authenticate(
   const secret = config.auth.jwtAccessSecret;
 
   try {
-    const decodedUnknown = jwt.verify(token, secret);
-    const decoded = decodedUnknown as { id: string };
-
-    if (typeof decoded !== 'object' || decoded === null || !decoded.id) {
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded !== 'object' || decoded === null || !decoded.sub) {
         request.log.warn('JWT payload missing user ID.');
         reply.code(401).send({ error: 'Unauthorized: Invalid token payload.' });
         return;
     }
-
-    request.authUserId = UserId.from(decoded.id);
+    request.authUserId = UserId.from(decoded.sub);
 
   } catch (err: unknown) {
     request.log.warn(`JWT verification failed: ${err}`);
