@@ -4,16 +4,17 @@ PROJECT_ROOT	:= $(PWD)
 APP				:= containers/application
 OPS				:= containers/operation
 DOCKER_APP_ENV	:= $(APP)/.env.local
+DOCKER_OPS_ENV	:= $(OPS)/.env.local
 export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 
 
 # Orthodox recipes
-all: init up-app up-ops
+all: init-app init-ops up-app up-ops
 
-init:
+init-app:
 	@cp -n $(APP)/.env.example $(APP)/.env.local || true
 
-up-app: init
+up-app: init-app
 	@bash $(APP)/tools/certs.sh
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build
 	@bash $(APP)/tools/hosts.sh create
@@ -29,9 +30,15 @@ fclean-app:
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
-up-ops: # TODO: Implementation pending
 
-down-ops: # TODO: Implementation pending
+init-ops:
+	@cp -n $(OPS)/.env.example $(OPS)/.env.local || true
+
+up-ops: init-ops
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yaml up --build -d
+
+down-ops:
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yaml down
 
 clean-ops: # TODO: Implementation pending
 
