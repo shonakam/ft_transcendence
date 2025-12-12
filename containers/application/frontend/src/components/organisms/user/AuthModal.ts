@@ -13,7 +13,7 @@ export class AuthModal implements Component {
   constructor() {
     this.rootElement = document.createElement('div');
     this.rootElement.id = 'auth-modal';
-    this.rootElement.className = 'hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20';
+    this.rootElement.className = 'hidden fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-20';
 
     this.loginForm = new LoginForm();
     this.signupForm = new SignupForm();

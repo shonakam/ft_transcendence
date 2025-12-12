@@ -1,6 +1,6 @@
 import { Routes } from '../interface/Route';
 
-import { HomePage } from '../pages/HomePage';
+import { HomePage } from '../pages/home/HomePage';
 import { AboutPage } from '../pages/AboutPage';
 // import { NotFoundPage } from '../pages/NotFoundPage';
 

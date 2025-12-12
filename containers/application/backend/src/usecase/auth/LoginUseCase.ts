@@ -19,7 +19,7 @@ export class LoginUseCase {
   ) {}
 
   private async generateTmpToken(id: string): Promise<LoginResponse> {
-    const payload = { id: id }
+    const payload = { sub: id }
     const tmpAuth = this.tokenService.generateTmpAuthToken(payload)
     return {
       accessToken: null,

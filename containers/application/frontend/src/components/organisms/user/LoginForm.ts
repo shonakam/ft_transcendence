@@ -1,4 +1,6 @@
 import { Component } from '../../../interface/Component';
+import loginTemplate from './html/login.html?raw';
+import { login, loginRequestForm } from '../../../services/auth/login';
 
 export class LoginForm implements Component {
   private rootElement: HTMLDivElement;
@@ -10,32 +12,51 @@ export class LoginForm implements Component {
   }
 
   private render(): void {
-    this.rootElement.innerHTML = `
-      <h2 class="text-2xl font-bold mb-6 text-center">ログイン</h2>
-      <form>
-        <div class="mb-4">
-          <label for="login-email" class="block text-left text-gray-700">メールアドレス</label>
-          <input type="email" id="login-email" class="w-full px-3 py-2 border rounded-lg" placeholder="email@example.com">
-        </div>
-        <div class="mb-6">
-          <label for="login-password" class="block text-left text-gray-700">パスワード</label>
-          <input type="password" id="login-password" class="w-full px-3 py-2 border rounded-lg">
-        </div>
-        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-          ログイン
-        </button>
-      </form>
-      <p class="mt-4 text-sm text-center">アカウントをお持ちでないですか？ <button data-switch-view="signup" class="font-medium text-blue-600 hover:underline">新規登録</button></p>
-    `;
+    this.rootElement.innerHTML = loginTemplate;
   }
 
   private initEventListeners(): void {
     const switchToSignupButton = this.rootElement.querySelector<HTMLButtonElement>('[data-switch-view="signup"]');
     switchToSignupButton?.addEventListener('click', () => {
-      // 親コンポーネントにビューの切り替えを依頼するためのカスタムイベントを発行
       const event = new CustomEvent('switchView', { detail: { view: 'signup' } });
       this.rootElement.dispatchEvent(event);
     });
+
+    const form = this.rootElement.querySelector('form');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.handleSubmit();
+    });
+  }
+
+  private async handleSubmit() {
+    const emailInput = this.rootElement.querySelector<HTMLInputElement>('#login-email');
+    const passwordInput = this.rootElement.querySelector<HTMLInputElement>('#login-password');
+    if (!emailInput || !passwordInput) {
+      console.error("必須フォーム要素が見つかりません。");
+      return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    if (!email || !password) {
+      alert('すべての項目を入力してください');
+      return;
+    }
+
+    try {
+      const req = loginRequestForm(email, password);
+      const response = await login(req)
+      console.log(response)
+      console.log('ログイン成功');
+      alert('ログイン成功しました');
+
+      const event = new CustomEvent('switchView', { detail: { view: 'login' } });
+      this.rootElement.dispatchEvent(event);
+    } catch (error) {
+      console.error('ログインエラー:', error);
+      alert('ログインに失敗しました。もう一度お試しください。');
+    }
   }
 
   public getElement(): HTMLElement {

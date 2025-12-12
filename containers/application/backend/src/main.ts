@@ -1,4 +1,6 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
+import cookie from '@fastify/cookie';
 import { registRouters } from './adapter/router/index.ts';
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
@@ -9,6 +11,20 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 async function main() {
   const server = fastify({ logger: true });
+
+  // setup cors
+  await server.register(cors, {
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  });
+
+  // setup cookie
+  await server.register(cookie, {
+    secret: process.env.COOKIE_SECRET || 'FQJH1Fh/yGZuqYyRkTK4pemzZF1pEX0hjbAnWcvxOLA=',
+    parseOptions: {}
+  });
+
   await registRouters(server, container);
 
   try {

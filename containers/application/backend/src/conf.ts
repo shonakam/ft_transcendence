@@ -60,3 +60,11 @@ export const config = {
     retries: process.env.REDIS_HOST || '3',
   },
 };
+
+export const cookieConfig = {
+  secure: false,
+  httpOnly: true,
+  // domain: 'api.transcendence.42.fr',
+  path: '/',
+  maxAge: 60 * 60 * 24 * 7,
+};

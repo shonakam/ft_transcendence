@@ -5,6 +5,7 @@ import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import { SetupTOTPForm } from '../../domain/auth/form/SetupTOTPForm.ts';
+import { cookieConfig } from '../../conf.ts';
 
 export default async function AuthController(
   server: FastifyInstance,
@@ -26,9 +27,20 @@ export default async function AuthController(
       try {
         const form = req.body as LoginForm;
         const response = await login.execute(form)
-        const code = (!response.tmpAuthToken) ? 200 : 202
+
+        let code = 0
+        if (!response.tmpAuthToken) {
+          code = 200
+          reply.setCookie('accessToken', response.accessToken!, cookieConfig)
+          reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
+        } else {
+          code = 202
+          reply.setCookie('tmpAuthToken', response.tmpAuthToken, cookieConfig)
+        }
+
         reply.status(code).send(response)
       } catch (err: unknown) {
+        console.warn(err)
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
         } else {

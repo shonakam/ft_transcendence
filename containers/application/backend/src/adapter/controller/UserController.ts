@@ -21,6 +21,7 @@ export default async function UserController(
     '/',
     async (req, reply) => {
       try {
+        console.log("HI: ", req.body)
         const form = req.body as CreateUserForm;
         const user = await createUser.execute(form);
         reply.status(201).send(user);

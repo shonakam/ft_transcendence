@@ -1,5 +1,6 @@
-import { Component } from "../interface/Component";
-import { AuthModal } from '../components/organisms/user/AuthModal';
+import { Component } from "../../interface/Component";
+import { AuthModal } from '../../components/organisms/user/AuthModal';
+import homeTemplate from './home.html?raw';
 
 export class HomePage implements Component {
   private rootElement: HTMLElement;
@@ -14,20 +15,7 @@ export class HomePage implements Component {
   }
 
   private render(): void {
-    this.rootElement.innerHTML = `
-      <div class="text-center pt-16">
-        <h1 class="text-4xl font-bold mb-4">Welcome</h1>
-        <p class="text-lg text-gray-700">これはTypeScriptで構築されたシングルページアプリケーションのサンプルです。</p>
-        <div class="mt-8 flex justify-center space-x-4">
-          <button id="login-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-            ログイン
-          </button>
-          <button id="signup-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg text-lg">
-            新規登録
-          </button>
-        </div>
-      </div>
-    `;
+    this.rootElement.innerHTML = homeTemplate;
     this.rootElement.appendChild(this.authModal.getElement());
   }
 
