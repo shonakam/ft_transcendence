@@ -15,17 +15,17 @@ init:
 
 up-app: init
 	@bash $(APP)/tools/certs.sh
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml up --build -d
 	@bash $(APP)/tools/hosts.sh create
 
 down-app:
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml down
 	@bash $(APP)/tools/hosts.sh delete
 
 clean-app: # TODO: Implementation pending
 
 fclean-app:
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
@@ -41,14 +41,14 @@ fclean-ops: # TODO: Implementation pending
 
 # --- Development Helpers ---
 app-logs:
-	@docker compose -f $(APP)/compose.yml logs -f
+	@docker compose -f $(APP)/compose.yaml logs -f
 
 ops-logs:
-	@docker compose -f $(OPS)/compose.yml logs -f
+	@docker compose -f $(OPS)/compose.yaml logs -f
 
 shell-backend:
-	@docker compose -f $(APP)/compose.yml exec backend sh
+	@docker compose -f $(APP)/compose.yaml exec backend sh
 
 shell-frontend:
-	@docker compose -f $(APP)/compose.yml exec frontend sh
+	@docker compose -f $(APP)/compose.yaml exec frontend sh
 

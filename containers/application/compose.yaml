@@ -18,20 +18,38 @@ volumes:
 
 secrets:
   nginx_certificate:
-    file: .secrets/certs/transcenders.42.fr.crt
+    file: ./.secrets/certs/transcendence.42.fr.crt
   nginx_private_key:
-    file: .secrets/certs/stranscenders.42.fr.key
+    file: ./.secrets/certs/transcendence.42.fr.key
 
 ####
 
 services:
+  nginx:
+    init: true
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ft-nginx
+    ports:
+      - "80:8080" # REDIRECT TO HTTPS
+      - "443:8443"
+    volumes:
+      - "./frontend/dist:/usr/share/nginx/html:ro"
+    networks:
+      - transcendence-network
+    secrets:
+      - nginx_certificate
+      - nginx_private_key
+    <<: *logging
+
   frontend:
     init: true
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: ft-frontend
-    ports:
+    ports: # TODO: delete this section.
       - "${FRONTEND_EXTERNAL_PORT:-5173}:${FRONTEND_INTERNAL_PORT:-5173}"
     volumes:
       - ./frontend:/app
@@ -46,7 +64,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: ft-backend
-    ports:
+    ports: # TODO: delete this section.
       - "${BACKEND_EXTERNAL_PORT:-8080}:${BACKEND_INTERNAL_PORT:-8080}"
     volumes:
       - ./backend:/app

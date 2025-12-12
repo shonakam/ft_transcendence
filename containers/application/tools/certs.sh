@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DOMAIN_NAME=${ENV_DOMAIN_NAME:-transcenders.42.fr}
+DOMAIN_NAME=${ENV_DOMAIN_NAME:-transcendence.42.fr}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_DIR+="/../.secrets/certs"
@@ -16,5 +16,8 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout $SCRIPT_DIR/${DOMAIN_NAME}.key \
     -out $SCRIPT_DIR/${DOMAIN_NAME}.crt \
     -subj "/C=FR/ST=Ile-de-France/L=Paris/O=42School/OU=Inception/CN=${DOMAIN_NAME}"
+
+chmod 644 $SCRIPT_DIR/${DOMAIN_NAME}.key
+chmod 644 $SCRIPT_DIR/${DOMAIN_NAME}.crt
 
 echo "SSL証明書と秘密鍵が '$SCRIPT_DIR' に生成されました。"
