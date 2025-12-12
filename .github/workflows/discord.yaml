@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Send PR Notification to Discord
-        uses: rjstone/discord-webhook-notify@v6
+        uses: rjstone/discord-webhook-notify@v2
         with:
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
           content: |
