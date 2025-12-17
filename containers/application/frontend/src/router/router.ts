@@ -41,9 +41,12 @@ export class Router {
             mainElement = document.createElement('main');
             this.appRoot.appendChild(mainElement);
         }
-        mainElement.innerHTML = '';
-        const pageInstance = PageComponent()
-        mainElement.appendChild(pageInstance.getElement())
+        if (PageComponent) {
+            const newPageElement: HTMLElement = PageComponent().getElement();
+            this.appRoot.appendChild(newPageElement);
+        } else {
+            console.error('No PageComponent found for path:', path);
+        }
     }
 
     private renderInitialStructure() {
