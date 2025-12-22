@@ -3,8 +3,8 @@ import { AuthModal } from '../components/organisms/user/AuthModal.js';
 
 import { PongGame } from '../components/game/PongGame.js';
 import { GameCanvas } from '../components/game/GameCanvas.ts';
-import IGameState, { GameState } from '../components/game/GameState.js';
-import GAME_CONFIG from '../components/game/GameConfig.js';
+import { GameState } from '../components/game/GameState.js';
+import CONFIG from '../components/game/GameConfig.js';
 
 // import { canvas } from '../components/game/pong.js';
 
@@ -22,9 +22,12 @@ export class GamePage implements Component {
 
     this.gameCanvas = new GameCanvas(
       this.rootElement.querySelector('.canvas-stack') as HTMLElement
-      , GAME_CONFIG.WIDTH, GAME_CONFIG.HEIGHT);
-    this.pongGame = new PongGame(this.gameCanvas, new GameState()); //　TODO: pass real game state
+      , CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+
+    this.pongGame = new PongGame(this.gameCanvas);
     this.rootElement.appendChild(this.authModal.getElement());
+    this.pongGame.initRenderer();
+    this.pongGame.start();
   }
 
   private render(): void {
@@ -37,10 +40,6 @@ export class GamePage implements Component {
       <div class="canvas-stack" style="position:relative; width:800px; height:600px;"></div>
     </div>
   `;
-  }
-
-  private initGame(): void {
-    // Game initialization logic can be added here
   }
 
   public getElement(): HTMLElement {

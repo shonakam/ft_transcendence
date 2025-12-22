@@ -3,17 +3,29 @@
  */
 
 const GAME_CONFIG = {
-  WIDTH: 800,
-  HEIGHT: 400,
-  PADDLE_WIDTH: 10,
+  // Canvas dimensions
+  CANVAS_WIDTH: 800,
+  CANVAS_HEIGHT: 400,
+
+  // Paddle properties
+  PADDLE_THICKNESS: 10,
+  PADDLE_LENGTH: 100,
+  PADDLE_OFFSET: 30,
+  PADDLE_SPEED: 600,
+
+  PADDLE_COLLISION_OFFSET: 10,
+
+  // Ball properties
+  BALL_RADIUS: 5,
+  BALL_SPEED: 500,
+
+  // Game properties
   CENTER_LINE_DASH: [5, 15],
   BALL_RESTART_DELAY: 1000,
   BALL_VERTICAL_FACTOR: 0.6,
-  MAX_BALL_SPEED_MULTIPLIER: 2,
   BOUNCE_FACTOR: 6,
-  PADDLE_COLLISION_LEFT: 20,
-  PADDLE_COLLISION_RIGHT: 10,
   WINNING_SCORE: 10, // Game ends when a player reaches this score
+
 } as const;
 
 export default GAME_CONFIG;

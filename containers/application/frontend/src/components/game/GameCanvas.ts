@@ -14,12 +14,20 @@ type CanvasKey =
 type RefCanvases = Record<CanvasKey, HTMLCanvasElement>;
 type RefContexts = Record<CanvasKey, CanvasRenderingContext2D>;
 
-export class GameCanvas {
-	private width: number;
-	private height: number;
-  private stack: HTMLElement;
-  private refCanvases: RefCanvases;
-  private refContexts: RefContexts;
+export interface GameCanvas {
+	width: number;
+	height: number;
+  stack: HTMLElement;
+  refCanvases: RefCanvases;
+  refContexts: RefContexts;
+
+  constructor(stack: HTMLElement, width: number, height: number): void;
+  getStack(): HTMLElement;
+  getCanvas(key: CanvasKey): HTMLCanvasElement;
+  getContext(key: CanvasKey): CanvasRenderingContext2D;
+}
+
+export class GameCanvas implements GameCanvas {
 
   constructor(stack: HTMLElement, width: number, height: number) {
     this.stack = stack;
@@ -55,6 +63,10 @@ export class GameCanvas {
         cvs.style.display = 'none';
       }
     }
+  }
+
+  getStack(): HTMLElement {
+    return this.stack;
   }
 
   getCanvas(key: CanvasKey): HTMLCanvasElement {

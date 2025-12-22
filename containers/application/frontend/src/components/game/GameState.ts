@@ -2,9 +2,13 @@
  * GameState.ts
  */
 
-import GAME_CONFIG from './GameConfig.js';
+import { Ball } from './Ball.js';
+import { Paddle } from './Paddle.js';
 
-export default interface IGameState {
+import CONFIG from './GameConfig.js';
+
+export interface GameState {
+
 	// BasicStatus
 	status: "ready" | "playing" | "paused" | "finished";
 	winner: null | "left" | "right";
@@ -17,49 +21,56 @@ export default interface IGameState {
 	// rightUser: User | null;
 
 	// Scores
-	leftScore: number;
-	rightScore: number;
+  scores: [left: number, right: number];
 
 	// Game field state
-	leftPaddle: { y: number };
-	rightPaddle: { y: number };
-	leftPaddleDir: -1 | 0 | 1; // -1: up, 0: still, 1: down
-	rightPaddleDir: -1 | 0 | 1; // -1: up, 0: still, 1: down
-	ball: { x: number; y: number; dx: number; dy: number };
+	paddles: Paddle[];
+	ball: Ball;
+
+  // Game Config
+	config: typeof CONFIG;
 
   // Game Metadata
-	gameId: string | null;
-	startTime: number;
+	lastFrameTime: number;
+	// gameId: string | null;
+	// startTime: number;
+
+	constructor(): void;
+	incrementScore(side: "left" | "right"): void;
 }
 
 export class GameState {
-  public state: IGameState;
-
 	constructor() {
-		this.state = {
-			// BasicStatus
-			status: "ready",
-			winner: null,
-			playerSide: null,
+		// BasicStatus
+		this.status = "ready";
+		this.winner = null;
+		this.playerSide = null;
 
-			// Game user info
-			leftUserAliasName: null,
-			rightUserAliasName: null,
+		// Game user info
+		this.leftUserAliasName = null;
+		this.rightUserAliasName = null;
 
-			// Scores
-			leftScore: 0,
-			rightScore: 0,
+		// Scores
+		this.scores = [0, 0];
 
-			// Game field state
-			leftPaddle: { y: (GAME_CONFIG.HEIGHT - 100) / 2 },
-			rightPaddle: { y: (GAME_CONFIG.HEIGHT - 100) / 2 },
-			leftPaddleDir: 0,
-			rightPaddleDir: 0,
-			ball: { x: GAME_CONFIG.WIDTH / 2, y: GAME_CONFIG.HEIGHT / 2, dx: 0, dy: 0 },
+		// Game field state
+		this.paddles = [new Paddle("left"), new Paddle("right")];
+		this.ball = new Ball();
 
-			// Game Metadata
-			gameId: null,
-			startTime: Date.now(),
-		};
+		// Game Config
+		this.config = CONFIG;
+
+		// Game Metadata
+		this.lastFrameTime = performance.now();
+		// this.gameId = null;
+		// this.startTime = Date.now();
+	};
+
+	incrementScore(side: "left" | "right") {
+		if (side === "left") {
+			this.scores[0]++;
+		} else if (side === "right") {
+			this.scores[1]++;
+		}
 	}
 }

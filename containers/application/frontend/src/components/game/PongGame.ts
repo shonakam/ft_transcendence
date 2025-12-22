@@ -1,25 +1,70 @@
-import { GameCanvas} from './GameCanvas.js';
-import IGameState, { GameState } from './GameState.js';
+import { GameCanvas } from './GameCanvas.js';
+import { GameState } from './GameState.js';
+import { PhysicsEngine } from './PhysicsEngine.js';
+import { CanvasRenderer } from './CanvasRenderer.js';
+import { InputHandler } from './InputHandler.js';
 
-interface Score {
-  player1: number;
-  player2: number;
+import CONFIG from './GameConfig.js';
+
+export interface PongGame {
+  canvas: GameCanvas;
+  state: GameState;
+  physics: PhysicsEngine;
+  renderer: CanvasRenderer;
+  input: InputHandler;
+
+  initRenderer(): void;
+  start(): void;
+  update(dt: number): void;
+  render(): void;
+  resume(): void;
+  startLoop(): void;
+  loop(currentTime: number): void;
+  requestAnimationFrame(callback: (time: number) => void): void;
+  render(): void;
 }
 
 export class PongGame {
-  private gameCanvas: GameCanvas;
-  private gameState: GameState;
 
-  constructor(gameCanvas: GameCanvas, gameState: GameState) {
-    this.gameCanvas = gameCanvas;
-    this.gameState = gameState;
+  constructor(gameCanvas: GameCanvas) {
+    this.state = new GameState();
+    this.canvas = new GameCanvas(gameCanvas.getStack(), CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+    this.input = new InputHandler(this.state);
+    this.physics = new PhysicsEngine(this.state, this.input);
+    this.renderer = new CanvasRenderer(this.state, this.canvas);
   }
 
-  private initGame(): void {
-
+  initRenderer(): void {
+    this.physics.update(0);
+    this.renderer.renderStaticLayer();
+    this.renderer.renderDynamicLayer();
   }
 
-  public start(): void {
-    this.initGame();
+  start(): void {
+    if (this.state.status === "ready")
+      this.state.status = "playing";
+    this.startLoop();
+  }
+
+  resume(): void {
+    if (this.state.status === "paused")
+      this.state.status = "playing";
+    this.startLoop();
+  }
+
+  startLoop(): void {
+    this.state.lastFrameTime = performance.now();
+    window.requestAnimationFrame(this.loop.bind(this));
+  }
+
+  loop(currentTime: number): void {
+    const dt = (currentTime - this.state.lastFrameTime) / 1000; // 秒単位の経過時間
+    this.state.lastFrameTime = currentTime;
+
+    this.physics.update(dt);
+    this.renderer.render();
+    if (this.state.status !== "playing")
+      return;
+    window.requestAnimationFrame(this.loop.bind(this));
   }
 }
