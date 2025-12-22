@@ -1,7 +1,0 @@
-services:
-  pong-game:
-    build: .
-    ports:
-      - "8080:80"
-    container_name: pong-tournament
-    restart: unless-stopped
