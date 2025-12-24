@@ -23,10 +23,13 @@ export interface PongGame {
 }
 
 export class PongGame implements PongGame {
-
   constructor(gameCanvas: GameCanvas) {
     this.state = new GameState();
-    this.canvas = new GameCanvas(gameCanvas.getStack(), CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+    this.canvas = new GameCanvas(
+      gameCanvas.getStack(),
+      CONFIG.CANVAS_WIDTH,
+      CONFIG.CANVAS_HEIGHT
+    );
     this.input = new InputHandler(this.state);
     this.physics = new PhysicsEngine(this.state, this.input);
     this.renderer = new CanvasRenderer(this.state, this.canvas);
@@ -39,8 +42,8 @@ export class PongGame implements PongGame {
   }
 
   start(): void {
-    if (this.state.status === "ready" || this.state.status === "paused")
-      this.state.setStatus("playing");
+    if (this.state.status === 'ready' || this.state.status === 'paused')
+      this.state.setStatus('playing');
     this.startLoop();
   }
 
@@ -55,8 +58,7 @@ export class PongGame implements PongGame {
 
     this.physics.update(dt);
     this.renderer.render();
-    if (this.state.status === "playing")
+    if (this.state.status === 'playing')
       window.requestAnimationFrame(this.loop.bind(this));
-    return;
   }
 }

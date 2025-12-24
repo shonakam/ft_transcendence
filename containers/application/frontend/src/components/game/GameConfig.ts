@@ -25,7 +25,6 @@ const GAME_CONFIG = {
   BALL_VERTICAL_FACTOR: 0.6,
   BOUNCE_FACTOR: 6,
   WINNING_SCORE: 5, // Game ends when a player reaches this score
-
 } as const;
 
 export default GAME_CONFIG;

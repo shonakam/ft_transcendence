@@ -16,7 +16,7 @@ export interface GamePage extends Component {
   addSpaceEventListener(): void;
 }
 
-export class GamePage implements GamePage{
+export class GamePage implements GamePage {
   rootElement: HTMLElement;
   authModal: AuthModal;
   gameCanvas: GameCanvas;
@@ -28,15 +28,17 @@ export class GamePage implements GamePage{
 
     this.render();
     this.gameCanvas = new GameCanvas(
-      this.rootElement.querySelector('.canvas-stack') as HTMLElement
-      , CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+      this.rootElement.querySelector('.canvas-stack') as HTMLElement,
+      CONFIG.CANVAS_WIDTH,
+      CONFIG.CANVAS_HEIGHT
+    );
 
     this.pongGame = new PongGame(this.gameCanvas);
     this.pongGame.initRenderer();
     this.addSpaceEventListener();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
-    this.pongGame.state.playerSide = "both";
+    this.pongGame.state.playerSide = 'both';
 
     this.rootElement.appendChild(this.authModal.getElement());
   }
@@ -70,8 +72,10 @@ export class GamePage implements GamePage{
   addSpaceEventListener(): void {
     window.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.code === 'Space') {
-        if (this.pongGame.state.status === 'ready' ||
-          this.pongGame.state.status === 'paused') {
+        if (
+          this.pongGame.state.status === 'ready' ||
+          this.pongGame.state.status === 'paused'
+        ) {
           this.pongGame.start();
         } else if (this.pongGame.state.status === 'playing') {
           this.pongGame.state.setStatus('paused');
@@ -83,9 +87,9 @@ export class GamePage implements GamePage{
   updateScore(left: number, right: number) {
     document.getElementById('score-left')!.textContent = left.toString();
     document.getElementById('score-right')!.textContent = right.toString();
-    if (left < CONFIG.WINNING_SCORE && right < CONFIG.WINNING_SCORE)
-      return;
-    const winner = left >= CONFIG.WINNING_SCORE ? 'Left Player' : 'Right Player';
+    if (left < CONFIG.WINNING_SCORE && right < CONFIG.WINNING_SCORE) return;
+    const winner =
+      left >= CONFIG.WINNING_SCORE ? 'Left Player' : 'Right Player';
     // add winning message
     document.querySelector('.game-canvas')!.innerHTML += `
       <div class="winning-message absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-75 p-4 rounded shadow-lg">
@@ -96,6 +100,7 @@ export class GamePage implements GamePage{
   }
 
   updateStatus(status: string) {
-    document.getElementById('game-status')!.textContent = `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+    document.getElementById('game-status')!.textContent =
+      `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
   }
 }

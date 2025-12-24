@@ -15,8 +15,8 @@ type RefCanvases = Record<CanvasKey, HTMLCanvasElement>;
 type RefContexts = Record<CanvasKey, CanvasRenderingContext2D>;
 
 export interface GameCanvas {
-	width: number;
-	height: number;
+  width: number;
+  height: number;
   stack: HTMLElement;
   refCanvases: RefCanvases;
   refContexts: RefContexts;
@@ -28,7 +28,6 @@ export interface GameCanvas {
 }
 
 export class GameCanvas implements GameCanvas {
-
   constructor(stack: HTMLElement, width: number, height: number) {
     this.stack = stack;
     this.width = width;

@@ -8,7 +8,7 @@ interface InputState {
 }
 
 export interface InputHandler {
-	keys: Set<string>;
+  keys: Set<string>;
   state: GameState;
 
   getInput(): InputState;
@@ -18,15 +18,15 @@ export interface InputHandler {
 }
 
 export class InputHandler implements InputHandler {
-	constructor(state: GameState) {
+  constructor(state: GameState) {
     this.keys = new Set<string>();
     this.state = state;
 
-    window.addEventListener("keydown", (e) => {
+    window.addEventListener('keydown', (e) => {
       this.keys.add(e.code);
     });
 
-    window.addEventListener("keyup", (e) => {
+    window.addEventListener('keyup', (e) => {
       this.keys.delete(e.code);
     });
   }
@@ -40,18 +40,18 @@ export class InputHandler implements InputHandler {
   }
 
   getLeftDirection(): Direction {
-    if (this.keys.has("KeyW")) return -1;
-    if (this.keys.has("KeyS")) return 1;
+    if (this.keys.has('KeyW')) return -1;
+    if (this.keys.has('KeyS')) return 1;
     return 0;
   }
 
   getRightDirection(): Direction {
-    if (this.keys.has("ArrowUp")) return -1;
-    if (this.keys.has("ArrowDown")) return 1;
+    if (this.keys.has('ArrowUp')) return -1;
+    if (this.keys.has('ArrowDown')) return 1;
     return 0;
   }
 
   getStartPauseInput(): boolean {
-    return this.keys.has("Space");
+    return this.keys.has('Space');
   }
 }

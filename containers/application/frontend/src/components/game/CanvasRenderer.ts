@@ -16,10 +16,9 @@ export class CanvasRenderer implements CanvasRenderer {
   }
 
   render(): void {
-    if (this.canvas.ifStaticCanvasRendered === false)
-      this.renderStaticLayer();
+    if (this.canvas.ifStaticCanvasRendered === false) this.renderStaticLayer();
     this.renderDynamicLayer();
-  };
+  }
 
   renderStaticLayer(): void {
     const ctx = this.canvas.refContexts.onscreenStatic;
@@ -27,11 +26,11 @@ export class CanvasRenderer implements CanvasRenderer {
     const height = this.canvas.height;
 
     // 背景色（緑のホッケーテーブル）
-    ctx.fillStyle = "#018001ff";
+    ctx.fillStyle = '#018001ff';
     ctx.fillRect(0, 0, width, height);
 
     // 中央線
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(width / 2, 0);
@@ -74,14 +73,14 @@ export class CanvasRenderer implements CanvasRenderer {
     ctx.stroke();
 
     this.canvas.ifStaticCanvasRendered = true;
-  };
+  }
 
   renderDynamicLayer(): void {
     this.clearDynamicLayer();
     this.drawBall();
     this.drawPaddle('left');
     this.drawPaddle('right');
-  };
+  }
 
   clearDynamicLayer(): void {
     const ctx = this.canvas.refContexts.onscreenDynamic;
@@ -93,7 +92,7 @@ export class CanvasRenderer implements CanvasRenderer {
     const ball = this.state.ball;
 
     // ctx.fillStyle = ball.color;
-    ctx.fillStyle = "white";
+    ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -106,10 +105,14 @@ export class CanvasRenderer implements CanvasRenderer {
     }
     const paddle = this.state.paddles[side === 'left' ? 0 : 1];
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(paddle.position.x, paddle.position.y, paddle.thickness, paddle.length);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(
+      paddle.position.x,
+      paddle.position.y,
+      paddle.thickness,
+      paddle.length
+    );
   }
-
 }
 
 export default CanvasRenderer;
