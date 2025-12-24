@@ -1,4 +1,4 @@
-import { Vector2 } from "../../interface/Vector2.ts";
+import { Vector2 } from "../../interface/Vector2.js";
 
 import CONFIG from "./GameConfig.js";
 
@@ -17,8 +17,6 @@ export class Ball implements Ball {
 		this.radius = CONFIG.BALL_RADIUS;
 		this.reset();
 	}
-
-
 
 	reset() {
 		this.position = {

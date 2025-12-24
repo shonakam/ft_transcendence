@@ -9,7 +9,7 @@ export interface CanvasRenderer {
   renderDynamicLayer(): void;
 }
 
-export class CanvasRenderer {
+export class CanvasRenderer implements CanvasRenderer {
   constructor(state: GameState, canvas: GameCanvas) {
     this.state = state;
     this.canvas = canvas;

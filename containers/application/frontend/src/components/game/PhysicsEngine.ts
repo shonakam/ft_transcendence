@@ -1,8 +1,8 @@
 import { GameState } from './GameState.js';
-import { InputHandler } from './InputHandler.ts';
+import { InputHandler } from './InputHandler.js';
 
-import { Ball } from './Ball.ts';
-import { Paddle } from './Paddle.ts';
+import { Ball } from './Ball.js';
+import { Paddle } from './Paddle.js';
 
 export interface PhysicsEngine {
 	state: GameState;
@@ -14,7 +14,7 @@ export interface PhysicsEngine {
 	checkCollisions(): void;
 }
 
-export class PhysicsEngine {
+export class PhysicsEngine implements PhysicsEngine {
 
 	constructor(state: GameState, inputHandler: InputHandler) {
 		this.state = state;
@@ -55,7 +55,7 @@ export class PhysicsEngine {
 
 	// 衝突判定ラッパー
 	checkCollisions() {
-		const { ball, paddles, config } = this.state;
+		const { ball, paddles } = this.state;
 
 		this.checkHorizontalWallCollision(ball);
 		this.checkLeftPaddleCollision(ball, paddles[0]);

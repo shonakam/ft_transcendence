@@ -38,11 +38,10 @@ export interface GameState {
 	// gameId: string | null;
 	// startTime: number;
 
-	constructor(): void;
 	incrementScore(side: "left" | "right"): void;
 }
 
-export class GameState {
+export class GameState implements GameState {
 	constructor() {
 		// BasicStatus
 		this.status = "ready";

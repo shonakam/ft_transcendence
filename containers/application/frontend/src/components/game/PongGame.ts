@@ -22,7 +22,7 @@ export interface PongGame {
   requestAnimationFrame(callback: (time: number) => void): void;
 }
 
-export class PongGame {
+export class PongGame implements PongGame {
 
   constructor(gameCanvas: GameCanvas) {
     this.state = new GameState();

@@ -1,7 +1,7 @@
 import { Component } from '../interface/Component.js';
 import { AuthModal } from '../components/organisms/user/AuthModal.js';
 
-import { GameCanvas } from '../components/game/GameCanvas.ts';
+import { GameCanvas } from '../components/game/GameCanvas.js';
 import { PongGame } from '../components/game/PongGame.js';
 
 import CONFIG from '../components/game/GameConfig.js';
@@ -12,12 +12,11 @@ export interface GamePage extends Component {
   gameCanvas: GameCanvas;
   pongGame: PongGame;
 
-  getElement(): HTMLElement;
   render(): void;
   addSpaceEventListener(): void;
 }
 
-export class GamePage implements Component {
+export class GamePage implements GamePage{
   rootElement: HTMLElement;
   authModal: AuthModal;
   gameCanvas: GameCanvas;

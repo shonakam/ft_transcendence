@@ -22,7 +22,6 @@ export interface GameCanvas {
   refContexts: RefContexts;
   ifStaticCanvasRendered: boolean;
 
-  constructor(stack: HTMLElement, width: number, height: number): void;
   getStack(): HTMLElement;
   getCanvas(key: CanvasKey): HTMLCanvasElement;
   getContext(key: CanvasKey): CanvasRenderingContext2D;

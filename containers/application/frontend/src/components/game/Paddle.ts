@@ -1,4 +1,4 @@
-import { Vector2 } from "../../interface/Vector2.ts";
+import { Vector2 } from "../../interface/Vector2.js";
 
 import CONFIG from "./GameConfig.js";
 

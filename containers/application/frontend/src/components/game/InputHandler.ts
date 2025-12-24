@@ -1,4 +1,4 @@
-import { Direction } from '../../types/Direction.ts';
+import { Direction } from '../../types/Direction.js';
 import { GameState } from './GameState.js';
 
 interface InputState {
