@@ -133,6 +133,7 @@ export class PhysicsEngine {
     if (ball.position.x - ball.radius <= 0) this.state.incrementScore('right');
     else if (config.CANVAS_WIDTH <= ball.position.x + ball.radius)
       this.state.incrementScore('left');
+    this.state.status = 'ready';
     ball.reset();
   }
 }
