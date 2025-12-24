@@ -1,4 +1,4 @@
-import { Component } from "../interface/Component";
+import { Component } from "../interface/Component.js";
 
 export class AboutPage implements Component {
   private el: HTMLElement
@@ -9,7 +9,8 @@ export class AboutPage implements Component {
 
     this.el.innerHTML = `
       <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4">About Pages</h1>
+        <div class="mb-6"> </div>
+        <h1 class="text-4xl font-bold mb-4">About Page</h1>
       </div>
     `;
   }

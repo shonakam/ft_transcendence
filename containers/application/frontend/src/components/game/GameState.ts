@@ -13,6 +13,8 @@ export interface GameState {
 	status: "ready" | "playing" | "paused" | "finished";
 	winner: null | "left" | "right";
 	playerSide: "left" | "right" | "both" | null;
+	setStatus(status: "ready" | "playing" | "paused" | "finished"): void;
+	onStatusChange: ((status: "ready" | "playing" | "paused" | "finished") => void);
 
 	// Game user info
 	leftUserAliasName: string | null;
@@ -22,6 +24,7 @@ export interface GameState {
 
 	// Scores
   scores: [left: number, right: number];
+	onScoreChange: ((left: number, right: number) => void);
 
 	// Game field state
 	paddles: Paddle[];
@@ -43,6 +46,7 @@ export class GameState {
 	constructor() {
 		// BasicStatus
 		this.status = "ready";
+
 		this.winner = null;
 		this.playerSide = null;
 
@@ -66,11 +70,30 @@ export class GameState {
 		// this.startTime = Date.now();
 	};
 
+	setStatus(status: "ready" | "playing" | "paused" | "finished") {
+		this.status = status;
+		this.onStatusChange(status);
+	}
+
 	incrementScore(side: "left" | "right") {
 		if (side === "left") {
 			this.scores[0]++;
 		} else if (side === "right") {
 			this.scores[1]++;
 		}
+		if (this.onScoreChange) {
+			this.onScoreChange(this.scores[0], this.scores[1]);
+		}
+		if (this.scores[0] < this.config.WINNING_SCORE &&
+			this.scores[1] < this.config.WINNING_SCORE) {
+			return;
+		}
+		if (this.scores[0] >= this.config.WINNING_SCORE) {
+			this.winner = "left";
+		} else if (this.scores[1] >= this.config.WINNING_SCORE) {
+			this.winner = "right";
+		}
+		this.setStatus("finished");
 	}
+
 }

@@ -11,7 +11,7 @@ const GAME_CONFIG = {
   PADDLE_THICKNESS: 10,
   PADDLE_LENGTH: 100,
   PADDLE_OFFSET: 30,
-  PADDLE_SPEED: 600,
+  PADDLE_SPEED: 400,
 
   PADDLE_COLLISION_OFFSET: 10,
 
@@ -24,7 +24,7 @@ const GAME_CONFIG = {
   BALL_RESTART_DELAY: 1000,
   BALL_VERTICAL_FACTOR: 0.6,
   BOUNCE_FACTOR: 6,
-  WINNING_SCORE: 10, // Game ends when a player reaches this score
+  WINNING_SCORE: 5, // Game ends when a player reaches this score
 
 } as const;
 

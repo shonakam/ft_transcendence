@@ -20,6 +20,7 @@ export interface GameCanvas {
   stack: HTMLElement;
   refCanvases: RefCanvases;
   refContexts: RefContexts;
+  ifStaticCanvasRendered: boolean;
 
   constructor(stack: HTMLElement, width: number, height: number): void;
   getStack(): HTMLElement;

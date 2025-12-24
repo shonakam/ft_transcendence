@@ -16,6 +16,7 @@ export class HomePage implements Component {
   private render(): void {
     this.rootElement.innerHTML = `
       <div class="text-center pt-16">
+        <div class="mb-6"> </div>
         <h1 class="text-4xl font-bold mb-4">Welcome</h1>
         <p class="text-lg text-gray-700">これはTypeScriptで構築されたシングルページアプリケーションのサンプルです。</p>
         <div class="mt-8 flex justify-center space-x-4">

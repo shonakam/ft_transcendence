@@ -40,9 +40,9 @@ export class PhysicsEngine {
 			leftPaddle.position.y += leftPaddle.speed * dt;
 
 		// 右パドル (矢印キー)
-		if (keys.has("ArrowUp") && rightPaddle.position.y > 0)
+		if ((keys.has("ArrowUp") || keys.has("KeyI")) && rightPaddle.position.y > 0)
 			rightPaddle.position.y -= rightPaddle.speed * dt;
-		if (keys.has("ArrowDown") && rightPaddle.position.y < canvasHeight - rightPaddle.length)
+		if ((keys.has("ArrowDown") || keys.has("KeyK")) && rightPaddle.position.y < canvasHeight - rightPaddle.length)
 			rightPaddle.position.y += rightPaddle.speed * dt;
 	}
 
@@ -84,12 +84,12 @@ export class PhysicsEngine {
 	checkLeftPaddleCollision(ball: Ball, paddle: Paddle) {
 		const leftPaddle = this.state.paddles[0];
 
-		if (ball.velocity.x >= 0)
+		if (0 < ball.velocity.x)
 			return;
 
 		if (
 			ball.position.x - ball.radius <= leftPaddle.position.x + leftPaddle.thickness &&
-			ball.position.x - ball.radius > leftPaddle.position.x &&
+			ball.position.x + ball.radius > leftPaddle.position.x &&
 			ball.position.y + ball.radius > leftPaddle.position.y &&
 			ball.position.y - ball.radius < leftPaddle.position.y + leftPaddle.length
 		) {
@@ -102,12 +102,12 @@ export class PhysicsEngine {
 	checkRightPaddleCollision(ball: Ball, paddle: Paddle) {
 		const rightPaddle = this.state.paddles[1];
 
-		if (ball.velocity.x <= 0)
+		if (ball.velocity.x < 0)
 			return;
 
 		if (
 			ball.position.x + ball.radius >= rightPaddle.position.x &&
-			ball.position.x + ball.radius < rightPaddle.position.x + rightPaddle.length &&
+			ball.position.x + ball.radius < rightPaddle.position.x + rightPaddle.thickness &&
 			ball.position.y + ball.radius > rightPaddle.position.y &&
 			ball.position.y - ball.radius < rightPaddle.position.y + rightPaddle.length
 		) {
@@ -120,14 +120,13 @@ export class PhysicsEngine {
 	checkGoalCollision(ball: Ball) {
 		const { config } = this.state;
 
-		if (ball.position.x < ball.radius)
-			this.state.incrementScore("right");
-		else if (ball.position.x > config.CANVAS_WIDTH - ball.radius)
-			this.state.incrementScore("left");
-		else
+		if (0 < ball.position.x - ball.radius &&
+			ball.position.x + ball.radius < config.CANVAS_WIDTH)
 			return;
-
-		this.state.status = "ready";
+		if (ball.position.x - ball.radius <= 0)
+			this.state.incrementScore("right");
+		else if (config.CANVAS_WIDTH <= ball.position.x + ball.radius)
+			this.state.incrementScore("left");
 		ball.reset();
 	}
 }

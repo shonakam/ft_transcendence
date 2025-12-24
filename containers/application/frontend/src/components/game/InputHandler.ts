@@ -4,6 +4,7 @@ import { GameState } from './GameState.js';
 interface InputState {
   left: Direction;
   right: Direction;
+  startPause: boolean;
 }
 
 export interface InputHandler {
@@ -11,6 +12,9 @@ export interface InputHandler {
   state: GameState;
 
   getInput(): InputState;
+  getLeftDirection(): Direction;
+  getRightDirection(): Direction;
+  getStartPauseInput(): boolean;
 }
 
 export class InputHandler implements InputHandler {
@@ -31,19 +35,23 @@ export class InputHandler implements InputHandler {
     return {
       left: this.getLeftDirection(),
       right: this.getRightDirection(),
+      startPause: this.getStartPauseInput(),
     };
   }
 
-  private getLeftDirection(): Direction {
+  getLeftDirection(): Direction {
     if (this.keys.has("KeyW")) return -1;
     if (this.keys.has("KeyS")) return 1;
     return 0;
   }
 
-  private getRightDirection(): Direction {
+  getRightDirection(): Direction {
     if (this.keys.has("ArrowUp")) return -1;
     if (this.keys.has("ArrowDown")) return 1;
     return 0;
   }
 
+  getStartPauseInput(): boolean {
+    return this.keys.has("Space");
+  }
 }

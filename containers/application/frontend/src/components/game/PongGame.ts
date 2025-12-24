@@ -14,14 +14,12 @@ export interface PongGame {
   input: InputHandler;
 
   initRenderer(): void;
+
   start(): void;
-  update(dt: number): void;
-  render(): void;
-  resume(): void;
+
   startLoop(): void;
   loop(currentTime: number): void;
   requestAnimationFrame(callback: (time: number) => void): void;
-  render(): void;
 }
 
 export class PongGame {
@@ -41,14 +39,8 @@ export class PongGame {
   }
 
   start(): void {
-    if (this.state.status === "ready")
-      this.state.status = "playing";
-    this.startLoop();
-  }
-
-  resume(): void {
-    if (this.state.status === "paused")
-      this.state.status = "playing";
+    if (this.state.status === "ready" || this.state.status === "paused")
+      this.state.setStatus("playing");
     this.startLoop();
   }
 
@@ -63,8 +55,8 @@ export class PongGame {
 
     this.physics.update(dt);
     this.renderer.render();
-    if (this.state.status !== "playing")
-      return;
-    window.requestAnimationFrame(this.loop.bind(this));
+    if (this.state.status === "playing")
+      window.requestAnimationFrame(this.loop.bind(this));
+    return;
   }
 }

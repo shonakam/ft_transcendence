@@ -16,7 +16,8 @@ export class CanvasRenderer {
   }
 
   render(): void {
-    this.renderStaticLayer();
+    if (this.canvas.ifStaticCanvasRendered === false)
+      this.renderStaticLayer();
     this.renderDynamicLayer();
   };
 
@@ -71,6 +72,8 @@ export class CanvasRenderer {
     ctx.beginPath();
     ctx.arc(width, height, 30, Math.PI, -Math.PI / 2);
     ctx.stroke();
+
+    this.canvas.ifStaticCanvasRendered = true;
   };
 
   renderDynamicLayer(): void {
