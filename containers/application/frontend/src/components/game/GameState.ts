@@ -7,12 +7,11 @@ import { Paddle } from './Paddle.js';
 
 import CONFIG from './GameConfig.js';
 
-export interface GameState {
+export class GameState {
   // BasicStatus
   status: 'ready' | 'playing' | 'paused' | 'finished';
   winner: null | 'left' | 'right';
   playerSide: 'left' | 'right' | 'both' | null;
-  setStatus(status: 'ready' | 'playing' | 'paused' | 'finished'): void;
   onStatusChange: (status: 'ready' | 'playing' | 'paused' | 'finished') => void;
 
   // Game user info
@@ -37,16 +36,13 @@ export interface GameState {
   // gameId: string | null;
   // startTime: number;
 
-  incrementScore(side: 'left' | 'right'): void;
-}
-
-export class GameState implements GameState {
   constructor() {
     // BasicStatus
     this.status = 'ready';
 
     this.winner = null;
     this.playerSide = null;
+    this.onStatusChange = () => {};
 
     // Game user info
     this.leftUserAliasName = null;
@@ -54,6 +50,7 @@ export class GameState implements GameState {
 
     // Scores
     this.scores = [0, 0];
+    this.onScoreChange = () => {};
 
     // Game field state
     this.paddles = [new Paddle('left'), new Paddle('right')];
@@ -74,25 +71,23 @@ export class GameState implements GameState {
   }
 
   incrementScore(side: 'left' | 'right') {
-    if (side === 'left') {
+    if (side === 'left')
       this.scores[0]++;
-    } else if (side === 'right') {
+    else if (side === 'right')
       this.scores[1]++;
-    }
-    if (this.onScoreChange) {
+    if (this.onScoreChange)
       this.onScoreChange(this.scores[0], this.scores[1]);
-    }
+
     if (
       this.scores[0] < this.config.WINNING_SCORE &&
       this.scores[1] < this.config.WINNING_SCORE
-    ) {
+    )
       return;
-    }
-    if (this.scores[0] >= this.config.WINNING_SCORE) {
+
+    if (this.scores[0] >= this.config.WINNING_SCORE)
       this.winner = 'left';
-    } else if (this.scores[1] >= this.config.WINNING_SCORE) {
+    else if (this.scores[1] >= this.config.WINNING_SCORE)
       this.winner = 'right';
-    }
     this.setStatus('finished');
   }
 }

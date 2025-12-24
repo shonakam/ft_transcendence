@@ -4,17 +4,10 @@ import { InputHandler } from './InputHandler.js';
 import { Ball } from './Ball.js';
 import { Paddle } from './Paddle.js';
 
-export interface PhysicsEngine {
+export class PhysicsEngine {
   state: GameState;
   inputHandler: InputHandler;
 
-  update(dt: number): void;
-  updatePaddles(dt: number): void;
-  updateBall(dt: number): void;
-  checkCollisions(): void;
-}
-
-export class PhysicsEngine implements PhysicsEngine {
   constructor(state: GameState, inputHandler: InputHandler) {
     this.state = state;
     this.inputHandler = inputHandler;
@@ -74,7 +67,7 @@ export class PhysicsEngine implements PhysicsEngine {
 
     if (ball.velocity.y < 0 && ball.position.y - ball.radius < 0) {
       ball.velocity.y = -ball.velocity.y;
-      ball.position.y = ball.radius - (ball.position.y - ball.radius); // 位置修正
+      ball.position.y = ball.radius - (ball.position.y - ball.radius);
       return;
     }
     if (
@@ -85,7 +78,7 @@ export class PhysicsEngine implements PhysicsEngine {
       ball.position.y =
         config.CANVAS_HEIGHT -
         ball.radius -
-        (ball.position.y + ball.radius - config.CANVAS_HEIGHT); // 位置修正
+        (ball.position.y + ball.radius - config.CANVAS_HEIGHT);
       return;
     }
   }
@@ -105,7 +98,7 @@ export class PhysicsEngine implements PhysicsEngine {
     ) {
       ball.velocity.x = -ball.velocity.x;
       ball.position.x =
-        leftPaddle.position.x + leftPaddle.thickness + ball.radius; // TODO: 位置修正
+        leftPaddle.position.x + leftPaddle.thickness + ball.radius;
     }
   }
 
@@ -124,7 +117,7 @@ export class PhysicsEngine implements PhysicsEngine {
         rightPaddle.position.y + rightPaddle.length
     ) {
       ball.velocity.x = -ball.velocity.x;
-      ball.position.x = rightPaddle.position.x - ball.radius; // TODO: 位置修正
+      ball.position.x = rightPaddle.position.x - ball.radius;
     }
   }
 

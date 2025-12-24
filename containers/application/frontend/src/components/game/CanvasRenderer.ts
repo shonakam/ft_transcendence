@@ -1,15 +1,10 @@
 import { GameState } from './GameState.js';
 import { GameCanvas } from './GameCanvas.js';
 
-export interface CanvasRenderer {
+export class CanvasRenderer {
   canvas: GameCanvas;
   state: GameState;
-  render(): void;
-  renderStaticLayer(): void;
-  renderDynamicLayer(): void;
-}
 
-export class CanvasRenderer implements CanvasRenderer {
   constructor(state: GameState, canvas: GameCanvas) {
     this.state = state;
     this.canvas = canvas;

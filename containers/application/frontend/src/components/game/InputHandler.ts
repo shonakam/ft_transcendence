@@ -7,17 +7,10 @@ interface InputState {
   startPause: boolean;
 }
 
-export interface InputHandler {
+export class InputHandler {
   keys: Set<string>;
   state: GameState;
 
-  getInput(): InputState;
-  getLeftDirection(): Direction;
-  getRightDirection(): Direction;
-  getStartPauseInput(): boolean;
-}
-
-export class InputHandler implements InputHandler {
   constructor(state: GameState) {
     this.keys = new Set<string>();
     this.state = state;

@@ -6,23 +6,14 @@ import { InputHandler } from './InputHandler.js';
 
 import CONFIG from './GameConfig.js';
 
-export interface PongGame {
+export class PongGame {
   canvas: GameCanvas;
   state: GameState;
   physics: PhysicsEngine;
   renderer: CanvasRenderer;
   input: InputHandler;
+  private readonly loopCallback: (time: number) => void;
 
-  initRenderer(): void;
-
-  start(): void;
-
-  startLoop(): void;
-  loop(currentTime: number): void;
-  requestAnimationFrame(callback: (time: number) => void): void;
-}
-
-export class PongGame implements PongGame {
   constructor(gameCanvas: GameCanvas) {
     this.state = new GameState();
     this.canvas = new GameCanvas(
@@ -33,6 +24,7 @@ export class PongGame implements PongGame {
     this.input = new InputHandler(this.state);
     this.physics = new PhysicsEngine(this.state, this.input);
     this.renderer = new CanvasRenderer(this.state, this.canvas);
+    this.loopCallback = this.loop.bind(this);
   }
 
   initRenderer(): void {
@@ -49,16 +41,16 @@ export class PongGame implements PongGame {
 
   startLoop(): void {
     this.state.lastFrameTime = performance.now();
-    window.requestAnimationFrame(this.loop.bind(this));
+    window.requestAnimationFrame(this.loopCallback);
   }
 
   loop(currentTime: number): void {
-    const dt = (currentTime - this.state.lastFrameTime) / 1000; // 秒単位の経過時間
+    const dt = (currentTime - this.state.lastFrameTime) / 1000;
     this.state.lastFrameTime = currentTime;
 
     this.physics.update(dt);
     this.renderer.render();
     if (this.state.status === 'playing')
-      window.requestAnimationFrame(this.loop.bind(this));
+      window.requestAnimationFrame(this.loopCallback);
   }
 }

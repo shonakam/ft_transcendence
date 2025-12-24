@@ -2,14 +2,12 @@ import { Vector2 } from '../../interface/Vector2.js';
 
 import CONFIG from './GameConfig.js';
 
-export interface Paddle {
+export class Paddle {
   position: Vector2;
   thickness: number;
   length: number;
   speed: number;
-}
 
-export class Paddle implements Paddle {
   constructor(side: 'left' | 'right') {
     const y = (CONFIG.CANVAS_HEIGHT - 100) / 2;
     if (side === 'left') {

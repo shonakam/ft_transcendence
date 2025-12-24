@@ -14,7 +14,7 @@ type CanvasKey =
 type RefCanvases = Record<CanvasKey, HTMLCanvasElement>;
 type RefContexts = Record<CanvasKey, CanvasRenderingContext2D>;
 
-export interface GameCanvas {
+export class GameCanvas {
   width: number;
   height: number;
   stack: HTMLElement;
@@ -22,12 +22,6 @@ export interface GameCanvas {
   refContexts: RefContexts;
   ifStaticCanvasRendered: boolean;
 
-  getStack(): HTMLElement;
-  getCanvas(key: CanvasKey): HTMLCanvasElement;
-  getContext(key: CanvasKey): CanvasRenderingContext2D;
-}
-
-export class GameCanvas implements GameCanvas {
   constructor(stack: HTMLElement, width: number, height: number) {
     this.stack = stack;
     this.width = width;
@@ -41,6 +35,8 @@ export class GameCanvas implements GameCanvas {
 
     this.refCanvases = {} as RefCanvases;
     this.refContexts = {} as RefContexts;
+
+    this.ifStaticCanvasRendered = false;
 
     this.stack.style.position = 'relative';
 

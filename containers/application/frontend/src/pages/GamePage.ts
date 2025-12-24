@@ -6,17 +6,7 @@ import { PongGame } from '../components/game/PongGame.js';
 
 import CONFIG from '../components/game/GameConfig.js';
 
-export interface GamePage extends Component {
-  rootElement: HTMLElement;
-  authModal: AuthModal;
-  gameCanvas: GameCanvas;
-  pongGame: PongGame;
-
-  render(): void;
-  addSpaceEventListener(): void;
-}
-
-export class GamePage implements GamePage {
+export class GamePage {
   rootElement: HTMLElement;
   authModal: AuthModal;
   gameCanvas: GameCanvas;
