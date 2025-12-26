@@ -1,5 +1,5 @@
-import { routes } from './routes'
-import { Header } from '../components/organisms/Header'
+import { routes } from './routes';
+import { Header } from '../components/organisms/header';
 
 const APP_ROOT_ID = 'app-root' // アプリケーションがマウントされるルート要素を特定
 
