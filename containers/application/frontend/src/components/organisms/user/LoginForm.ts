@@ -1,6 +1,7 @@
-import { Component } from '../../../interface/Component';
-import loginTemplate from './html/login.html?raw';
-import { login, loginRequestForm } from '../../../services/auth/login';
+import { Component } from '../../../interface/Component'
+import loginTemplate from './html/login.html?raw'
+import { login, loginRequestForm } from '../../../services/auth/login'
+import { router } from '../../../router/router'
 
 export class LoginForm implements Component {
   private rootElement: HTMLDivElement;
@@ -51,8 +52,12 @@ export class LoginForm implements Component {
       console.log('ログイン成功');
       alert('ログイン成功しました');
 
-      const event = new CustomEvent('switchView', { detail: { view: 'login' } });
-      this.rootElement.dispatchEvent(event);
+      const authModal = document.getElementById('auth-modal')
+      if (authModal) {
+        authModal.classList.add('hidden')
+      }
+
+      router.navigateTo('/')
     } catch (error) {
       console.error('ログインエラー:', error);
       alert('ログインに失敗しました。もう一度お試しください。');

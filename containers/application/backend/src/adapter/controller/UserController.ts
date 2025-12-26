@@ -61,6 +61,31 @@ export default async function UserController(
 
   // GET user detail
   server.get<{ Params: { id: string }}>(
+    '/me',
+    { preHandler: authenticate },
+    async (req, reply) => {
+      try {
+        const trustedUserId = req.authUserId;
+        if (trustedUserId === undefined) {
+          return reply.status(500).send({ message: 'Authentication data missing.' });
+        }
+
+        const user = await getUser.execute(trustedUserId);
+        user
+          ? reply.send(user)
+          : reply.status(404).send({ message: 'User not found' });
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
+      }
+    },
+  );
+
+  // GET user detail
+  server.get<{ Params: { id: string }}>(
     '/:id',
     { preHandler: authenticate },
     async (req, reply) => {

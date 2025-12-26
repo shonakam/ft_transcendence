@@ -54,9 +54,11 @@ export default async function AuthController(
     '/refresh',
     async (req, reply) => {
       try {
-        console.log("HERE", req.body)
-        const token = req.body as { refreshToken: string }
-        const response = await refresh.execute(token.refreshToken)
+        const refreshToken = req.cookies.refreshToken
+        const response = await refresh.execute(refreshToken!)
+
+        reply.setCookie('accessToken', response.accessToken!, cookieConfig)
+        reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
         reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {

@@ -1,44 +1,83 @@
-const AUTH_TOKEN_KEY = 'auth_token';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+
+let isRefreshing = false;
+let refreshSubscribers: (() => void)[] = [];
+
+function onRefreshed() {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+}
 
 async function httpClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${BASE_URL}/${endpoint}`;
-  const headers = new Headers(options.headers || {});
+  const url = `${BASE_URL}/${endpoint}`
+  const headers = new Headers(options.headers || {})
 
   if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+    headers.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(url, {
-    ...options, headers: headers, credentials: 'include',
-  });
-  console.log(response.headers)
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers,
+    credentials: 'include',
+  };
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      console.error('認証エラー: トークンが無効です。強制ログアウト処理を実行します。');
-      // 💡 ここでログアウト処理をキック（例: Cookie削除、ストアのリセット、リダイレクト）
-      // 例: eraseCookie(AUTH_TOKEN_KEY);
-      // 例: window.location.href = '/login';
+  try {
+    const response = await fetch(url, fetchOptions)
+    if (response.ok) {
+      if (response.status === 204) return {} as T
+      return response.json()
     }
 
-    let errorData = null;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = { message: `HTTP Error ${response.status}: ${response.statusText}` };
+    if (response.status === 401 || response.status === 400) {
+      if (endpoint === "auth/login" || endpoint === "auth/refresh") {
+        console.log("HERE")
+        return Promise.reject(new Error("Authentication failed"));
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          refreshSubscribers.push(() => {
+            resolve(httpClient<T>(endpoint, options))
+          })
+        })
+      }
+
+      isRefreshing = true;
+      try {
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        })
+
+        if (!refreshRes.ok) throw new Error("Refresh failed");
+
+        isRefreshing = false;
+        onRefreshed()
+        return await httpClient<T>(endpoint, options)
+      } catch (error) {
+        isRefreshing = false
+        handleForceLogout()
+        return Promise.reject(error)
+      }
     }
-    return Promise.reject(errorData);
-  }
 
-  if (response.status === 204) {
-    return {} as T;
-  }
+    const errorData = await response.json().catch(() => ({
+      message: `HTTP Error ${response.status}: ${response.statusText}`
+    }))
+    return Promise.reject(errorData)
 
-  return response.json();
+  } catch (networkError) {
+    return Promise.reject(networkError)
+  }
+}
+
+function handleForceLogout() {
+  console.warn("Session expired. Redirecting to login...")
+  window.location.href = '/login'
 }
 
 export const api = {
@@ -53,4 +92,4 @@ export const api = {
 
   delete: <T>(endpoint: string, options?: Omit<RequestInit, 'method'>) =>
     httpClient<T>(endpoint, { ...options, method: 'DELETE' }),
-};
+}

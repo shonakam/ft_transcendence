@@ -1,52 +1,66 @@
-import { routes } from './routes';
-import { Header } from '../components/organisms/Header';
+import { routes } from './routes'
+import { Header } from '../components/organisms/Header'
 
-// アプリケーションがマウントされるルート要素を特定
-const APP_ROOT_ID = 'app-root';
+const APP_ROOT_ID = 'app-root' // アプリケーションがマウントされるルート要素を特定
 
 export class Router {
-    private appRoot: HTMLElement;
+    private static instance: Router;
+    private appRoot!: HTMLElement;
 
     constructor() {
-        const root = document.getElementById(APP_ROOT_ID);
+        if (Router.instance) return Router.instance
+        const root = document.getElementById(APP_ROOT_ID)
         if (!root)
-            throw new Error(`Root element with ID '${APP_ROOT_ID}' not found.`);
-        this.appRoot = root;
-        this.initListeners();
-        this.renderInitialStructure();
-        this.renderContent();
+            throw new Error(`Root element with ID '${APP_ROOT_ID}' not found.`)
+        this.appRoot = root
+        this.initListeners()
+        this.renderInitialStructure()
+        this.renderContent()
+        Router.instance = this
+    }
+
+    public static getInstance(): Router {
+        if (!Router.instance) Router.instance = new Router()
+        return Router.instance
     }
 
     public navigateTo(url: string) {
-        history.pushState(null, '', url);
-        this.renderContent();
+        const path = new URL(url, window.location.origin).pathname
+        history.pushState(null, '', path)
+        this.renderContent()
     }
 
     private renderContent() {
         const path = window.location.pathname;
         const PageComponent = routes[path] || routes['/'];
-        const oldContent = this.appRoot.querySelector('main');
-        if (oldContent) {
-            this.appRoot.removeChild(oldContent);
+        let mainElement = this.appRoot.querySelector('main');
+        if (!mainElement) {
+            mainElement = document.createElement('main');
+            this.appRoot.appendChild(mainElement);
         }
-        const newPageElement = PageComponent().getElement();
-        this.appRoot.appendChild(newPageElement);
+        mainElement.innerHTML = '';
+        const pageInstance = PageComponent()
+        mainElement.appendChild(pageInstance.getElement())
     }
 
     private renderInitialStructure() {
-        const header = new Header().getElement();
-        this.appRoot.prepend(header);
+        if (this.appRoot.querySelector('header')) return
+        const header = new Header().getElement()
+        this.appRoot.prepend(header)
     }
 
     private initListeners() {
         document.body.addEventListener('click', e => {
-            const target = e.target as HTMLAnchorElement;
+            const target = e.target as HTMLAnchorElement
             if (target && target.matches('a[href]')) {
-                e.preventDefault();
-                this.navigateTo(target.href);
+                e.preventDefault()
+                this.navigateTo(target.href)
             }
         });
 
-        window.addEventListener('popstate', () => this.renderContent());
+        window.addEventListener('popstate', () => this.renderContent())
     }
 }
+
+export const router = Router.getInstance()
+
