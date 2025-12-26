@@ -8,13 +8,10 @@ export class HeaderNav implements Component {
     this.el = document.createElement('nav')
     this.el.className = 'space-x-4'
 
-    const homeLink = new NavLink('Home', '/home').getElement()
-    const aboutLink = new NavLink('About', '/about').getElement()
-    const dashboardLink = new NavLink('Dashboard', '/dashboard').getElement()
-
-    this.el.appendChild(homeLink)
-    this.el.appendChild(aboutLink)
-    this.el.appendChild(dashboardLink)
+    this.el.appendChild(new NavLink('Home', '/home').getElement())
+    this.el.appendChild(new NavLink('About', '/about').getElement())
+    this.el.appendChild(new NavLink('Dashboard', '/dashboard').getElement())
+    this.el.appendChild(new NavLink('Auth', '/auth').getElement())
   }
 
   public getElement(): HTMLElement {
