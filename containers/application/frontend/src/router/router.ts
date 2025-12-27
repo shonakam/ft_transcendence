@@ -25,8 +25,11 @@ export class Router {
     }
 
     public navigateTo(url: string) {
-        const path = new URL(url, window.location.origin).pathname
-        history.pushState(null, '', path)
+        // const path = new URL(url, window.location.origin).pathname
+        // history.pushState(null, '', path)
+        const targetUrl = new URL(url, window.location.origin);
+        const fullPath = targetUrl.pathname + targetUrl.search;
+        history.pushState(null, '', fullPath);
         this.renderContent()
     }
 

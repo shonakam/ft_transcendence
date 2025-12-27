@@ -1,16 +1,23 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+import { toaster } from "../components/common/Toaster"
+import { router } from '../router/router'
 
-let isRefreshing = false;
-let refreshSubscribers: (() => void)[] = [];
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1'
 
-function onRefreshed() {
-  refreshSubscribers.forEach((callback) => callback());
-  refreshSubscribers = [];
+let isRefreshing = false
+let refreshSubscribers: ((fail?: boolean) => void)[] = []
+
+function onRefreshed(fail = false) {
+  refreshSubscribers.forEach((callback) => callback(fail))
+  refreshSubscribers = []
+}
+
+interface CustomOptions extends RequestInit {
+  _retry?: boolean
 }
 
 async function httpClient<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: CustomOptions = {}
 ): Promise<T> {
   const url = `${BASE_URL}/${endpoint}`
   const headers = new Headers(options.headers || {})
@@ -23,43 +30,59 @@ async function httpClient<T>(
     ...options,
     headers,
     credentials: 'include',
-  };
+  }
 
   try {
     const response = await fetch(url, fetchOptions)
+
+    // 1. 成功時の処理
     if (response.ok) {
       if (response.status === 204) return {} as T
       return response.json()
     }
 
-    if (response.status === 401 || response.status === 400) {
-      if (endpoint === "auth/login" || endpoint === "auth/refresh") {
-        console.log("HERE")
-        return Promise.reject(new Error("Authentication failed"));
+    // 2. 認証エラー (401) 時の処理
+    if (response.status === 401) {
+      // 認証系エンドポイント自体が401を返した場合、または既にリトライ済みの場合はループ防止のため終了
+      const isAuthEndpoint = ["auth/login", "auth/refresh", "auth/verify-mfa/totp"].some(path => endpoint.includes(path))
+
+      if (isAuthEndpoint || options._retry) {
+        if (!isAuthEndpoint) handleForceLogout()
+        return Promise.reject(new Error("Authentication failed"))
       }
 
+      // 他のリクエストが既にリフレッシュ中の場合、Promiseを返して待機列に入る
       if (isRefreshing) {
-        return new Promise((resolve) => {
-          refreshSubscribers.push(() => {
-            resolve(httpClient<T>(endpoint, options))
+        return new Promise((resolve, reject) => {
+          refreshSubscribers.push((fail) => {
+            if (fail) {
+              reject(new Error("Session expired"))
+            } else {
+              // リフレッシュ成功後に一度だけリトライ
+              resolve(httpClient<T>(endpoint, { ...options, _retry: true }))
+            }
           })
         })
       }
 
-      isRefreshing = true;
+      isRefreshing = true
       try {
         const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         })
 
-        if (!refreshRes.ok) throw new Error("Refresh failed");
+        if (!refreshRes.ok) throw new Error("Refresh token expired")
 
-        isRefreshing = false;
-        onRefreshed()
-        return await httpClient<T>(endpoint, options)
+        isRefreshing = false
+
+        const result = await httpClient<T>(endpoint, { ...options, _retry: true })
+        onRefreshed(false)
+        return result
+
       } catch (error) {
         isRefreshing = false
+        onRefreshed(true)
         handleForceLogout()
         return Promise.reject(error)
       }
@@ -76,20 +99,24 @@ async function httpClient<T>(
 }
 
 function handleForceLogout() {
+  if (window.location.pathname.startsWith('/auth')) return
+
   console.warn("Session expired. Redirecting to login...")
-  window.location.href = '/login'
+  toaster.show('Session expired. Redirecting to login...', 'error')
+  router.navigateTo('/auth?view=login')
 }
 
+// --- 公開API ---
 export const api = {
-  get: <T>(endpoint: string, options?: Omit<RequestInit, 'method'>) =>
+  get: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) =>
     httpClient<T>(endpoint, { ...options, method: 'GET' }),
 
-  post: <T>(endpoint: string, body: unknown, options?: Omit<RequestInit, 'method' | 'body'>) =>
+  post: <T>(endpoint: string, body: unknown, options?: Omit<CustomOptions, 'method' | 'body'>) =>
     httpClient<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) }),
 
-  put: <T>(endpoint: string, body: unknown, options?: Omit<RequestInit, 'method' | 'body'>) =>
+  put: <T>(endpoint: string, body: unknown, options?: Omit<CustomOptions, 'method' | 'body'>) =>
     httpClient<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) }),
 
-  delete: <T>(endpoint: string, options?: Omit<RequestInit, 'method'>) =>
+  delete: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) =>
     httpClient<T>(endpoint, { ...options, method: 'DELETE' }),
 }

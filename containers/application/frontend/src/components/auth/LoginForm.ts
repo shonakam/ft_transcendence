@@ -1,4 +1,7 @@
 import { Component } from '../../interface/Component'
+import { toaster } from '../common/Toaster'
+import { login, loginRequestForm } from '../../services/auth/login'
+import { to } from '../../lib/to'
 
 export class LoginForm implements Component {
   private root: HTMLFormElement
@@ -57,16 +60,32 @@ export class LoginForm implements Component {
     })
   }
 
-  private handleSubmit() {
+  private async handleSubmit() {
     const email = this.emailInput.value
     const password = this.passwordInput.value
 
     if (!email || !password) {
-      alert('すべての項目を入力してください')
-      return
+      return toaster.show('すべての項目を入力してください', 'error')
     }
 
-    // login ロジック
+    this.setLoading(true)
+
+    const request = loginRequestForm(email, password)
+    const [response, err] = await to(login(request))
+
+    if (err) {
+      this.setLoading(false)
+      return toaster.show('ログインに失敗しました。メールアドレスかパスワードが違います。', 'error')
+    }
+
+    this.root.dispatchEvent(new CustomEvent('loginSuccess', {
+      detail: { user: response }
+    }))
+  }
+
+  private setLoading(isLoading: boolean) {
+    this.submitButton.disabled = isLoading
+    this.submitButton.textContent = isLoading ? '認証中...' : 'ログイン'
   }
 
   getElement(): HTMLElement {

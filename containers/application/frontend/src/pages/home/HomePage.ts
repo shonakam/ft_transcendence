@@ -11,21 +11,21 @@ export class HomePage implements Component {
     this.authModal = new AuthModal();
 
     this.render();
-    this.initEventListeners();
+    // this.initEventListeners();
   }
 
   private render(): void {
     this.rootElement.innerHTML = homeTemplate;
-    this.rootElement.appendChild(this.authModal.getElement());
+    // this.rootElement.appendChild(this.authModal.getElement());
   }
 
-  private initEventListeners(): void {
-    const loginButton = this.rootElement.querySelector<HTMLButtonElement>('#login-button');
-    const signupButton = this.rootElement.querySelector<HTMLButtonElement>('#signup-button');
+  // private initEventListeners(): void {
+  //   const loginButton = this.rootElement.querySelector<HTMLButtonElement>('#login-button');
+  //   const signupButton = this.rootElement.querySelector<HTMLButtonElement>('#signup-button');
 
-    loginButton?.addEventListener('click', () => this.authModal.open('login'));
-    signupButton?.addEventListener('click', () => this.authModal.open('signup'));
-  }
+  //   loginButton?.addEventListener('click', () => this.authModal.open('login'));
+  //   signupButton?.addEventListener('click', () => this.authModal.open('signup'));
+  // }
 
   public getElement(): HTMLElement {
     return this.rootElement;
