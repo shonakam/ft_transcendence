@@ -61,10 +61,15 @@ export default async function AuthController(
         reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
         reply.status(200).send(response)
       } catch (err: unknown) {
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply
+          .clearCookie('accessToken', clearOptions)
+          .clearCookie('refreshToken', clearOptions)
+          .clearCookie('tmpAuthToken', clearOptions)
         if (err instanceof Error) {
-          reply.status(400).send({ error: err.message });
+          reply.status(401).send({ error: err.message })
         } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
+          reply.status(500).send({ message: 'Internal Server Error' })
         }
       }
     },
@@ -115,9 +120,9 @@ export default async function AuthController(
         reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
-          reply.status(400).send({ error: err.message });
+          reply.status(400).send({ error: err.message })
         } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
+          reply.status(500).send({ message: 'Internal Server Error' })
         }
       }
     },
@@ -129,44 +134,40 @@ export default async function AuthController(
     { preHandler: authenticate },
     async (req, reply) => {
       try {
-        const trustedUserId = req.authUserId;
+        const trustedUserId = req.authUserId
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' });
+          return reply.status(500).send({ message: 'Authentication data missing.' })
         }
 
         await revokeTOTP.execute(trustedUserId)
         reply.status(200)
       } catch (err: unknown) {
         if (err instanceof Error) {
-          reply.status(400).send({ error: err.message });
+          reply.status(400).send({ error: err.message })
         } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
+          reply.status(500).send({ message: 'Internal Server Error' })
         }
       }
     },
   );
 
-  server.post(
+  server.delete(
     '/logout',
     async (req, reply) => {
       try {
-        console.log("HERE", req.headers)
-        const authHeader = req.headers.authorization
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-          console.warn('Missing or invalid Authorization header.');
-          reply.code(401).send({ error: 'Unauthorized: Token not provided.' });
-          return;
-        }
-
-        const token = authHeader.substring(7);
-        await logout.execute(token)
-        reply.status(200)
+        const accessToken = req.cookies.accessToken
+        await logout.execute(accessToken!)
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply
+          .clearCookie('accessToken', clearOptions)
+          .clearCookie('refreshToken', clearOptions)
+          .clearCookie('tmpAuthToken', clearOptions)
+          .status(204)
+          .send()
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          reply.status(400).send({ error: err.message });
-        } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
-        }
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply.clearCookie('accessToken', clearOptions).clearCookie('refreshToken', clearOptions)
+        reply.status(500).send({ message: 'Internal Server Error' })
       }
     },
   );

@@ -22,7 +22,8 @@ async function httpClient<T>(
   const url = `${BASE_URL}/${endpoint}`
   const headers = new Headers(options.headers || {})
 
-  if (!headers.has('Content-Type')) {
+  const hasBody = options.body !== undefined && options.body !== null
+  if (!headers.has('Content-Type') && hasBody) {
     headers.set('Content-Type', 'application/json')
   }
 
@@ -51,14 +52,12 @@ async function httpClient<T>(
         return Promise.reject(new Error("Authentication failed"))
       }
 
-      // 他のリクエストが既にリフレッシュ中の場合、Promiseを返して待機列に入る
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           refreshSubscribers.push((fail) => {
             if (fail) {
               reject(new Error("Session expired"))
             } else {
-              // リフレッシュ成功後に一度だけリトライ
               resolve(httpClient<T>(endpoint, { ...options, _retry: true }))
             }
           })
@@ -75,9 +74,9 @@ async function httpClient<T>(
         if (!refreshRes.ok) throw new Error("Refresh token expired")
 
         isRefreshing = false
+        onRefreshed(false)
 
         const result = await httpClient<T>(endpoint, { ...options, _retry: true })
-        onRefreshed(false)
         return result
 
       } catch (error) {
@@ -98,8 +97,12 @@ async function httpClient<T>(
   }
 }
 
-function handleForceLogout() {
+async function handleForceLogout() {
   if (window.location.pathname.startsWith('/auth')) return
+
+  await api.delete('auth/logout').catch(() => {})
+  localStorage.clear()
+  sessionStorage.clear()
 
   console.warn("Session expired. Redirecting to login...")
   toaster.show('Session expired. Redirecting to login...', 'error')

@@ -11,13 +11,11 @@ export class RefreshUseCase {
   ) {}
 
   async execute(refresh: string): Promise<{accessToken: string, refreshToken: string}> {
-    const payload = this.tokenService.verifyToken(refresh, config.auth.jwtRefreshSecret);
+    const payload = this.tokenService.verifyToken(refresh, config.auth.jwtRefreshSecret)
     if (typeof payload === "string" || !('sub' in payload)) {
       console.warn("RefreshUseCase: invald payload")
       throw new Error("Invalid refresh token.")
     }
-
-    console.log("Payload:", payload)
 
     const user = await this.userRepo.findById(payload.sub!)
     if (!user) {
@@ -32,7 +30,7 @@ export class RefreshUseCase {
       throw new Error("Session expired or invalid.")
     }
 
-    const rePayload = { sub: user.id } // TODO: Define VO
+    const rePayload = { id: user.id }
     const access = this.tokenService.generateAccessToken(rePayload)
 
     return {

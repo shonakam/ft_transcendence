@@ -17,12 +17,11 @@ export class LogoutUseCase {
       throw new Error("Invalid refresh token.")
     }
 
-    const user = await this.userRepo.findById(payload.id)
+    const user = await this.userRepo.findById(payload.sub)
     if (!user) {
       console.warn("LogoutUseCase: findById is failed.")
       throw new Error("User not found.")
     }
-
     const key = `session:refresh:${user.id}`
     await this.volatileDataRepositoryRedis.delete(key)
   }
