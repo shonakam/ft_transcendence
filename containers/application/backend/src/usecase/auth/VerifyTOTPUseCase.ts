@@ -29,18 +29,18 @@ export class VerifyTOTPUseCase {
       throw new Error("Not registered.")
     }
 
-    if (speakeasy.totp.verify({secret: user2fa.totpSeceret, token: form.code})) {
-      console.warn("VerifyTOTPUseCase: invalid auth code.")
-      throw new Error("Invalid auth code.")  
+    if (!speakeasy.totp.verify({secret: user2fa.totpSeceret, token: form.code})) {
+      console.warn("VerifyTOTPUseCase: invalid auth code.");
+      throw new Error("Invalid auth code.")
     }
-    
+
     if (!user2fa.isTotpEnabled) {
       user2fa.updatedAt = getUnixTimeMs()
       user2fa.isTotpEnabled = 1
       await this.user2faRepository.save(user2fa)
     }
 
-    const loginPayload = { id: payload.sub } 
+    const loginPayload = { id: payload.sub }
     const access = this.tokenService.generateAccessToken(loginPayload)
     const refresh = this.tokenService.generateRefreshToken(loginPayload)
 
