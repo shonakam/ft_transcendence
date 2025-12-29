@@ -1,11 +1,12 @@
 import { Component } from '../../interface/Component'
 import { LoginForm } from '../../components/auth/LoginForm'
 import { SignupForm } from '../../components/auth/SignupForm'
-import { MfaForm } from '../../components/auth/mfaForm'
-import { getCookie } from '../../lib/getCookie'
+import { MfaForm } from '../../components/auth/MfaForm'
 import { router } from '../../router/router'
+import { design } from '../../conf'
 
 export type AuthView = 'login' | 'signup' | 'mfa'
+
 export class AuthPage implements Component {
   private root: HTMLDivElement
   private container: HTMLDivElement
@@ -14,11 +15,12 @@ export class AuthPage implements Component {
   private mfaForm: MfaForm
 
   constructor() {
+
     this.root = document.createElement('div')
-    this.root.className = 'min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900'
+    this.root.className = design.bg
 
     this.container = document.createElement('div')
-    this.container.className = 'bg-white/10 backdrop-blur rounded-xl p-8 w-[380px]'
+    this.container.className = design.container
 
     this.loginForm = new LoginForm()
     this.signupForm = new SignupForm()
@@ -30,12 +32,6 @@ export class AuthPage implements Component {
   }
 
   private determineInitialView() {
-    if (getCookie('tmpAuthToken')) {
-      this.switchView('mfa')
-      this.updateUrl('mfa')
-      return
-    }
-
     const params = new URLSearchParams(window.location.search)
     const viewParam = params.get('view') as AuthView
     const initialView = viewParam === 'signup' ? 'signup' : 'login'

@@ -2,6 +2,7 @@ import { Component } from '../../interface/Component'
 import { api } from '../../lib/httpClient'
 import { to } from '../../lib/to'
 import { router } from '../../router/router'
+import { setupMfa } from '../../services/auth/setupMfa'
 import { toaster } from '../common/Toaster'
 
 import QRCode from 'qrcode'
@@ -14,6 +15,7 @@ export class MfaForm implements Component {
   private qrImage: HTMLImageElement
   private codeInput: HTMLInputElement
   private submitButton: HTMLButtonElement
+  private cancelButton: HTMLButtonElement
   private mode: MfaMode = 'verify'
 
 	constructor() {
@@ -31,6 +33,13 @@ export class MfaForm implements Component {
     qrText.textContent = '認証アプリでQRコードをスキャンしてください'
     this.qrSection.append(this.qrImage, qrText)
 
+    const refreshBtn = document.createElement('button')
+    refreshBtn.type = 'button'
+    refreshBtn.className = 'text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors'
+    refreshBtn.innerHTML = '<span>🔄</span> 再読み込み'
+    refreshBtn.onclick = () => this.fetchAndGenerateQrCode()
+    this.qrSection.append(this.qrImage, refreshBtn)
+
     this.codeInput = document.createElement('input')
     this.codeInput.type = 'text'
     this.codeInput.maxLength = 6
@@ -42,14 +51,33 @@ export class MfaForm implements Component {
     this.submitButton.className = 'w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors'
     this.submitButton.textContent = '認証する'
 
-    this.root.append(this.qrSection, this.codeInput, this.submitButton)
+    this.cancelButton = document.createElement('button')
+    this.cancelButton.type = 'button'
+    this.cancelButton.className = 'w-full py-2 text-sm text-white hover:text-indigo-400 transition-colors mt-2 cursor-pointer';
+    this.cancelButton.textContent = 'キャンセル'
+
+    const buttonGroup = document.createElement('div')
+    buttonGroup.className = 'flex flex-col space-y-2 mt-4'
+
+    this.submitButton.className = 'w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors'
+    this.cancelButton.className = 'w-full py-2 text-sm text-slate-400 hover:text-white transition-colors'
+
+    buttonGroup.append(this.submitButton, this.cancelButton);
+
+    this.root.innerHTML = ''
+    this.root.append(this.qrSection, this.codeInput, buttonGroup)
     this.initEvents()
 	}
 
 	private async fetchAndGenerateQrCode() {
-    const [res, err] = await to(api.post<{ uri: string }>('auth/setup-mfa/totp', {}))
+    this.qrImage.style.opacity = '0.5'
+    const [res, err] = await to(setupMfa())
 
-    if (err) return toaster.show('QRコードの取得に失敗しました', 'error')
+    if (err) {
+      this.qrImage.style.opacity = '1'
+      console.warn('MFA Setup Error:', err)
+      return toaster.show('QRコードの取得に失敗しました', 'error')
+    }
 
     if (res && res.uri) {
       try {
@@ -91,6 +119,10 @@ export class MfaForm implements Component {
 
       toaster.show('認証に成功しました', 'success')
       router.navigateTo('/dashboard')
+    })
+
+    this.cancelButton.addEventListener('click', () => {
+      this.root.dispatchEvent(new CustomEvent('cancel'))
     })
   }
 

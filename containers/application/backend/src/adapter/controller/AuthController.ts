@@ -92,13 +92,13 @@ export default async function AuthController(
     },
   );
 
-  server.post(
+  server.get(
     // '/setup-mfa/:factor',
     '/setup-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
-        const form = req.body as SetupTOTPForm
-        const response = await setupTOTP.execute(form)
+        const accessToken = req.cookies.accessToken
+        const response = await setupTOTP.execute(accessToken!)
         reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -115,8 +115,18 @@ export default async function AuthController(
     '/verify-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
+        const accessToken = req.cookies.accessToken
+        const tmpAuthToken = req.cookies.tmpAuthToken
+
         const form = req.body as VerifyTOTPForm
-        const response = await verifyTOTP.execute(form)
+        const response = await verifyTOTP.execute(form, accessToken!, tmpAuthToken!)
+
+        reply.setCookie('accessToken', response.accessToken, cookieConfig)
+        reply.setCookie('refreshToken', response.refreshToken, cookieConfig)
+
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply.clearCookie('tmpAuthToken', clearOptions)
+
         reply.status(200).send(response)
       } catch (err: unknown) {
         if (err instanceof Error) {

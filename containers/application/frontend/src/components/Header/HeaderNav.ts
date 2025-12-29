@@ -1,4 +1,4 @@
-import { NavLink } from '../atoms/NavLink'
+import { NavLink } from './NavLink'
 import { Component } from '../../interface/Component'
 import { router } from '../../router/router'
 import { logout } from '../../services/auth/logout'

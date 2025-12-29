@@ -5,7 +5,7 @@ class Toaster {
 
   constructor() {
     this.container = document.createElement('div')
-    this.container.className = 'fixed top-4 right-4 z-[9999] flex flex-col space-y-3 pointer-events-none'
+    this.container.className = 'fixed bottom-4 right-4 z-[9999] flex flex-col-reverse space-y-reverse space-y-3 pointer-events-none'
     document.body.appendChild(this.container);
   }
 

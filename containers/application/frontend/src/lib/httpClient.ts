@@ -43,7 +43,7 @@ async function httpClient<T>(
     }
 
     // 2. 認証エラー (401) 時の処理
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 400) {
       // 認証系エンドポイント自体が401を返した場合、または既にリトライ済みの場合はループ防止のため終了
       const isAuthEndpoint = ["auth/login", "auth/refresh", "auth/verify-mfa/totp"].some(path => endpoint.includes(path))
 
@@ -99,6 +99,7 @@ async function httpClient<T>(
 
 async function handleForceLogout() {
   if (window.location.pathname.startsWith('/auth')) return
+
 
   await api.delete('auth/logout').catch(() => {})
   localStorage.clear()
