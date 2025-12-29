@@ -21,10 +21,7 @@ export class AuthPage implements Component {
     this.container = document.createElement('div');
     this.container.className = design.container;
 
-    this.loginForm = new LoginForm();
-    this.signupForm = new SignupForm();
-    this.mfaForm = new MfaForm();
-
+    // 初始化各个子表单组件 (只保留一份)
     this.loginForm = new LoginForm();
     this.signupForm = new SignupForm();
     this.mfaForm = new MfaForm();
@@ -33,6 +30,7 @@ export class AuthPage implements Component {
     this.initEventListeners();
     this.determineInitialView();
 
+    // 处理 OIDC 回调等挂起的数据
     const pendingData = sessionStorage.getItem('pending_auth_data');
     if (pendingData) {
       sessionStorage.removeItem('pending_auth_data');
