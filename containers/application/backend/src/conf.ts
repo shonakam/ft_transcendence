@@ -5,7 +5,7 @@ export const config = {
     jwtTmpAuthSecret: process.env.JWT_TMP_AUTH_SECRET || 'r2ke4j+PYjNzpcOHtO+As1kl1uHEDF/xE+zSo6HZL9k=',
     accessTokenTtlMs: 900000, // 15min (15 * 60 * 1000)
     refreshTokenTtlMs: 86400000,  // 1day (24 * 60 * 60 * 1000)
-    issure: process.env.JWT_ISSURE || 'https://api.transcendence.42.fr',
+    issuer: process.env.JWT_ISSUER || 'https://api.transcendence.42.fr',
     audience: process.env.JWT_AUDIENCE || 'https://transcendence.42.fr',
     idp: {
       redirect_uri: process.env.REDIRECT_URI || 'https://transcendence.42.fr/auth/callback',
@@ -33,7 +33,7 @@ export const config = {
     user: {
       path: 'users',
       version: 'v1',
-      paginaiton: {
+      pagination: {
         offset: 0,
         limit: 20
       }
@@ -56,7 +56,7 @@ export const config = {
   },
   redis: {
     host: process.env.REDIS_HOST || 'ft-redis',
-    port: process.env.REDIS_HOST || '6379',
-    retries: process.env.REDIS_HOST || '3',
+    port: process.env.REDIS_PORT || '6379',
+    retries: process.env.REDIS_RETRIES || '3',
   },
 };
