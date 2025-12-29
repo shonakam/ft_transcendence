@@ -3,7 +3,6 @@ import { createUser, userCreateRequestForm } from '../../services/user/create'
 import { api } from '../../lib/httpClient'
 import { toaster } from '../common/Toaster'
 import { to } from '../../lib/to'
-import { getCookie } from '../../lib/getCookie'
 
 export class SignupForm implements Component {
   private root: HTMLFormElement
@@ -13,7 +12,6 @@ export class SignupForm implements Component {
   private confirmPasswordInput: HTMLInputElement
   private imageInput: HTMLInputElement
   private previewImage: HTMLImageElement
-  private mfaCheckbox: HTMLInputElement
   private submitButton: HTMLButtonElement
   private switchButton: HTMLButtonElement
 
@@ -43,22 +41,6 @@ export class SignupForm implements Component {
     this.passwordInput = this.createInput('password', 'パスワード')
     this.confirmPasswordInput = this.createInput('password', 'パスワード（確認）')
 
-    // mfa 有効化チェックボックス
-    const mfaContainer = document.createElement('div')
-    mfaContainer.className = 'flex items-center space-x-2 py-1 px-1'
-
-    this.mfaCheckbox = document.createElement('input')
-    this.mfaCheckbox.type = 'checkbox'
-    this.mfaCheckbox.id = 'mfa-enable'
-    this.mfaCheckbox.className = 'w-4 h-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-500 cursor-pointer'
-
-    const mfaLabel = document.createElement('label')
-    mfaLabel.htmlFor = 'mfa-enable'
-    mfaLabel.textContent = '2段階認証を有効にする'
-    mfaLabel.className = 'text-sm text-slate-300 cursor-pointer select-none'
-
-    mfaContainer.append(this.mfaCheckbox, mfaLabel)
-
     // 登録ボタン
     this.submitButton = document.createElement('button')
     this.submitButton.type = 'submit'
@@ -80,7 +62,6 @@ export class SignupForm implements Component {
       this.emailInput,
       this.passwordInput,
       this.confirmPasswordInput,
-      mfaContainer,
       this.submitButton,
       this.switchButton
     )
@@ -98,7 +79,6 @@ export class SignupForm implements Component {
   }
 
   private initEvents() {
-    // 画像選択時のプレビュー処理
     this.imageInput.addEventListener('change', (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files[0]) {
@@ -108,14 +88,12 @@ export class SignupForm implements Component {
       }
     })
 
-    // フォーム送信処理
     this.root.addEventListener('submit', e => {
       e.preventDefault()
       e.stopPropagation()
       this.handleSubmit()
     })
 
-    // ビュー切り替えイベント
     this.switchButton.addEventListener('click', () => {
       this.root.dispatchEvent(
         new CustomEvent('switchView', { detail: { view: 'login' } })
@@ -136,7 +114,6 @@ export class SignupForm implements Component {
     const email = this.emailInput.value
     const password = this.passwordInput.value
     const confirmPassword = this.confirmPasswordInput.value
-    const mfaEnabled = this.mfaCheckbox.checked
 
     if (!username || !email || !password || !confirmPassword) {
       return toaster.show('すべての項目を入力してください', 'error')
@@ -168,18 +145,16 @@ export class SignupForm implements Component {
         username,
         password,
         imagePath,
-        mfaEnabled
       )
 
       const [response, err] = await to(createUser(requestData))
-      console.log('API Success:', response)
 
       toaster.show('アカウントを作成しました！ログインしてください。', 'success')
-      const hasAuth = !!getCookie('tmpAuthToken')
-      if (hasAuth) {
-        alert("HI")
-      }
-      this.root.dispatchEvent(new CustomEvent('signupSuccess'))
+
+      this.root.dispatchEvent(new CustomEvent('signupSuccess',{
+        detail: { data: response }
+      }))
+
     } catch (error: any) {
       console.error('Signup Error:', error)
       toaster.show(error.message || '登録に失敗しました。サーバーの状態を確認してください。', 'error')

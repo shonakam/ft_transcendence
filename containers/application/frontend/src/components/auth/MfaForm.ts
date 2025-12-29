@@ -4,6 +4,8 @@ import { to } from '../../lib/to'
 import { router } from '../../router/router'
 import { toaster } from '../common/Toaster'
 
+import QRCode from 'qrcode'
+
 export type MfaMode = 'setup' | 'verify'
 
 export class MfaForm implements Component {
@@ -44,6 +46,25 @@ export class MfaForm implements Component {
     this.initEvents()
 	}
 
+	private async fetchAndGenerateQrCode() {
+    const [res, err] = await to(api.post<{ uri: string }>('auth/setup-mfa/totp', {}))
+
+    if (err) return toaster.show('QRコードの取得に失敗しました', 'error')
+
+    if (res && res.uri) {
+      try {
+        const dataUrl = await QRCode.toDataURL(res.uri, {
+          width: 200,
+          margin: 2,
+        })
+        this.qrImage.src = dataUrl
+      } catch (qrErr) {
+        console.error('QR Generation failed', qrErr)
+        toaster.show('QRコードの生成に失敗しました', 'error')
+      }
+    }
+  }
+
 	async activate(mode: MfaMode) {
     this.mode = mode
     this.codeInput.value = ''
@@ -51,17 +72,11 @@ export class MfaForm implements Component {
     if (mode === 'setup') {
       this.qrSection.classList.remove('hidden')
       this.submitButton.textContent = '設定を完了する'
-      await this.fetchQrCode()
+      await this.fetchAndGenerateQrCode()
     } else {
       this.qrSection.classList.add('hidden')
       this.submitButton.textContent = 'ログイン'
     }
-  }
-
-	private async fetchQrCode() {
-    const [res, err] = await to(api.post<{ qrCodeUrl: string }>('auth/setup-mfa/totp', {}))
-    if (err) return toaster.show('QRコードの取得に失敗しました', 'error')
-    if (res) this.qrImage.src = res.qrCodeUrl
   }
 
   private initEvents() {

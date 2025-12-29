@@ -79,7 +79,7 @@ export class LoginForm implements Component {
     }
 
     this.root.dispatchEvent(new CustomEvent('loginSuccess', {
-      detail: { user: response }
+      detail: { data: response }
     }))
   }
 

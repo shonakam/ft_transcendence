@@ -3,7 +3,7 @@ export interface CreateUserForm {
   username: string;
   password: string;
   imagePath: string | null;
-  is2faEnabled: boolean;
+  // is2faEnabled: boolean;
 }
 
 export interface UpdateUserForm {

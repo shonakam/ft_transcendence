@@ -5,7 +5,11 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {}
+export interface  LoginResponse {
+  accessToken: string | null
+  refreshToken: string | null
+  tmpAuthToken: string | null
+}
 
 export function loginRequestForm(
 	email: string,
@@ -18,5 +22,5 @@ export function loginRequestForm(
 }
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
-	return api.post<LoginRequest>('auth/login', data);
+	return api.post<LoginResponse>('auth/login', data)
 }

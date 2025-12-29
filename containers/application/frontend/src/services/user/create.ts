@@ -19,14 +19,14 @@ export function userCreateRequestForm(
 	username: string,
 	password: string,
 	imagePath: string | null,
-	is2faEnabled: boolean
+	// is2faEnabled: boolean
 ): UserCreateRequest {
 	return {
 		email: email,
     username: username,
     password: password,
     imagePath: imagePath,
-    is2faEnabled: is2faEnabled
+    // is2faEnabled: is2faEnabled
 	} as UserCreateRequest
 }
 

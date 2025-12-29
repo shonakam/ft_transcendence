@@ -49,19 +49,16 @@ private initEventListeners() {
       this.updateUrl(view)
     }
 
-    this.signupForm.getElement().addEventListener('signupSuccess', () => {
-      if (getCookie('tmpAuthToken')) {
-        this.switchView('mfa', true)
-        this.updateUrl('mfa')
-      } else {
-        this.switchView('login')
-        this.updateUrl('login')
-      }
+    this.signupForm.getElement().addEventListener('signupSuccess', (e: Event) => {
+      this.switchView('login')
+      this.updateUrl('login')
     })
 
-    this.loginForm.getElement().addEventListener('loginSuccess', () => {
-      if (getCookie('tmpAuthToken')) {
-        this.switchView('mfa', false)
+    this.loginForm.getElement().addEventListener('loginSuccess', (e: Event) => {
+      const customEvent = e as CustomEvent
+      const data = customEvent.detail.data
+      if (data.tmpAuthToken) {
+        this.switchView('mfa')
         this.updateUrl('mfa')
       } else {
         router.navigateTo('/dashboard')
@@ -79,11 +76,11 @@ private initEventListeners() {
     window.history.pushState({}, '', url.pathname + url.search)
   }
 
-  private async switchView(view: AuthView, isSetup: boolean = false) {
+  private async switchView(view: AuthView) {
     let element: HTMLElement
     switch (view) {
       case 'mfa':
-        await this.mfaForm.activate(isSetup ? 'setup' : 'verify')
+        await this.mfaForm.activate('verify')
         element = this.mfaForm.getElement()
         break
       case 'signup':
