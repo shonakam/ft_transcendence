@@ -1,7 +1,7 @@
 import { User } from "../entity/User.ts";
-import type { 
+import type {
   CreateUserForm,
-  UpdateUserForm 
+  UpdateUserForm
 } from "./request/UserForm.ts";
 import { getUnixTimeMs } from '../../../utils/unixtime.ts';
 import UserId from '../vo/UserId.ts';
@@ -28,11 +28,12 @@ export class UserForm {
 
   static update(user: User, form: UpdateUserForm): User {
     const now = getUnixTimeMs();
-  
+
     user.username = form.username ?? user.username;
     user.email = form.email ?? user.email;
-    user.password = (form.newPassword && Password.create(form.newPassword).getHash()) ?? user.password; 
-    user.imagePath = form.imagePath ?? user.imagePath; 
+    user.password = (form.newPassword && Password.create(form.newPassword).getHash()) ?? user.password;
+    user.imagePath = form.imagePath ?? user.imagePath;
+    user.is2faEnabled = (form.is2faEnabled) ? 1 : 0
     user.updatedAt = now;
     return user
   }

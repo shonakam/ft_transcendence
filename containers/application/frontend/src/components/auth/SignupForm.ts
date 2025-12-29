@@ -107,7 +107,6 @@ export class SignupForm implements Component {
      - 画像が選択された場合アップロード（パスを取得）
      - ユーザー作成APIリクエスト
      - 成功後にログインビューへ遷移
-       - tmpAuthTokenがセットされる場合は MFA 設定へ
    */
   private async handleSubmit() {
     const username = this.usernameInput.value
@@ -148,10 +147,13 @@ export class SignupForm implements Component {
       )
 
       const [response, err] = await to(createUser(requestData))
+      if (err) {
+        return toaster.show('アカウントを作成に失敗しました。', 'error')
+      }
 
       toaster.show('アカウントを作成しました！ログインしてください。', 'success')
 
-      this.root.dispatchEvent(new CustomEvent('signupSuccess',{
+      this.root.dispatchEvent(new CustomEvent('signupSuccess', {
         detail: { data: response }
       }))
 
