@@ -29,8 +29,9 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
-    "tailwindcss": "^4.1.13",
     "@tailwindcss/cli": "^4.1.13",
-    "qrcode": "^1.5.4"
+    "chart.js": "^4.4.0",
+    "qrcode": "^1.5.4",
+    "tailwindcss": "^4.1.13"
   }
 }
