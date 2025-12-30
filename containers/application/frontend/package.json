@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.13",
+    "chart.js": "^4.4.0",
     "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.13"
   }

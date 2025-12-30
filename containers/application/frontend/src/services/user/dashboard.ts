@@ -1,6 +1,6 @@
 import { api } from '../../lib/httpClient'
 
-//　あとで必要な項目のみにする
+// User profile response
 export interface UserResponse {
   id: string;
   email: string;
@@ -16,3 +16,10 @@ export interface UserResponse {
 export async function getMe(): Promise<UserResponse> {
   return api.get<UserResponse>('users/me');
 }
+
+// TODO: Implement getStats() to fetch user/game statistics for dashboard
+// Example:
+// export async function getStats(): Promise<DashboardStats> {
+//   return api.get<DashboardStats>('users/me/stats');
+// }
+// Define DashboardStats interface according to backend response

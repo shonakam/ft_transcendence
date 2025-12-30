@@ -40,7 +40,7 @@ export const config = {
         limit: 20
       }
     },
-    geme: {
+    game: {
 
     },
     chat: {
