@@ -34,6 +34,9 @@ init-ops:
 
 up-ops: init-ops
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml up --build -d --remove-orphans
+	@curl -u "elastic:changeme" \
+		-X POST "http://localhost:5601/api/saved_objects/_import" \
+		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson
 
 down-ops: # TODO: Implementation pending
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down
@@ -42,6 +45,8 @@ clean-ops: # TODO: Implementation pending
 
 fclean-ops:
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down --rmi local -v
+
+re-ops: fclean-ops up-ops
 
 .PHONEY:
 
@@ -57,4 +62,3 @@ shell-backend:
 
 shell-frontend:
 	@docker compose -f $(APP)/compose.yaml exec frontend sh
-

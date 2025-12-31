@@ -154,11 +154,12 @@ services:
       kibana:
         condition: service_healthy
     image: docker.elastic.co/beats/metricbeat:8.18.8
+    container_name: ft-metricbeat
     user: root
     volumes:
-      - certs:/usr/share/metricbeat/certs
-      - metricbeatdata01:/usr/share/metricbeat/data
-      - "./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - ft_certs:/usr/share/metricbeat/certs
+      - ft_metricbeatdata:/usr/share/metricbeat/data
+      - "./elk/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
       - "/proc:/hostfs/proc:ro"
@@ -174,22 +175,24 @@ services:
 
   filebeat:
     depends_on:
-      es01:
+      elasticsearch:
         condition: service_healthy
     image: docker.elastic.co/beats/filebeat:8.18.8
+    container_name: ft-filebeat
     user: root
     volumes:
       - ft_certs:/usr/share/filebeat/certs
       - ft_filebeatdata:/usr/share/filebeat/data
-      - "./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
-      - "./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
+      # - "./elk/filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
+      - "../application/backend/logs:/usr/share/filebeat/ingest_data:ro"
+      - "./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     environment:
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ELASTIC_HOSTS=https://es01:9200
-      - KIBANA_HOSTS=http://kibana:5601
-      - LOGSTASH_HOSTS=http://logstash01:9600
+      - ELASTIC_HOSTS=https://ft-elasticsearch:9200
+      - KIBANA_HOSTS=http://ft-kibana:5601
+      - LOGSTASH_HOSTS=http://ft-logstash01:9600
     networks:
       - transcendence-network
