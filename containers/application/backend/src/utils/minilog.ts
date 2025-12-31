@@ -1,6 +1,18 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
+export const TAG = {
+  SYSTEM: 'SYSTEM',
+  DB: 'DB',
+  REDIS: 'REDIS',
+  AUTH: 'AUTH',
+  USER: 'USER',
+  HTTP: 'HTTP',
+  WEBSOCKET: 'WEBSOCKET',
+  GAME: 'GAME',
+  CHAT: 'CHAT',
+} as const
+
 class MiniLog {
   private logDir: string
   private logFile: string
