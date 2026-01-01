@@ -2,7 +2,7 @@
 
 ## 1. ER図 (Mermaid)
 
-```mermaid
+```{mermaid}
 erDiagram
     users ||--o{ chat_room_members : "is member of"
     users ||--o{ chat_messages : "sends"
@@ -36,7 +36,7 @@ erDiagram
         TEXT room_id FK "References chat_rooms(id)"
         TEXT sender_id FK "References users(id)"
         TEXT content "Message text / Invite data"
-        INTEGER is_invite "0: Message, 1: Pong Invite"
+        TEXT message_type "'text' | 'invitation'"
         INTEGER createdAt "Unix Time"
     }
 
@@ -76,6 +76,7 @@ erDiagram
 | room_id | TEXT | FK, NOT NULL | `chat_rooms.id` を参照 |
 | sender_id | TEXT | FK, NOT NULL | `users.id` を参照 |
 | content | TEXT | NOT NULL | メッセージ本文または招待パラメータ |
+| message_type | TEXT | NOT NULL | 'text' または 'invitation' |
 | createdAt | INTEGER | NOT NULL | 送信日時 (Unix Time) |
 
 ### 2.4 user_blocks

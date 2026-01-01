@@ -63,7 +63,7 @@
 | room_id | TEXT | FK, NOT NULL | `chat_rooms.id` を参照 |
 | sender_id | TEXT | FK, NOT NULL | `users.id` (送信者) を参照 |
 | content | TEXT | NOT NULL | 本文（または招待データ） |
-| is_invite | INTEGER | NOT NULL DEFAULT 0 | 1=招待, 0=通常メッセージ |
+| message_type | TEXT | NOT NULL | 'text' または 'invitation' |
 | createdAt | INTEGER | NOT NULL | 送信日時 (Unix Time) |
 
 **Constraints:**
@@ -126,7 +126,7 @@ erDiagram
         TEXT room_id FK "参照ルームID"
         TEXT sender_id FK "送信者ID"
         TEXT content "本文"
-        INTEGER is_invite "招待フラグ"
+        TEXT message_type "メッセージ種別 ('text' / 'invitation')"
         INTEGER createdAt "送信日時"
     }
 
