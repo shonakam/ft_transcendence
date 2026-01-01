@@ -9,9 +9,11 @@ export class HeaderNav implements Component {
     this.el.className = 'space-x-4';
 
     const homeLink = new NavLink('Home', '/home').getElement();
+    const chatLink = new NavLink('Chat', '/chat').getElement();
     const aboutLink = new NavLink('About', '/about').getElement();
 
     this.el.appendChild(homeLink);
+    this.el.appendChild(chatLink);
     this.el.appendChild(aboutLink);
   }
 

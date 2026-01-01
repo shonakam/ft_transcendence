@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import fastifyWebsocket from '@fastify/websocket';
 import { registRouters } from './adapter/router/index.ts';
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
@@ -9,6 +10,7 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 async function main() {
   const server = fastify({ logger: true });
+  await server.register(fastifyWebsocket);
   await registRouters(server, container);
 
   try {
