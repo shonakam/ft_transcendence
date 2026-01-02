@@ -6,7 +6,6 @@ import { User2faRepository } from "../../domain/user/repository/User2faRepositor
 import { VerifyTOTPForm } from "../../domain/auth/form/VerifyTOTPForm.ts";
 import speakeasy from 'speakeasy';
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
-import { RefreshToken } from "../../domain/auth/vo/RefreshToken.ts";
 
 export class VerifyTOTPUseCase {
   constructor(
@@ -16,8 +15,20 @@ export class VerifyTOTPUseCase {
     private user2faRepository: User2faRepository,
   ) {}
 
-  async execute(form: VerifyTOTPForm): Promise<{accessToken: string, refreshToken: string}> {
-    const payload = this.tokenService.verifyToken(form.tmpAuthToken, config.auth.jwtTmpAuthSecret)
+  private getPayload(a: string, t: string) {
+    console.log("access: ", a)
+    console.log("tmpauth: ", t)
+    let payload
+    if (a == null || a == undefined) {
+      payload = this.tokenService.verifyToken(t, config.auth.jwtTmpAuthSecret)
+    } else {
+      payload = this.tokenService.verifyToken(a, config.auth.jwtAccessSecret)
+    }
+    return payload
+  }
+
+  async execute(form: VerifyTOTPForm, a: string, t: string): Promise<{accessToken: string, refreshToken: string}> {
+    const payload = this.getPayload(a, t)
     if (typeof payload === "string" || !('sub' in payload) || !payload.sub) {
       console.warn("VerifyTOTPUseCase: invald payload")
       throw new Error("Invalid tmp auth token.")
@@ -31,16 +42,16 @@ export class VerifyTOTPUseCase {
 
     if (speakeasy.totp.verify({secret: user2fa.totpSeceret, token: form.code})) {
       console.warn("VerifyTOTPUseCase: invalid auth code.")
-      throw new Error("Invalid auth code.")  
+      throw new Error("Invalid auth code.")
     }
-    
+
     if (!user2fa.isTotpEnabled) {
       user2fa.updatedAt = getUnixTimeMs()
       user2fa.isTotpEnabled = 1
       await this.user2faRepository.save(user2fa)
     }
 
-    const loginPayload = { id: payload.sub } 
+    const loginPayload = { id: payload.sub }
     const access = this.tokenService.generateAccessToken(loginPayload)
     const refresh = this.tokenService.generateRefreshToken(loginPayload)
 

@@ -29,7 +29,7 @@ export async function initAuthUsecases() {
   const tokenService = new TokenService()
   const user2faRepository = new User2faRepositorySqlite()
 
-  const login = new LoginUseCase(volatileDataRepositoryRedis, userRepository, tokenService)
+  const login = new LoginUseCase(volatileDataRepositoryRedis, userRepository, tokenService, user2faRepository)
   const loginWithOIDC = new LoginWithOIDCUseCase(volatileDataRepositoryRedis, userRepository, userIdpRepo, tokenService)
   const logout = new LogoutUseCase(volatileDataRepositoryRedis, userRepository, tokenService)
   const refresh = new RefreshUseCase(volatileDataRepositoryRedis, userRepository, tokenService)

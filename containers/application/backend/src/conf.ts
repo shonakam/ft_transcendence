@@ -3,6 +3,8 @@ export const config = {
     jwtAccessSecret: process.env.JWT_ACCESS_SECRET || 'FQJH1Fh/yGZuqYyRkTK4pemzZF1pEX0hjbAnWcvxOLA=',
     jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'lOhCGrbX6haACZZfzERYyia6conx7VhbNiphITO52GY=',
     jwtTmpAuthSecret: process.env.JWT_TMP_AUTH_SECRET || 'r2ke4j+PYjNzpcOHtO+As1kl1uHEDF/xE+zSo6HZL9k=',
+    // accessTokenTtlMs: 1000, // 1sec
+    // refreshTokenTtlMs: 5000, // 5sec
     accessTokenTtlMs: 900000, // 15min (15 * 60 * 1000)
     refreshTokenTtlMs: 86400000,  // 1day (24 * 60 * 60 * 1000)
     issure: process.env.JWT_ISSURE || 'https://api.transcendence.42.fr',
@@ -59,4 +61,12 @@ export const config = {
     port: process.env.REDIS_HOST || '6379',
     retries: process.env.REDIS_HOST || '3',
   },
+};
+
+export const cookieConfig = {
+  secure: false,
+  httpOnly: true,
+  // domain: 'api.transcendence.42.fr',
+  path: '/',
+  maxAge: 60 * 60 * 24 * 7,
 };

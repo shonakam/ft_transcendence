@@ -1,6 +1,6 @@
 import { Component } from '../../interface/Component';
-import { Logo } from '../atoms/Logo';
-import { HeaderNav } from '../molecules/HeaderNav';
+import { Logo } from './Logo';
+import { HeaderNav } from './HeaderNav';
 
 export class Header implements Component {
   private el: HTMLElement;
