@@ -52,3 +52,13 @@ shell-backend:
 shell-frontend:
 	@docker compose -f $(APP)/compose.yaml exec frontend sh
 
+shell-blockchain:
+	@docker build -f $(APP)/blockchain/Dockerfile -t ft-blockchain $(APP)/blockchain
+	@docker run --rm -it -p 8545:8545 ft-blockchain bash
+
+PRIVATE_KEY := $(shell grep '^WALLET_PRIVATE=' $(APP)/.env.local | cut -d '=' -f2)
+FUJI_RPC_URL := $(shell grep '^FUJI_RPC_URL=' $(APP)/.env.local | cut -d '=' -f2)
+deploy-contract-fuji:
+	@docker run --rm -it -e FUJI_PRIVATE_KEY=$(PRIVATE_KEY) -e FUJI_RPC_URL=$(FUJI_RPC_URL) \
+ 		ft-blockchain npm run deploy:fuji
+# 	@docker run --rm -it -e PRIVATE_KEY=$$PRIVATE_KEY ft-blockchain npm run deploy:hardhat

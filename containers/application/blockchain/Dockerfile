@@ -3,10 +3,13 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package*.json ./
+
+RUN apk add --no-cache bash curl ca-certificates
 RUN npm install
 
 COPY . .
 
-EXPOSE 5173
+# JSON-RPC
+EXPOSE 8545
 
-CMD ["npm", "run", "dev"]
+CMD ["npx", "hardhat", "node"]

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy:fuji": "hardhat ignition deploy ignition/modules/GameResultRegistry.ts --network fuji --yes",
+    "deploy:hardhat": "hardhat ignition deploy ignition/modules/GameResultRegistry.ts --network hardhatMainnet --yes"
   },
   "keywords": [],
   "author": "",
