@@ -4,17 +4,24 @@ import { HomePage } from '../pages/home/HomePage';
 import { AboutPage } from '../pages/AboutPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ChatPage } from '../pages/ChatPage';
-import { AuthPage } from '../pages/auth/AuthPage';
 import { GamePage } from '../pages/GamePage';
+
+import { AuthPage } from '../pages/auth/AuthPage';
+import { CallbackPage } from '../pages/auth/CallbackPage';
+
 import { NotFoundPage } from '../pages/NotFoundPage';
 
 export const routes: Routes = {
+  '': () => new HomePage(),
   '/': () => new HomePage(),
-  '/auth': () => new AuthPage(),
   '/home': () => new HomePage(),
   '/about': () => new AboutPage(),
   '/dashboard': () => new DashboardPage(),
   '/game': () => new GamePage(),
   '/chat': () => new ChatPage(),
+
+  '/auth': () => new AuthPage(),
+  '/auth/callback': () => new CallbackPage(),
+
   '/404': () => new NotFoundPage(),
 };

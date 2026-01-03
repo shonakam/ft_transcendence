@@ -22,8 +22,8 @@ export const config = {
         ft: {
           endpoint: 'https://api.intra.42.fr',
           path: '/oauth/token',
-          clientId: process.env.FT_CLIENT_ID || '',
-          clientSecret: process.env.FT_CLIENT_SECRET || '',
+          clientId: process.env.VITE_42_CLIENT_ID || '',
+          clientSecret: process.env.VITE_42_CLIENT_SECRET || '',
         },
         // github: {
         //   endpoint: ,
