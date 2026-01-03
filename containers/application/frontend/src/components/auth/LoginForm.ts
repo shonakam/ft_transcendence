@@ -2,7 +2,7 @@ import { Component } from '../../interface/Component';
 import { toaster } from '../common/Toaster';
 import { login, loginRequestForm } from '../../services/auth/login';
 import { to } from '../../lib/to';
-import { loading } from '../common/loading';
+import { loading } from '../common/Loading';
 
 export class LoginForm implements Component {
   private root: HTMLFormElement;

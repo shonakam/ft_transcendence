@@ -20,7 +20,7 @@ export class CallbackPage implements Component {
     const params = new URLSearchParams(window.location.search)
     const code = params.get("code")
 
-    if (code == null) {
+    if (!code) {
       toaster.show('Authentication Failed', 'error')
       router.navigateTo('/auth')
       return
