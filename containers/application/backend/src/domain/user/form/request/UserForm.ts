@@ -12,6 +12,7 @@ export interface UpdateUserForm {
   imagePath?: string | null;
   currentPassword: string;
   newPassword?: string;
+  is2faEnabled?: boolean;
 }
 
 export interface ChangePasswordForm {

@@ -39,7 +39,7 @@ export class User2faRepositorySqlite implements User2faRepository {
       );
     } catch (err) {
       console.error("User2faRepositorySqlite.sacve: ", err, user2fa)
-    } 
+    }
   }
 
   async findById(userId: string): Promise<User2fa | null> {
