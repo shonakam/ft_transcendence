@@ -8,8 +8,8 @@ export class Pagination {
     offset?: number,
     limit?: number,
   ) {
-    this.offset = offset ?? config.api.user.paginaiton.offset;
-    this.limit = limit ?? config.api.user.paginaiton.limit;
+    this.offset = offset ?? config.api.user.pagination.offset;
+    this.limit = limit ?? config.api.user.pagination.limit;
 
     if (this.offset < 0) {
       throw new Error('Offset cannot be a negative number.');
