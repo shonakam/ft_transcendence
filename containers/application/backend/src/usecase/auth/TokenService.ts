@@ -33,8 +33,8 @@ export class TokenService {
     const ttlMs = config.auth.refreshTokenTtlMs;
     const secret = config.auth.jwtRefreshSecret;
 
+    payload = this.payloadConfigure(payload)
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
-
     return RefreshToken.create(tokenString, getUnixTimeMs() + ttlMs);
   }
 

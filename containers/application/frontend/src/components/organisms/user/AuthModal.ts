@@ -1,6 +1,6 @@
 import { Component } from '../../../interface/Component';
-import { LoginForm } from './LoginForm';
-import { SignupForm } from './SignupForm';
+import { LoginForm } from '../../auth/LoginForm';
+import { SignupForm } from '../../auth/SignupForm';
 
 type AuthView = 'login' | 'signup';
 
@@ -13,7 +13,7 @@ export class AuthModal implements Component {
   constructor() {
     this.rootElement = document.createElement('div');
     this.rootElement.id = 'auth-modal';
-    this.rootElement.className = 'hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20';
+    this.rootElement.className = 'hidden fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-20';
 
     this.loginForm = new LoginForm();
     this.signupForm = new SignupForm();
@@ -25,9 +25,13 @@ export class AuthModal implements Component {
 
   private render(): void {
     this.rootElement.innerHTML = `
-      <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm relative">
-        <button id="close-modal-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
-        <div id="auth-form-container"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-black"></div>
+      <div class="absolute inset-0 opacity-20 bg-[url('/noise.png')]"></div>
+
+      <div class="relative z-10 w-full max-w-md">
+        <div class="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-10">
+          <div id="auth-form-container"></div>
+        </div>
       </div>
     `;
   }

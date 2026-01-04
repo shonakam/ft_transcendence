@@ -4,6 +4,7 @@ import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
 import Password from "../../domain/user/vo/Password.ts";
 import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
+import { User2faRepository } from "../../domain/user/repository/User2faRepository.ts";
 
 export interface LoginResponse {
   accessToken: string | null
@@ -16,6 +17,7 @@ export class LoginUseCase {
     private volatileDataRepositoryRedis: VolatileDataRepositoryRedis,
     private userRepo: UserRepository,
     private tokenService: TokenService,
+    private user2faRepository: User2faRepository,
   ) {}
 
   private async generateTmpToken(id: string): Promise<LoginResponse> {
@@ -55,8 +57,14 @@ export class LoginUseCase {
       throw new Error("Invalid email or password.")
     }
 
+    const user2fa = await this.user2faRepository.findById(user.id)
+    // if (!user2fa?.totpSeceret) {
+    //   console.warn("VerifyTOTPUseCase: findById is failed.")
+    //   throw new Error("Not registered.")
+    // }
+
     console.log("user: ", user)
-    return (user.is2faEnabled == 1)
+    return (user2fa!.isTotpEnabled == 1)
       ? this.generateTmpToken(user.id)
       : this.issueTokenAndSotoreToken(user.id)
   }

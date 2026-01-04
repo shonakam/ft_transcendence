@@ -1,7 +1,6 @@
 import { config } from "../../conf.ts";
 import { TokenService } from "./TokenService.ts";
 import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
-import { SetupTOTPForm } from "../../domain/auth/form/SetupTOTPForm.ts";
 import { User2faRepository } from "../../domain/user/repository/User2faRepository.ts";
 import { User2fa } from "../../domain/user/entity/User2fa.ts";
 import { getUnixTimeMs } from "../../utils/unixtime.ts";
@@ -19,14 +18,14 @@ export class SetupTOTPUseCase {
 
   private async setTotpSecrete(user2fa: User2fa, secret: string) {
     const now = getUnixTimeMs()
-    
+
     user2fa.updatedAt = now
     user2fa.totpSeceret = secret
     await this.user2faRepository.save(user2fa)
   }
 
-  async execute(form: SetupTOTPForm): Promise<SetupTOTPResponse> {
-    const payload = this.tokenService.verifyToken(form.tmpAuthToken, config.auth.jwtTmpAuthSecret)
+  async execute(accessToken: string): Promise<SetupTOTPResponse> {
+    const payload = this.tokenService.verifyToken(accessToken, config.auth.jwtAccessSecret)
     if (typeof payload === "string" || !('sub' in payload) || !payload.sub) {
       console.warn("SetupTOTPUseCase: invald payload")
       throw new Error("Invalid tmp auth token.")
@@ -43,12 +42,12 @@ export class SetupTOTPUseCase {
       console.warn("SetupTOTPUseCase: findById is failed or already registered.")
       throw new Error("execute failed.")
     }
-    
+
     // TOTP用秘密鍵及びurlの生成
     // https://tex2e.github.io/rfc-translater/html/rfc6238.html
     const authUrl = speakeasy.generateSecret({
       length: 20,
-      otpauth_url: true, 
+      otpauth_url: true,
       issuer: config.auth.issure
     })
     await this.setTotpSecrete(user2fa, authUrl.base32)
