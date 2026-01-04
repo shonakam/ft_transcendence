@@ -1,11 +1,10 @@
-NAME 			:= ft_transcendence
-UNAME			= $(uname -a)
+NAME 		:= ft_transcendence
+UNAME		= $(uname -a)
 PROJECT_ROOT	:= $(PWD)
-APP				:= containers/application
-OPS				:= containers/operation
+APP		:= containers/application
+OPS		:= containers/operation
 DOCKER_APP_ENV	:= $(APP)/.env.local
 export DATA_DIR := $(PWD)/$(APP)/sqlite/data
-
 
 # Orthodox recipes
 all: init up-app up-ops
