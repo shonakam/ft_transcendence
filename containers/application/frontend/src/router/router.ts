@@ -68,5 +68,4 @@ export class Router {
     }
 }
 
-export const router = Router.getInstance()
-
+export const router = Router.getInstance();

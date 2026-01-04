@@ -1,5 +1,5 @@
-import { Component } from "../interface/Component.js";
-import { AuthModal } from '../components/organisms/user/AuthModal.js';
+import { Component } from "../interface/Component";
+import { AuthModal } from '../components/organisms/user/AuthModal';
 
 export class HomePage implements Component {
   private rootElement: HTMLElement;

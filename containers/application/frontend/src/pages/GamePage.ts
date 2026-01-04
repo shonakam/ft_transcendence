@@ -1,10 +1,10 @@
-import { Component } from '../interface/Component.js';
-import { AuthModal } from '../components/organisms/user/AuthModal.js';
+import { Component } from '../interface/Component';
+import { AuthModal } from '../components/organisms/user/AuthModal';
 
-import { GameCanvas } from '../components/game/GameCanvas.js';
-import { PongGame } from '../components/game/PongGame.js';
+import { GameCanvas } from '../components/game/GameCanvas';
+import { PongGame } from '../components/game/PongGame';
 
-import CONFIG from '../components/game/GameConfig.js';
+import CONFIG from '../components/game/GameConfig';
 
 export class GamePage {
   rootElement: HTMLElement;

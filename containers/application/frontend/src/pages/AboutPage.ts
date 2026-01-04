@@ -1,4 +1,4 @@
-import { Component } from "../interface/Component.js";
+import { Component } from "../interface/Component";
 
 export class AboutPage implements Component {
   private el: HTMLElement

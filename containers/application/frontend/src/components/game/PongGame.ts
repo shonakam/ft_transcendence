@@ -1,10 +1,10 @@
-import { GameCanvas } from './GameCanvas.js';
-import { GameState } from './GameState.js';
-import { PhysicsEngine } from './PhysicsEngine.js';
-import { CanvasRenderer } from './CanvasRenderer.js';
-import { InputHandler } from './InputHandler.js';
+import { GameCanvas } from './GameCanvas';
+import { GameState } from './GameState';
+import { PhysicsEngine } from './PhysicsEngine';
+import { CanvasRenderer } from './CanvasRenderer';
+import { InputHandler } from './InputHandler';
 
-import CONFIG from './GameConfig.js';
+import CONFIG from './GameConfig';
 
 export class PongGame {
   canvas: GameCanvas;

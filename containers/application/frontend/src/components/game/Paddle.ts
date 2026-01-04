@@ -1,6 +1,6 @@
-import { Vector2 } from '../../interface/Vector2.js';
+import { Vector2 } from '../../interface/Vector2';
 
-import CONFIG from './GameConfig.js';
+import CONFIG from './GameConfig';
 
 export class Paddle {
   position: Vector2;

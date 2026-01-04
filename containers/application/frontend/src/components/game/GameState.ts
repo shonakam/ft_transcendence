@@ -2,10 +2,10 @@
  * GameState.ts
  */
 
-import { Ball } from './Ball.js';
-import { Paddle } from './Paddle.js';
+import { Ball } from './Ball';
+import { Paddle } from './Paddle';
 
-import CONFIG from './GameConfig.js';
+import CONFIG from './GameConfig';
 
 export class GameState {
   // BasicStatus

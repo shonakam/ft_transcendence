@@ -1,5 +1,5 @@
-import { GameState } from './GameState.js';
-import { GameCanvas } from './GameCanvas.js';
+import { GameState } from './GameState';
+import { GameCanvas } from './GameCanvas';
 
 export class CanvasRenderer {
   canvas: GameCanvas;

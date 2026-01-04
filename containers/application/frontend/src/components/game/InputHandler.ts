@@ -1,5 +1,5 @@
-import { Direction } from '../../types/Direction.js';
-import { GameState } from './GameState.js';
+import { Direction } from '../../types/Direction';
+import { GameState } from './GameState';
 
 interface InputState {
   left: Direction;
