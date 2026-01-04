@@ -1,13 +1,3 @@
-process.on("uncaughtException", err => {
-  console.error("UNCAUGHT EXCEPTION:", err, typeof err)
-  console.error(err instanceof Error ? err.stack : err)
-})
-
-process.on("unhandledRejection", reason => {
-  console.error("UNHANDLED REJECTION:", reason, typeof reason)
-  if (reason instanceof Error) console.error(reason.stack)
-})
-
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
@@ -37,7 +27,8 @@ async function main() {
 
   // setup cors
   await server.register(cors, {
-    origin: 'http://localhost:5173',
+    // origin: 'http://localhost:5173',
+    origin: 'https://transcendence.42.fr',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });

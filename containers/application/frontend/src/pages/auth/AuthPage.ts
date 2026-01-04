@@ -25,9 +25,20 @@ export class AuthPage implements Component {
     this.signupForm = new SignupForm();
     this.mfaForm = new MfaForm();
 
+    this.loginForm = new LoginForm();
+    this.signupForm = new SignupForm();
+    this.mfaForm = new MfaForm();
+
     this.root.appendChild(this.container);
     this.initEventListeners();
     this.determineInitialView();
+
+    const pendingData = sessionStorage.getItem('pending_auth_data');
+    if (pendingData) {
+      sessionStorage.removeItem('pending_auth_data');
+      const data = JSON.parse(pendingData);
+      setTimeout(() => this.emitLoginSuccess(data), 0);
+    }
   }
 
   private determineInitialView() {
@@ -89,6 +100,14 @@ export class AuthPage implements Component {
     }
 
     this.container.replaceChildren(element);
+  }
+
+  public emitLoginSuccess(data: any) {
+    this.loginForm.getElement().dispatchEvent(
+      new CustomEvent('loginSuccess', {
+        detail: { data },
+      })
+    );
   }
 
   getElement(): HTMLElement {

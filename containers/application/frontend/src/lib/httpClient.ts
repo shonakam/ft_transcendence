@@ -1,8 +1,7 @@
 import { toaster } from '../components/common/Toaster';
 import { router } from '../router/router';
 
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/';
 
 let isRefreshing = false;
 let refreshSubscribers: ((fail?: boolean) => void)[] = [];
@@ -20,7 +19,7 @@ async function httpClient<T>(
   endpoint: string,
   options: CustomOptions = {}
 ): Promise<T> {
-  const url = `${BASE_URL}/${endpoint}`;
+  const url = `${BASE_URL}${endpoint}`;
   const headers = new Headers(options.headers || {});
 
   const hasBody = options.body !== undefined && options.body !== null;
@@ -71,7 +70,7 @@ async function httpClient<T>(
 
       isRefreshing = true;
       try {
-        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+        const refreshRes = await fetch(`${BASE_URL}auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });

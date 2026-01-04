@@ -75,8 +75,15 @@ export default async function AuthController(
         const form = req.body as OIDCForm
         const response = await loginWithOIDC.execute(form, req.params.provider)
 
-        reply.setCookie('accessToken', response.accessToken!, cookieConfig)
-        reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
+        let code = 0
+        if (!response.tmpAuthToken) {
+          code = 200
+          reply.setCookie('accessToken', response.accessToken!, cookieConfig)
+          reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
+        } else {
+          code = 202
+          reply.setCookie('tmpAuthToken', response.tmpAuthToken, cookieConfig)
+        }
         reply.status(200).send(response)
       } catch (err: unknown) {
         const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
@@ -172,23 +179,27 @@ export default async function AuthController(
     },
   );
 
-  server.delete('/logout', async (req, reply) => {
-    try {
-      const accessToken = req.cookies.accessToken;
-      await logout.execute(accessToken!);
-      const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
-      reply
-        .clearCookie('accessToken', clearOptions)
-        .clearCookie('refreshToken', clearOptions)
-        .clearCookie('tmpAuthToken', clearOptions)
-        .status(204)
-        .send();
-    } catch (err: unknown) {
-      const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
-      reply
-        .clearCookie('accessToken', clearOptions)
-        .clearCookie('refreshToken', clearOptions);
-      reply.status(500).send({ message: 'Internal Server Error' });
-    }
-  });
+  server.delete(
+    '/logout',
+    async (req, reply) => {
+      try {
+        const accessToken = req.cookies.accessToken
+        await logout.execute(accessToken!)
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply
+          .clearCookie('accessToken', clearOptions)
+          .clearCookie('refreshToken', clearOptions)
+          .clearCookie('tmpAuthToken', clearOptions)
+          .status(204)
+          .send()
+      } catch (err: unknown) {
+        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
+        reply
+          .clearCookie('accessToken', clearOptions)
+          .clearCookie('refreshToken', clearOptions)
+          .clearCookie('tmpAuthToken', clearOptions)
+        reply.status(500).send({ message: 'Internal Server Error' })
+      }
+    },
+  );
 }

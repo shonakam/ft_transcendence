@@ -11,6 +11,7 @@ import UserId from '../../domain/user/vo/UserId.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import UserIdpId from '../../domain/user/vo/UserIdpId.ts';
 import { IdP } from '../../infra/idp/IdP.ts';
+import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
 
 interface IdpConfig {
   redirect_uri: string;
@@ -24,12 +25,19 @@ interface IdpConfig {
   };
 }
 
+export interface LoginWithOIDCResponse {
+  accessToken: string | null;
+  refreshToken: string | null;
+  tmpAuthToken: string | null;
+}
+
 export class LoginWithOIDCUseCase {
   constructor(
     private volatileDataRepositoryRedis: VolatileDataRepositoryRedis,
     private userRepo: UserRepository,
     private userIdpRepo: UserIdpRepository,
     private tokenService: TokenService,
+    private user2faRepo: User2faRepository,
   ) {}
 
   private switchIdP(provider: string) {
@@ -56,27 +64,37 @@ export class LoginWithOIDCUseCase {
     }
   }
 
+  private async generateTmpToken(id: string): Promise<LoginWithOIDCResponse> {
+    const payload = { id: id };
+    const tmpAuth = this.tokenService.generateTmpAuthToken(payload);
+    return {
+      accessToken: null,
+      refreshToken: null,
+      tmpAuthToken: tmpAuth.token,
+    };
+  }
+
   private async issueTokenAndSotoreToken(
     userId: string,
     provider: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<LoginWithOIDCResponse> {
     const payload = { id: userId, idp: provider };
     const access = this.tokenService.generateAccessToken(payload);
     const refresh = this.tokenService.generateRefreshToken(payload);
-
     const key = `session:refresh:${userId}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();
     await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);
     return {
       accessToken: access.token,
       refreshToken: refresh.token,
+      tmpAuthToken: null,
     };
   }
 
   async execute(
     form: OIDCForm,
     provider: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<LoginWithOIDCResponse> {
     const code = AuthCode.from(form.code);
 
     const idp = this.switchIdP(provider);
@@ -85,15 +103,18 @@ export class LoginWithOIDCUseCase {
     }
     const res = await idp.trade(code);
     const userInfo = await idp.getUserInfo(res.access_token);
-
     const now = getUnixTimeMs();
-    const tokens = await transaction(async (db) => {
-      let userId;
-      const user = await this.userIdpRepo.findById(userInfo.id, provider);
+
+    const { userId, isTotpEnabled } = await transaction(async (db) => {
+      const user = await this.userIdpRepo.providerUserId(
+        userInfo.providerUserId,
+        provider,
+      );
+      let userId: string;
       if (!user) {
-        userId = UserId.create();
+        userId = UserId.create().get();
         await this.userRepo.save({
-          id: userId.get(),
+          id: userId,
           username: userInfo.name,
           email: userInfo.email,
           password: null,
@@ -104,9 +125,17 @@ export class LoginWithOIDCUseCase {
           withdrawnAt: null,
         });
 
+        await this.user2faRepo.save({
+          userId: userId,
+          totpSeceret: null,
+          isTotpEnabled: 0,
+          createdAt: now,
+          updatedAt: now,
+        });
+
         await this.userIdpRepo.save({
           id: UserIdpId.create().get(),
-          userId: userId.get(),
+          userId: userId,
           provider: provider,
           providerUserId: userInfo.providerUserId,
           imagePath: userInfo.imagePath,
@@ -119,12 +148,15 @@ export class LoginWithOIDCUseCase {
         await this.syncProfileData(userId, userInfo);
       }
 
-      return await this.issueTokenAndSotoreToken(userId as string, provider);
+      const user2fa = await this.user2faRepo.findById(userId);
+      return {
+        userId,
+        isTotpEnabled: user2fa?.isTotpEnabled === 1,
+      };
     });
 
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    };
+    return isTotpEnabled
+      ? this.generateTmpToken(userId)
+      : this.issueTokenAndSotoreToken(userId, provider);
   }
 }
