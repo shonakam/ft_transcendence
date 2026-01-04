@@ -35,7 +35,12 @@ export class Router {
 
     private renderContent() {
         const path = window.location.pathname;
-        const PageComponent = routes[path] || routes['/'];
+        const normalizedPath = path.replace(/\/+$/, '');
+        let PageComponent = routes[normalizedPath];
+        if (PageComponent === undefined) {
+            history.replaceState(null, '', '/404');
+            PageComponent = routes['/404'];
+        }
         let mainElement = this.appRoot.querySelector('main');
         if (!mainElement) {
             mainElement = document.createElement('main');

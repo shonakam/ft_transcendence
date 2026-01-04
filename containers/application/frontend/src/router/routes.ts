@@ -5,7 +5,7 @@ import { AboutPage } from '../pages/AboutPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { AuthPage } from '../pages/auth/AuthPage';
 import { GamePage } from '../pages/GamePage';
-// import { NotFoundPage } from '../pages/NotFoundPage.js';
+import { NotFoundPage } from '../pages/NotFoundPage';
 
 export const routes: Routes = {
   '/': () => new HomePage(),
@@ -14,5 +14,5 @@ export const routes: Routes = {
   '/about': () => new AboutPage(),
   '/dashboard': () => new DashboardPage(),
   '/game': () => new GamePage(),
-  // '/404': () => new NotFoundPage(),
+  '/404': () => new NotFoundPage(),
 };
