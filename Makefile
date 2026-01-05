@@ -4,17 +4,18 @@ PROJECT_ROOT	:= $(PWD)
 APP		:= containers/application
 OPS		:= containers/operation
 DOCKER_APP_ENV	:= $(APP)/.env.local
+DOCKER_OPS_ENV	:= $(OPS)/.env.local
 export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 
 # Orthodox recipes
-all: init up-app up-ops
+all: init-app up-app init-ops up-ops
 
-init:
+init-app:
 	@cp -n $(APP)/.env.example $(APP)/.env.local || true
 
-up-app: init
+up-app: init-app
 	@bash $(APP)/tools/certs.sh
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml up --build -d
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml up --build -d --remove-orphans
 	@bash $(APP)/tools/hosts.sh create
 
 down-app:
@@ -28,13 +29,24 @@ fclean-app:
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
-up-ops: # TODO: Implementation pending
+init-ops:
+	@cp -n $(OPS)/.env.example $(OPS)/.env.local || true
+
+up-ops: init-ops
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml up --build -d --remove-orphans
+	@curl -u "elastic:changeme" \
+		-X POST "http://localhost:5601/api/saved_objects/_import" \
+		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson
 
 down-ops: # TODO: Implementation pending
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down
 
 clean-ops: # TODO: Implementation pending
 
-fclean-ops: # TODO: Implementation pending
+fclean-ops:
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down --rmi local -v
+
+re-ops: fclean-ops up-ops
 
 .PHONEY:
 
@@ -50,4 +62,3 @@ shell-backend:
 
 shell-frontend:
 	@docker compose -f $(APP)/compose.yaml exec frontend sh
-
