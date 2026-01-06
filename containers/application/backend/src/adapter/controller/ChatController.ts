@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { authenticate } from '../auth/authPreHandler.ts';
 import type { ChatUseCases } from '../../container/chat.container.ts';
 import type { MessageType } from '../../domain/chat/entity/ChatMessage.ts';
@@ -21,7 +21,7 @@ export default async function ChatController(
   server.get(
     '/rooms',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -39,7 +39,7 @@ export default async function ChatController(
   server.post<{ Body: { targetUserId: string } }>(
     '/rooms/dm',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest<{ Body: { targetUserId: string } }>, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -58,7 +58,7 @@ export default async function ChatController(
   server.get<{ Params: { roomId: string } }>(
     '/rooms/:roomId/messages',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest<{ Params: { roomId: string } }>, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -77,7 +77,10 @@ export default async function ChatController(
   server.post<{ Params: { roomId: string }; Body: { content: string; messageType?: MessageType } }>(
     '/rooms/:roomId/messages',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (
+      req: FastifyRequest<{ Params: { roomId: string }; Body: { content: string; messageType?: MessageType } }>,
+      reply: FastifyReply,
+    ) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -97,7 +100,7 @@ export default async function ChatController(
   server.get(
     '/blocks',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -115,7 +118,7 @@ export default async function ChatController(
   server.post<{ Body: { blockedUserId: string } }>(
     '/blocks',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest<{ Body: { blockedUserId: string } }>, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -134,7 +137,7 @@ export default async function ChatController(
   server.delete<{ Params: { blockedUserId: string } }>(
     '/blocks/:blockedUserId',
     { preHandler: authenticate },
-    async (req, reply) => {
+    async (req: FastifyRequest<{ Params: { blockedUserId: string } }>, reply: FastifyReply) => {
       try {
         const userId = req.authUserId;
         if (!userId) {

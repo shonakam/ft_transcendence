@@ -3,12 +3,19 @@ import type { Database } from 'sqlite';
 import type { ChatRoomRepository } from '../../../../domain/chat/repository/ChatRoomRepository.ts';
 import type { ChatRoom } from '../../../../domain/chat/entity/ChatRoom.ts';
 
+interface ChatRoomRow {
+  id: string;
+  name: string | null;
+  type: 'global' | 'dm';
+  created_at: number;
+}
+
 export class ChatRoomRepositorySqlite implements ChatRoomRepository {
   private get db(): Database {
     return getDb();
   }
 
-  private scan(row: any): ChatRoom {
+  private scan(row: ChatRoomRow): ChatRoom {
     return {
       id: row.id,
       name: row.name,
@@ -37,13 +44,13 @@ export class ChatRoomRepositorySqlite implements ChatRoomRepository {
 
   async findUserRooms(userId: string): Promise<ChatRoom[]> {
     const rows = await this.db.all(
-      `SELECT r.* FROM chat_rooms r
-       JOIN chat_room_members m ON r.id = m.room_id
-       WHERE m.user_id = ?
+      `SELECT DISTINCT r.* FROM chat_rooms r
+       LEFT JOIN chat_room_members m ON r.id = m.room_id
+       WHERE r.type = 'global' OR m.user_id = ?
        ORDER BY r.created_at DESC`,
       [userId],
     );
-    return rows.map((row) => this.scan(row));
+    return rows.map((row: ChatRoomRow) => this.scan(row));
   }
 
   async findDMRoom(userId1: string, userId2: string): Promise<ChatRoom | null> {
