@@ -32,13 +32,18 @@ jobs:
             -f containers/application/compose.yml \
             up -d --build backend
 
+      - name: Debug Containers
+        run: |
+          docker ps
+          docker logs ft-backend
+
       - name: Wait for Server and Health Check
         run: |
           echo "Starting health check...💊"
           timeout 60s bash -c '
-          until curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health | grep -q "200"; do
+          until curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health | grep -q "200"; do
             echo "Waiting for backend..."
-            sleep 3
+            sleep 5
           done'
           echo "Backend is up and running!🚀"
 
