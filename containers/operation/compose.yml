@@ -1,0 +1,198 @@
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-file: "10"
+      max-size: "100m"
+
+networks:
+  transcendence-network:
+    name: transcendence-network
+    external: true
+
+volumes:
+ ft_certs:
+   driver: local
+ ft_esdata:
+   driver: local
+ ft_kibanadata:
+   driver: local
+ ft_metricbeatdata:
+   driver: local
+ ft_filebeatdata:
+   driver: local
+ ft_logstashdata:
+   driver: local
+
+####
+
+services:
+  setup:
+    container_name: ft-setup
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.8
+    volumes:
+      - ft_certs:/usr/share/elasticsearch/config/certs
+      - ./elk/setup.sh:/usr/share/elasticsearch/setup.sh
+    user: "0"
+    command: bash /usr/share/elasticsearch/setup.sh
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/ft-elasticsearch/ft-elasticsearch.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+    networks:
+      - transcendence-network
+
+  elasticsearch:
+    init: true
+    build:
+      context: ./elk/elasticsearch
+      dockerfile: Dockerfile
+    depends_on:
+     setup:
+       condition: service_healthy
+    container_name: ft-elasticsearch
+    volumes:
+      - ft_certs:/usr/share/elasticsearch/config/certs
+      - ft_esdata:/usr/share/elasticsearch/data
+    environment:
+      - node.name=ft-elasticsearch
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/ft-elasticsearch/ft-elasticsearch.key
+      - xpack.security.http.ssl.certificate=certs/ft-elasticsearch/ft-elasticsearch.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/ft-elasticsearch/ft-elasticsearch.key
+      - xpack.security.transport.ssl.certificate=certs/ft-elasticsearch/ft-elasticsearch.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    networks:
+      - transcendence-network
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+     memlock:
+       soft: -1
+       hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    <<: *logging
+
+  logstash:
+    init: true
+    build:
+      context: ./elk/logstash
+      dockerfile: Dockerfile
+    depends_on:
+     elasticsearch:
+       condition: service_healthy
+     kibana:
+       condition: service_healthy
+    labels:
+     co.elastic.logs/module: logstash
+    container_name: ft-logstash
+    networks:
+      - transcendence-network
+
+  kibana:
+    init: true
+    build:
+      context: ./elk/kibana
+      dockerfile: Dockerfile
+    container_name: ft-kibana
+    networks:
+      - transcendence-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    labels:
+      co.elastic.logs/module: kibana
+    volumes:
+      - ft_certs:/usr/share/kibana/config/certs
+      - ft_kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT:-5601}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://ft-elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+    mem_limit: ${KB_MEM_LIMIT}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  metricbeat:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:8.18.8
+    container_name: ft-metricbeat
+    user: root
+    volumes:
+      - ft_certs:/usr/share/metricbeat/certs
+      - ft_metricbeatdata:/usr/share/metricbeat/data
+      - "./elk/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://ft-elasticsearch:9200
+      - KIBANA_HOSTS=http://ft-kibana:5601
+      - LOGSTASH_HOSTS=http://ft-logstash:9600
+    networks:
+      - transcendence-network
+
+  filebeat:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/beats/filebeat:8.18.8
+    container_name: ft-filebeat
+    user: root
+    volumes:
+      - ft_certs:/usr/share/filebeat/certs
+      - ft_filebeatdata:/usr/share/filebeat/data
+      # - "./elk/filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
+      - "../application/backend/logs:/usr/share/filebeat/ingest_data:ro"
+      - "./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://ft-elasticsearch:9200
+      - KIBANA_HOSTS=http://ft-kibana:5601
+      - LOGSTASH_HOSTS=http://ft-logstash01:9600
+    networks:
+      - transcendence-network

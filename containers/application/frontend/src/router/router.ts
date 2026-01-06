@@ -35,15 +35,23 @@ export class Router {
 
     private renderContent() {
         const path = window.location.pathname;
-        const PageComponent = routes[path] || routes['/'];
+        const normalizedPath = path.replace(/\/+$/, '');
+        let PageComponent = routes[normalizedPath];
+        if (PageComponent === undefined) {
+            history.replaceState(null, '', '/404');
+            PageComponent = routes['/404'];
+        }
         let mainElement = this.appRoot.querySelector('main');
         if (!mainElement) {
             mainElement = document.createElement('main');
             this.appRoot.appendChild(mainElement);
         }
-        mainElement.innerHTML = '';
-        const pageInstance = PageComponent()
-        mainElement.appendChild(pageInstance.getElement())
+        if (PageComponent) {
+            const newPageElement: HTMLElement = PageComponent().getElement();
+            this.appRoot.appendChild(newPageElement);
+        } else {
+            console.error('No PageComponent found for path:', path);
+        }
     }
 
     private renderInitialStructure() {
@@ -65,5 +73,4 @@ export class Router {
     }
 }
 
-export const router = Router.getInstance()
-
+export const router = Router.getInstance();
