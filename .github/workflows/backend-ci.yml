@@ -1,0 +1,50 @@
+name: Build Check Backend
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+    env:
+      DATA_DIR: ${{ github.workspace }}/containers/application/sqlite/data
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and Start Backend Container
+        run: |
+          mkdir -p containers/application/sqlite/data
+
+          if [ -f containers/application/.env.example ]; then
+            cp containers/application/.env.example containers/application/.env.local
+            echo ".env.local created from example"
+          else
+            touch containers/application/.env.local
+            echo ".env.local created as empty file"
+          fi
+
+          docker compose \
+            --env-file containers/application/.env.local \
+            -f containers/application/compose.yml \
+            up -d --build backend
+
+      - name: Wait for Server and Health Check
+        run: |
+          echo "Starting health check...💊"
+          timeout 30s bash -c '
+          until curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health | grep -q "200"; do
+            echo "Waiting for backend..."
+            sleep 2
+          done'
+          echo "Backend is up and running!🚀"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f containers/application/compose.yml ]; then
+            docker compose -f containers/application/compose.yml down
+          fi

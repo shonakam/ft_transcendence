@@ -48,7 +48,7 @@ export class SetupTOTPUseCase {
     const authUrl = speakeasy.generateSecret({
       length: 20,
       otpauth_url: true,
-      issuer: config.auth.issure
+      issuer: config.auth.issuer
     })
     await this.setTotpSecrete(user2fa, authUrl.base32)
 

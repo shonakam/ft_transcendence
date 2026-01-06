@@ -12,23 +12,6 @@ on:
     - develop
 
 jobs:
-  notify_pr:
-    name: Notify Discord for Pull Request
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Send PR Notification to Discord
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          color: '#206694'
-          title: "📢 PR作成: ${{ github.event.pull_request.title }}"
-          description: |
-            ブランチ: ${{ github.head_ref }} -> ${{ github.base_ref }}
-            作成者: ${{ github.event.pull_request.user.login }}
-          footer: "URL: ${{ github.event.pull_request.html_url }}"
-
   notify_merge:
       name: Notify Discord for Push (Merge)
       if: github.event_name == 'push'
