@@ -16,10 +16,21 @@ export async function initializeDatabase(): Promise<void> {
   await db.exec('PRAGMA journal_mode = WAL;');
 
   try {
-    const schemaSql = await fs.readFile('/app/tools/initialize_schema.sql', 'utf8');
-    await db.exec(schemaSql);
+    const migrationsDir = '/app/tools/migrations';
+    const files: string[] = await fs.readdir(migrationsDir);
+    const sqlFiles = files
+      .filter((file: string) => file.endsWith('.sql'))
+      .sort((a: string, b: string) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+    console.log(`Found ${sqlFiles.length} migration files.`);
+
+    for (const file of sqlFiles) {
+      console.log(`Applying migration: ${file}`);
+      const schemaSql = await fs.readFile(`${migrationsDir}/${file}`, 'utf8');
+      await db.exec(schemaSql);
+    }
   } catch (err) {
-    console.error(`スキーマファイルの読み込みまたは実行に失敗しました:`, err);
+    console.error(`マイグレーションの実行に失敗しました:`, err);
     throw err;
   }
 }
