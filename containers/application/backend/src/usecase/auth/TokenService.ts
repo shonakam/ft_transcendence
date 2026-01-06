@@ -9,7 +9,7 @@ export class TokenService {
   // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
   private payloadConfigure(payload: jwt.JwtPayload): jwt.JwtPayload {
     return payload = {
-      iss: config.auth.issure,
+      iss: config.auth.issuer,
       sub: payload.id,
       aud: config.auth.audience,
       // exp: number | undefined;

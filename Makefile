@@ -15,17 +15,17 @@ init-app:
 
 up-app: init-app
 	@bash $(APP)/tools/certs.sh
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml up --build -d --remove-orphans
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build -d --remove-orphans
 	@bash $(APP)/tools/hosts.sh create
 
 down-app:
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml down
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down
 	@bash $(APP)/tools/hosts.sh delete
 
 clean-app: # TODO: Implementation pending
 
 fclean-app:
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yaml down --rmi local -v
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
