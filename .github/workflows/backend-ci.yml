@@ -30,22 +30,23 @@ jobs:
           docker compose \
             --env-file containers/application/.env.local \
             -f containers/application/compose.yml \
-            up -d --build backend
-
-      - name: Debug Containers
-        run: |
-          docker ps
-          docker logs ft-backend
+            up -d --build backend redis
 
       - name: Wait for Server and Health Check
         run: |
           echo "Starting health check...💊"
-          timeout 60s bash -c '
+          timeout 120s bash -c '
           until curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health | grep -q "200"; do
             echo "Waiting for backend..."
             sleep 5
           done'
           echo "Backend is up and running!🚀"
+
+      - name: Show Backend Logs on Failure
+        if: failure()
+        run: |
+          docker ps
+          docker compose -f containers/application/compose.yml logs backend
 
       - name: Cleanup
         if: always()
