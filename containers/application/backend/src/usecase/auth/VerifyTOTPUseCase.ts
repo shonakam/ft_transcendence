@@ -1,11 +1,11 @@
-import { config } from "../../conf.ts";
-import { VolatileDataRepositoryRedis } from "../../infra/redis/repository/VolatileDataRepositoryRedis.ts";
-import { UserRepository } from "../../domain/user/repository/UserRepository.ts";
-import { TokenService } from "./TokenService.ts";
-import { User2faRepository } from "../../domain/user/repository/User2faRepository.ts";
-import { VerifyTOTPForm } from "../../domain/auth/form/VerifyTOTPForm.ts";
+import { config } from '../../conf.ts';
+import { VolatileDataRepositoryRedis } from '../../infra/redis/repository/VolatileDataRepositoryRedis.ts';
+import { UserRepository } from '../../domain/user/repository/UserRepository.ts';
+import { TokenService } from './TokenService.ts';
+import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
+import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import speakeasy from 'speakeasy';
-import { getUnixTimeMs } from "../../utils/unixtime.ts";
+import { getUnixTimeMs } from '../../utils/unixtime.ts';
 
 export class VerifyTOTPUseCase {
   constructor(
@@ -16,52 +16,58 @@ export class VerifyTOTPUseCase {
   ) {}
 
   private getPayload(a: string, t: string) {
-    console.log("access: ", a)
-    console.log("tmpauth: ", t)
-    let payload
+    console.log('access: ', a);
+    console.log('tmpauth: ', t);
+    let payload;
     if (a == null || a == undefined) {
-      payload = this.tokenService.verifyToken(t, config.auth.jwtTmpAuthSecret)
+      payload = this.tokenService.verifyToken(t, config.auth.jwtTmpAuthSecret);
     } else {
-      payload = this.tokenService.verifyToken(a, config.auth.jwtAccessSecret)
+      payload = this.tokenService.verifyToken(a, config.auth.jwtAccessSecret);
     }
-    return payload
+    return payload;
   }
 
-  async execute(form: VerifyTOTPForm, a: string, t: string): Promise<{accessToken: string, refreshToken: string}> {
-    const payload = this.getPayload(a, t)
-    if (typeof payload === "string" || !('sub' in payload) || !payload.sub) {
-      console.warn("VerifyTOTPUseCase: invald payload")
-      throw new Error("Invalid tmp auth token.")
+  async execute(
+    form: VerifyTOTPForm,
+    a: string,
+    t: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = this.getPayload(a, t);
+    if (typeof payload === 'string' || !('sub' in payload) || !payload.sub) {
+      console.warn('VerifyTOTPUseCase: invald payload');
+      throw new Error('Invalid tmp auth token.');
     }
 
-    const user2fa = await this.user2faRepository.findById(payload.sub)
+    const user2fa = await this.user2faRepository.findById(payload.sub);
     if (!user2fa?.totpSeceret) {
-      console.warn("VerifyTOTPUseCase: findById is failed.")
-      throw new Error("Not registered.")
+      console.warn('VerifyTOTPUseCase: findById is failed.');
+      throw new Error('Not registered.');
     }
 
-    if (speakeasy.totp.verify({secret: user2fa.totpSeceret, token: form.code})) {
-      console.warn("VerifyTOTPUseCase: invalid auth code.")
-      throw new Error("Invalid auth code.")
+    if (
+      speakeasy.totp.verify({ secret: user2fa.totpSeceret, token: form.code })
+    ) {
+      console.warn('VerifyTOTPUseCase: invalid auth code.');
+      throw new Error('Invalid auth code.');
     }
 
     if (!user2fa.isTotpEnabled) {
-      user2fa.updatedAt = getUnixTimeMs()
-      user2fa.isTotpEnabled = 1
-      await this.user2faRepository.save(user2fa)
+      user2fa.updatedAt = getUnixTimeMs();
+      user2fa.isTotpEnabled = 1;
+      await this.user2faRepository.save(user2fa);
     }
 
-    const loginPayload = { id: payload.sub }
-    const access = this.tokenService.generateAccessToken(loginPayload)
-    const refresh = this.tokenService.generateRefreshToken(loginPayload)
+    const loginPayload = { id: payload.sub };
+    const access = this.tokenService.generateAccessToken(loginPayload);
+    const refresh = this.tokenService.generateRefreshToken(loginPayload);
 
-    const key = `session:refresh:${payload.sub}`
-    const ttl = refresh.expiredAt - getUnixTimeMs()
-    await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl)
+    const key = `session:refresh:${payload.sub}`;
+    const ttl = refresh.expiredAt - getUnixTimeMs();
+    await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);
 
     return {
       accessToken: access.token,
       refreshToken: refresh.token,
-    }
+    };
   }
 }

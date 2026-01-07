@@ -1,13 +1,10 @@
-import { config } from "../../../conf.ts";
+import { config } from '../../../conf.ts';
 
 export class Pagination {
   public readonly offset: number;
   public readonly limit: number;
 
-  private constructor(
-    offset?: number,
-    limit?: number,
-  ) {
+  private constructor(offset?: number, limit?: number) {
     this.offset = offset ?? config.api.user.pagination.offset;
     this.limit = limit ?? config.api.user.pagination.limit;
 

@@ -8,16 +8,16 @@ export class UpdateUserUseCase {
   constructor(private repo: UserRepository) {}
 
   async execute(id: UserId, form: UpdateUserForm): Promise<User> {
-    const user = await this.repo.findById(id.get())
+    const user = await this.repo.findById(id.get());
     if (!user) {
-      throw new Error("user not found")
+      throw new Error('user not found');
     }
 
     if (!Password.compare(form.currentPassword, user.password!)) {
-      throw new Error("invalid password")
+      throw new Error('invalid password');
     }
 
-    const updateUser = UserForm.update(user, form)
+    const updateUser = UserForm.update(user, form);
 
     await this.repo.save(updateUser);
     return updateUser;

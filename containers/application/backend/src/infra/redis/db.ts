@@ -31,7 +31,7 @@ export async function initializeRedis(): Promise<void> {
 
 export function getRedis(): Redis {
   if (!redis) {
-    throw new Error("Redis is not initialized. Call initializeRedis() first.");
+    throw new Error('Redis is not initialized. Call initializeRedis() first.');
   }
   return redis;
 }

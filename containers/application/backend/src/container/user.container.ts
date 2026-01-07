@@ -17,7 +17,7 @@ export interface UserUseCases {
 
 export async function initUserUseCases() {
   const userRepository = new UserRepositorySqlite();
-  const user2faRepository = new User2faRepositorySqlite()
+  const user2faRepository = new User2faRepositorySqlite();
 
   const createUser = new CreateUserUseCase(userRepository, user2faRepository);
   const getUser = new GetUserUseCase(userRepository);

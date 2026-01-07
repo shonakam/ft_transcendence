@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { authenticate } from '../auth/authPreHandler.ts'
+import { authenticate } from '../auth/authPreHandler.ts';
 import { authUseCases } from '../../container/auth.container.ts';
 import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
@@ -19,69 +19,63 @@ export default async function AuthController(
     setupTOTP,
     verifyTOTP,
     revokeTOTP,
-  } = opts.useCases
+  } = opts.useCases;
 
-  server.post(
-    '/login',
-    async (req, reply) => {
-      try {
-        const form = req.body as LoginForm;
-        const response = await login.execute(form)
+  server.post('/login', async (req, reply) => {
+    try {
+      const form = req.body as LoginForm;
+      const response = await login.execute(form);
 
-        let code = 0
-        if (!response.tmpAuthToken) {
-          code = 200
-          reply.setCookie('accessToken', response.accessToken!, cookieConfig)
-          reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
-        } else {
-          code = 202
-          reply.setCookie('tmpAuthToken', response.tmpAuthToken, cookieConfig)
-        }
-
-        reply.status(code).send(response)
-      } catch (err: unknown) {
-        console.warn(err)
-        if (err instanceof Error) {
-          reply.status(400).send({ error: err.message });
-        } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
-        }
+      let code = 0;
+      if (!response.tmpAuthToken) {
+        code = 200;
+        reply.setCookie('accessToken', response.accessToken!, cookieConfig);
+        reply.setCookie('refreshToken', response.refreshToken!, cookieConfig);
+      } else {
+        code = 202;
+        reply.setCookie('tmpAuthToken', response.tmpAuthToken, cookieConfig);
       }
-    },
-  );
 
-  server.post(
-    '/refresh',
-    async (req, reply) => {
-      try {
-        const refreshToken = req.cookies.refreshToken
-        const response = await refresh.execute(refreshToken!)
-
-        reply.setCookie('accessToken', response.accessToken!, cookieConfig)
-        reply.setCookie('refreshToken', response.refreshToken!, cookieConfig)
-        reply.status(200).send(response)
-      } catch (err: unknown) {
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
-        reply
-          .clearCookie('accessToken', clearOptions)
-          .clearCookie('refreshToken', clearOptions)
-          .clearCookie('tmpAuthToken', clearOptions)
-        if (err instanceof Error) {
-          reply.status(401).send({ error: err.message })
-        } else {
-          reply.status(500).send({ message: 'Internal Server Error' })
-        }
+      reply.status(code).send(response);
+    } catch (err: unknown) {
+      console.warn(err);
+      if (err instanceof Error) {
+        reply.status(400).send({ error: err.message });
+      } else {
+        reply.status(500).send({ message: 'Internal Server Error' });
       }
-    },
-  );
+    }
+  });
+
+  server.post('/refresh', async (req, reply) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      const response = await refresh.execute(refreshToken!);
+
+      reply.setCookie('accessToken', response.accessToken!, cookieConfig);
+      reply.setCookie('refreshToken', response.refreshToken!, cookieConfig);
+      reply.status(200).send(response);
+    } catch (err: unknown) {
+      const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
+      reply
+        .clearCookie('accessToken', clearOptions)
+        .clearCookie('refreshToken', clearOptions)
+        .clearCookie('tmpAuthToken', clearOptions);
+      if (err instanceof Error) {
+        reply.status(401).send({ error: err.message });
+      } else {
+        reply.status(500).send({ message: 'Internal Server Error' });
+      }
+    }
+  });
 
   server.post(
     '/login/oidc/:provider',
     async (req: FastifyRequest<{ Params: { provider: string } }>, reply) => {
       try {
-        const form = req.body as OIDCForm
-        const response = await loginWithOIDC.execute(form, req.params.provider)
-        reply.status(200).send(response)
+        const form = req.body as OIDCForm;
+        const response = await loginWithOIDC.execute(form, req.params.provider);
+        reply.status(200).send(response);
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -97,9 +91,9 @@ export default async function AuthController(
     '/setup-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
-        const accessToken = req.cookies.accessToken
-        const response = await setupTOTP.execute(accessToken!)
-        reply.status(200).send(response)
+        const accessToken = req.cookies.accessToken;
+        const response = await setupTOTP.execute(accessToken!);
+        reply.status(200).send(response);
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -115,24 +109,32 @@ export default async function AuthController(
     '/verify-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
-        const accessToken = req.cookies.accessToken
-        const tmpAuthToken = req.cookies.tmpAuthToken
+        const accessToken = req.cookies.accessToken;
+        const tmpAuthToken = req.cookies.tmpAuthToken;
 
-        const form = req.body as VerifyTOTPForm
-        const response = await verifyTOTP.execute(form, accessToken!, tmpAuthToken!)
+        const form = req.body as VerifyTOTPForm;
+        const response = await verifyTOTP.execute(
+          form,
+          accessToken!,
+          tmpAuthToken!,
+        );
 
-        reply.setCookie('accessToken', response.accessToken, cookieConfig)
-        reply.setCookie('refreshToken', response.refreshToken, cookieConfig)
+        reply.setCookie('accessToken', response.accessToken, cookieConfig);
+        reply.setCookie('refreshToken', response.refreshToken, cookieConfig);
 
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
-        reply.clearCookie('tmpAuthToken', clearOptions)
+        const clearOptions = {
+          ...cookieConfig,
+          maxAge: 0,
+          expires: new Date(0),
+        };
+        reply.clearCookie('tmpAuthToken', clearOptions);
 
-        reply.status(200).send(response)
+        reply.status(200).send(response);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          reply.status(400).send({ error: err.message })
+          reply.status(400).send({ error: err.message });
         } else {
-          reply.status(500).send({ message: 'Internal Server Error' })
+          reply.status(500).send({ message: 'Internal Server Error' });
         }
       }
     },
@@ -144,41 +146,42 @@ export default async function AuthController(
     { preHandler: authenticate },
     async (req, reply) => {
       try {
-        const trustedUserId = req.authUserId
+        const trustedUserId = req.authUserId;
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' })
+          return reply
+            .status(500)
+            .send({ message: 'Authentication data missing.' });
         }
 
-        await revokeTOTP.execute(trustedUserId)
-        reply.status(200)
+        await revokeTOTP.execute(trustedUserId);
+        reply.status(200);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          reply.status(400).send({ error: err.message })
+          reply.status(400).send({ error: err.message });
         } else {
-          reply.status(500).send({ message: 'Internal Server Error' })
+          reply.status(500).send({ message: 'Internal Server Error' });
         }
       }
     },
   );
 
-  server.delete(
-    '/logout',
-    async (req, reply) => {
-      try {
-        const accessToken = req.cookies.accessToken
-        await logout.execute(accessToken!)
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
-        reply
-          .clearCookie('accessToken', clearOptions)
-          .clearCookie('refreshToken', clearOptions)
-          .clearCookie('tmpAuthToken', clearOptions)
-          .status(204)
-          .send()
-      } catch (err: unknown) {
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) }
-        reply.clearCookie('accessToken', clearOptions).clearCookie('refreshToken', clearOptions)
-        reply.status(500).send({ message: 'Internal Server Error' })
-      }
-    },
-  );
+  server.delete('/logout', async (req, reply) => {
+    try {
+      const accessToken = req.cookies.accessToken;
+      await logout.execute(accessToken!);
+      const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
+      reply
+        .clearCookie('accessToken', clearOptions)
+        .clearCookie('refreshToken', clearOptions)
+        .clearCookie('tmpAuthToken', clearOptions)
+        .status(204)
+        .send();
+    } catch (err: unknown) {
+      const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
+      reply
+        .clearCookie('accessToken', clearOptions)
+        .clearCookie('refreshToken', clearOptions);
+      reply.status(500).send({ message: 'Internal Server Error' });
+    }
+  });
 }

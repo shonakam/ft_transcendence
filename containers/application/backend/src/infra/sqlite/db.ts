@@ -41,13 +41,15 @@ export function getDb(): Database<sqlite3.Database, sqlite3.Statement> {
     return txDb;
   }
   if (!db) {
-    throw new Error("Database is not initialized. Call initializeDatabase() first.");
+    throw new Error(
+      'Database is not initialized. Call initializeDatabase() first.',
+    );
   }
   return db;
 }
 
 export async function transaction<T>(
-  fn: (db: Database) => Promise<T>
+  fn: (db: Database) => Promise<T>,
 ): Promise<T> {
   const db = getDb();
   try {

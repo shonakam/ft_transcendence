@@ -1,10 +1,7 @@
-import { Router } from "./router/router";
+import { Router } from './router/router';
 
 document.addEventListener('DOMContentLoaded', () => {
-  try {
-
-  } catch (e) {
-    
-  }
+  // try {
+  // } catch (e) {}
   new Router();
 });

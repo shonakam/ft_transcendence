@@ -1,4 +1,4 @@
-import { Component } from "../../interface/Component";
+import { Component } from '../../interface/Component';
 
 export class Logo implements Component {
   private el: HTMLAnchorElement;

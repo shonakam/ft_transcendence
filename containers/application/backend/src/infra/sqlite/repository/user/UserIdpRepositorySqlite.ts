@@ -38,8 +38,9 @@ export class UserIdpRepositorySqlite implements UserIdpRepository {
       `SELECT * FROM user_idps 
        WHERE id = ?
        AND provider = ?
-       AND withdrawn_at IS NULL`, 
-    [id, provider]);
+       AND withdrawn_at IS NULL`,
+      [id, provider],
+    );
     return row ?? null;
   }
 

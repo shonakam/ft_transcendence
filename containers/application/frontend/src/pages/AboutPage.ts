@@ -1,11 +1,11 @@
-import { Component } from "../interface/Component";
+import { Component } from '../interface/Component';
 
 export class AboutPage implements Component {
-  private el: HTMLElement
+  private el: HTMLElement;
 
   constructor() {
-    this.el = document.createElement('main')
-    this.el.className = ""
+    this.el = document.createElement('main');
+    this.el.className = '';
 
     this.el.innerHTML = `
       <div class="text-center">
@@ -16,6 +16,6 @@ export class AboutPage implements Component {
   }
 
   public getElement(): HTMLElement {
-    return this.el
+    return this.el;
   }
 }

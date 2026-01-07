@@ -1,4 +1,4 @@
-import { Component } from "../../interface/Component";
+import { Component } from '../../interface/Component';
 import { AuthModal } from '../../components/organisms/user/AuthModal';
 import homeTemplate from './home.html?raw';
 

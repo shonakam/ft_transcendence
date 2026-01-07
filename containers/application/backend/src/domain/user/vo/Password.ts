@@ -30,7 +30,9 @@ export default class Password {
   }
 
   static compare(raw: string, stored: string): boolean {
-    if (!raw || !stored) { return false }
+    if (!raw || !stored) {
+      return false;
+    }
     const [salt, keyHex] = stored.split(':') as [string, string];
 
     const hashBuffer = scryptSync(raw, salt, 64); // 生パスワードからハッシュを生成 (Buffer 形式)
@@ -38,7 +40,7 @@ export default class Password {
 
     // 長さが違うと timingSafeEqual が throw する可能性があるため、バッファの長さが異なる場合、timingSafeEqual の前に弾く
     // タイミング攻撃耐性のある比較を実行 (比較にかかる時間がデータの内容によって変化しないことが保証される)
-    return (hashBuffer.length !== keyBuffer.length)
+    return hashBuffer.length !== keyBuffer.length
       ? false
       : timingSafeEqual(hashBuffer, keyBuffer);
   }
