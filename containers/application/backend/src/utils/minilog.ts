@@ -46,7 +46,6 @@ class MiniLog {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
         const archivedPath = path.join(this.logDir, `app-${timestamp}.log`)
         fs.renameSync(this.logFile, archivedPath)
-        fs.renameSync(this.logFile, archivedPath)
         this.updateStream()
         this.purgeOldLogs()
       }
