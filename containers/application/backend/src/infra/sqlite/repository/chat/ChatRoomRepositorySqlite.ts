@@ -66,15 +66,11 @@ export class ChatRoomRepositorySqlite implements ChatRoomRepository {
   }
 
   async addMember(roomId: string, userId: string): Promise<void> {
-    // ID generates randomly for member as it's not provided by interface, assuming we need UUID
-    // However, the interface might need more careful design if ID is required
-    // For now, I'll use a simple approach since the table has a PK 'id'
-    const id = crypto.randomUUID();
     await this.db.run(
-      `INSERT INTO chat_room_members (id, room_id, user_id, created_at)
-       VALUES (?, ?, ?, (unixepoch()))
+      `INSERT INTO chat_room_members (room_id, user_id, created_at)
+       VALUES (?, ?, (unixepoch()))
        ON CONFLICT(room_id, user_id) DO NOTHING`,
-      [id, roomId, userId],
+      [roomId, userId],
     );
   }
 }

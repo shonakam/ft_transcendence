@@ -27,7 +27,7 @@ export default async function ChatController(
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
-        const rooms = await listUserRooms.execute(userId);
+        const rooms = await listUserRooms.execute(userId.get());
         reply.status(200).send(rooms);
       } catch (err: any) {
         reply.status(500).send({ error: err.message });
@@ -46,7 +46,7 @@ export default async function ChatController(
           return reply.status(401).send({ error: 'Unauthorized' });
         }
         const { targetUserId } = req.body;
-        const room = await getOrCreateDMRoom.execute(userId, targetUserId);
+        const room = await getOrCreateDMRoom.execute(userId.get(), targetUserId);
         reply.status(200).send(room);
       } catch (err: any) {
         reply.status(400).send({ error: err.message });
@@ -65,7 +65,7 @@ export default async function ChatController(
           return reply.status(401).send({ error: 'Unauthorized' });
         }
         const { roomId } = req.params;
-        const messages = await getRoomMessages.execute(userId, roomId);
+        const messages = await getRoomMessages.execute(userId.get(), roomId);
         reply.status(200).send(messages);
       } catch (err: any) {
         reply.status(500).send({ error: err.message });
@@ -88,7 +88,7 @@ export default async function ChatController(
         }
         const { roomId } = req.params;
         const { content, messageType } = req.body;
-        const message = await sendMessage.execute(userId, roomId, content, messageType);
+        const message = await sendMessage.execute(userId.get(), roomId, content, messageType);
         reply.status(201).send(message);
       } catch (err: any) {
         reply.status(400).send({ error: err.message });
@@ -106,7 +106,7 @@ export default async function ChatController(
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
-        const blockedUsers = await listBlockedUsers.execute(userId);
+        const blockedUsers = await listBlockedUsers.execute(userId.get());
         reply.status(200).send(blockedUsers);
       } catch (err: any) {
         reply.status(500).send({ error: err.message });
@@ -125,7 +125,7 @@ export default async function ChatController(
           return reply.status(401).send({ error: 'Unauthorized' });
         }
         const { blockedUserId } = req.body;
-        await blockUser.execute(userId, blockedUserId);
+        await blockUser.execute(userId.get(), blockedUserId);
         reply.status(201).send({ message: 'User blocked' });
       } catch (err: any) {
         reply.status(400).send({ error: err.message });
@@ -144,7 +144,7 @@ export default async function ChatController(
           return reply.status(401).send({ error: 'Unauthorized' });
         }
         const { blockedUserId } = req.params;
-        await unblockUser.execute(userId, blockedUserId);
+        await unblockUser.execute(userId.get(), blockedUserId);
         reply.status(204).send();
       } catch (err: any) {
         reply.status(400).send({ error: err.message });

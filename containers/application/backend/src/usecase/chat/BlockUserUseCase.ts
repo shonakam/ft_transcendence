@@ -10,7 +10,6 @@ export class BlockUserUseCase {
     }
 
     const block: UserBlock = {
-      id: crypto.randomUUID(),
       blockerId,
       blockedId,
       createdAt: Math.floor(Date.now() / 1000),
