@@ -6,11 +6,10 @@ CREATE TABLE IF NOT EXISTS chat_rooms (
 );
 
 CREATE TABLE IF NOT EXISTS chat_room_members (
-    id TEXT PRIMARY KEY,
     room_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-    UNIQUE(room_id, user_id),
+    PRIMARY KEY(room_id, user_id),
     FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -27,11 +26,10 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
-    id TEXT PRIMARY KEY,
     blocker_id TEXT NOT NULL,
     blocked_id TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-    UNIQUE(blocker_id, blocked_id),
+    PRIMARY KEY(blocker_id, blocked_id),
     FOREIGN KEY (blocker_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (blocked_id) REFERENCES users(id) ON DELETE CASCADE
 );
