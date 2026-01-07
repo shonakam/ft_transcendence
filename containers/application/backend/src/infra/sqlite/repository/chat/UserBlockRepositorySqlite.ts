@@ -10,7 +10,6 @@ export class UserBlockRepositorySqlite implements UserBlockRepository {
 
   private scan(row: any): UserBlock {
     return {
-      id: row.id,
       blockerId: row.blocker_id,
       blockedId: row.blocked_id,
       createdAt: row.created_at,
@@ -19,10 +18,10 @@ export class UserBlockRepositorySqlite implements UserBlockRepository {
 
   async save(block: UserBlock): Promise<void> {
     await this.db.run(
-      `INSERT INTO user_blocks (id, blocker_id, blocked_id, created_at)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO user_blocks (blocker_id, blocked_id, created_at)
+       VALUES (?, ?, ?)
        ON CONFLICT(blocker_id, blocked_id) DO NOTHING`,
-      [block.id, block.blockerId, block.blockedId, block.createdAt],
+      [block.blockerId, block.blockedId, block.createdAt],
     );
   }
 

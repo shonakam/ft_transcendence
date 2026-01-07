@@ -2,13 +2,25 @@ import fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import { registRouters } from './adapter/router/index.ts'
-import { container } from './container/index.js'
+import { container } from './container/index.ts'
 import { initializeDatabase } from './infra/sqlite/db.ts'
 import { initializeRedis } from './infra/redis/db.ts'
-import minilog, { TAG } from './utils/minilog.js';
+import minilog, { TAG } from './utils/minilog.ts';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080
 const HOST = process.env.HOST || '0.0.0.0'
+
+process.on('uncaughtException', (err) => {
+  console.error('=== UNCAUGHT EXCEPTION ===');
+  console.error('Error:', err);
+  console.error('Type:', typeof err);
+  console.error('Constructor:', err?.constructor?.name);
+  console.error('Message:', err?.message);
+  console.error('Stack:', err?.stack);
+  console.error('Keys:', Object.keys(err || {}));
+  console.error('==========================');
+  process.exit(1);
+});
 
 async function main() {
   const server = fastify({ logger: true });
