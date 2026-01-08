@@ -1,12 +1,25 @@
 {
-  "name": "ft_transcen",
+  "name": "ft_transcendence",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --cache containers/application/{frontend,backend}",
+    "lint:fix": "eslint --cache --fix containers/application/{frontend,backend}",
+    "format": "prettier --write 'containers/application/{frontend,backend}/src/**/*.ts'"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.7.4",
+    "typescript-eslint": "^8.52.0"
+  }
 }

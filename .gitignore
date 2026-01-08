@@ -11,6 +11,16 @@ Thumbs.db
 logs/
 *.log
 
+# Dependency directories
+node_modules/
+
+# Linting cache
+.eslintcache
+
+# Environment variables
+.env
+.env.local
+
 # Temporary files
 tmp/
 temp/

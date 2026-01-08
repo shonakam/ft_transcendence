@@ -8,11 +8,11 @@ import { User2faRepository } from '../../domain/user/repository/User2faRepositor
 export class CreateUserUseCase {
   constructor(
     private repo: UserRepository,
-    private user2faRepo: User2faRepository
+    private user2faRepo: User2faRepository,
   ) {}
 
   async execute(form: CreateUserForm): Promise<User> {
-    const user = UserForm.create(form)
+    const user = UserForm.create(form);
 
     await transaction(async (db) => {
       await this.repo.save(user);
@@ -23,7 +23,7 @@ export class CreateUserUseCase {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       });
-    })
+    });
     return user;
   }
 }

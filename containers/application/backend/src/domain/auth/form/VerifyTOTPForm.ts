@@ -1,3 +1,3 @@
 export interface VerifyTOTPForm {
-  code: string
+  code: string;
 }

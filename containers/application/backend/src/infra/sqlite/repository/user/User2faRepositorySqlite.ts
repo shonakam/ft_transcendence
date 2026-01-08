@@ -15,8 +15,8 @@ export class User2faRepositorySqlite implements User2faRepository {
       totpSeceret: row.totp_secret,
       isTotpEnabled: row.is_totp_enabled,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
-    } as User2fa
+      updatedAt: row.updated_at,
+    } as User2fa;
   }
 
   async save(user2fa: User2fa): Promise<void> {
@@ -38,16 +38,18 @@ export class User2faRepositorySqlite implements User2faRepository {
         ],
       );
     } catch (err) {
-      console.error("User2faRepositorySqlite.sacve: ", err, user2fa)
+      console.error('User2faRepositorySqlite.sacve: ', err, user2fa);
     }
   }
 
   async findById(userId: string): Promise<User2fa | null> {
-    let row
+    let row;
     try {
-      row = await this.db.get(`SELECT * FROM user_2fa WHERE user_id = ?`, [userId]);
+      row = await this.db.get(`SELECT * FROM user_2fa WHERE user_id = ?`, [
+        userId,
+      ]);
     } catch (err) {
-      console.error("User2faRepositorySqlite.sacve:", err)
+      console.error('User2faRepositorySqlite.sacve:', err);
     }
     return this.scan(row) ?? null;
   }

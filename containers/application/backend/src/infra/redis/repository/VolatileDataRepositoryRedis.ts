@@ -22,7 +22,7 @@ export class VolatileDataRepositoryRedis {
       return null;
     }
 
-    const effectiveTtl = (ttl === -1) ? null : ttl;
+    const effectiveTtl = ttl === -1 ? null : ttl;
     return VolatileData.create(value, effectiveTtl);
   }
 
@@ -41,6 +41,6 @@ export class VolatileDataRepositoryRedis {
   }
 
   async delete(key: string): Promise<void> {
-    await this.redis.del(key)
+    await this.redis.del(key);
   }
 }

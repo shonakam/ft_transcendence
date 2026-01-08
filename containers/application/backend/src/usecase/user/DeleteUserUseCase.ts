@@ -8,18 +8,18 @@ export class DeleteUserUseCase {
   constructor(private repo: UserRepository) {}
 
   async execute(id: UserId, form: DeleteUserForm): Promise<void> {
-    const user = await this.repo.findById(id.get())
+    const user = await this.repo.findById(id.get());
     if (!user) {
-      throw new Error("user not found")
+      throw new Error('user not found');
     }
 
     if (!Password.compare(form.password, user.password!)) {
-      console.warn("LoginUseCase: Password compare is failed.")
-      throw new Error("Invalid email or password.")
+      console.warn('LoginUseCase: Password compare is failed.');
+      throw new Error('Invalid email or password.');
     }
 
     const now = getUnixTimeMs();
     const deletedEmail = `${form.email}_${now}`;
-    await this.repo.delete(user.id, deletedEmail, now)
+    await this.repo.delete(user.id, deletedEmail, now);
   }
 }

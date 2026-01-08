@@ -1,18 +1,11 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "editor.tabSize": 2,
-  "files.trimTrailingWhitespace": true,
-  "[typescript]": {
-    "editor.insertSpaces": false
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
   },
-  "[javascript]": {
-    "editor.insertSpaces": false
-  },
-  "[html]": {
-    "editor.insertSpaces": false
-  },
+  // Only Makefile files are formatterd with vscode
   "[makefile]": {
     "editor.tabSize": 8,
     "editor.insertSpaces": false

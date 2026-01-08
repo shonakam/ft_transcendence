@@ -13,13 +13,16 @@ export class AuthModal implements Component {
   constructor() {
     this.rootElement = document.createElement('div');
     this.rootElement.id = 'auth-modal';
-    this.rootElement.className = 'hidden fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-20';
+    this.rootElement.className =
+      'hidden fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-20';
 
     this.loginForm = new LoginForm();
     this.signupForm = new SignupForm();
 
     this.render();
-    this.formContainer = this.rootElement.querySelector('#auth-form-container') as HTMLDivElement;
+    this.formContainer = this.rootElement.querySelector(
+      '#auth-form-container'
+    ) as HTMLDivElement;
     this.initEventListeners();
   }
 
@@ -37,7 +40,9 @@ export class AuthModal implements Component {
   }
 
   private initEventListeners(): void {
-    const closeModalButton = this.rootElement.querySelector<HTMLButtonElement>('#close-modal-button');
+    const closeModalButton = this.rootElement.querySelector<HTMLButtonElement>(
+      '#close-modal-button'
+    );
     closeModalButton?.addEventListener('click', () => this.close());
     this.rootElement.addEventListener('click', (e) => {
       if (e.target === this.rootElement) {
@@ -45,8 +50,12 @@ export class AuthModal implements Component {
       }
     });
 
-    this.loginForm.getElement().addEventListener('switchView', () => this.switchView('signup'));
-    this.signupForm.getElement().addEventListener('switchView', () => this.switchView('login'));
+    this.loginForm
+      .getElement()
+      .addEventListener('switchView', () => this.switchView('signup'));
+    this.signupForm
+      .getElement()
+      .addEventListener('switchView', () => this.switchView('login'));
   }
 
   private switchView(view: AuthView): void {

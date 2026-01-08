@@ -1,8 +1,5 @@
-import { User } from "../entity/User.ts";
-import type {
-  CreateUserForm,
-  UpdateUserForm
-} from "./request/UserForm.ts";
+import { User } from '../entity/User.ts';
+import type { CreateUserForm, UpdateUserForm } from './request/UserForm.ts';
 import { getUnixTimeMs } from '../../../utils/unixtime.ts';
 import UserId from '../vo/UserId.ts';
 import Email from '../vo/Email.ts';
@@ -19,7 +16,7 @@ export class UserForm {
       email: Email.create(form.email).get(),
       password: Password.create(form.password).getHash(),
       imagePath: form.imagePath,
-      is2faEnabled: (form.is2faEnabled) ? 1 : 0,
+      is2faEnabled: form.is2faEnabled ? 1 : 0,
       createdAt: now,
       updatedAt: now,
       withdrawnAt: null,
@@ -31,10 +28,12 @@ export class UserForm {
 
     user.username = form.username ?? user.username;
     user.email = form.email ?? user.email;
-    user.password = (form.newPassword && Password.create(form.newPassword).getHash()) ?? user.password;
+    user.password =
+      (form.newPassword && Password.create(form.newPassword).getHash()) ??
+      user.password;
     user.imagePath = form.imagePath ?? user.imagePath;
-    user.is2faEnabled = (form.is2faEnabled) ? 1 : 0
+    user.is2faEnabled = form.is2faEnabled ? 1 : 0;
     user.updatedAt = now;
-    return user
+    return user;
   }
 }

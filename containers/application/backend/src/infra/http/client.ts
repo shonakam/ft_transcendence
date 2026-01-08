@@ -1,6 +1,6 @@
 export class FetchError extends Error {
   public status: number;
-  public data: any; 
+  public data: any;
 
   constructor(status: number, message: string, data: any) {
     super(message);
@@ -45,18 +45,21 @@ export class HttpClient {
     method: string,
     path: string,
     data?: any,
-    config: RequestInit = {}
+    config: RequestInit = {},
   ): Promise<T> {
     const fullUrl = this.baseURL + path;
     const headers = {
-        'Content-Type': 'application/json',
-        ...config.headers,
+      'Content-Type': 'application/json',
+      ...config.headers,
     };
 
     const init: RequestInit = {
       method,
       headers,
-      body: (data && method !== 'GET' && method !== 'HEAD') ? JSON.stringify(data) : undefined,
+      body:
+        data && method !== 'GET' && method !== 'HEAD'
+          ? JSON.stringify(data)
+          : undefined,
       ...config,
     };
 
@@ -69,17 +72,17 @@ export class HttpClient {
       } catch (e) {
         errorData = await response.text();
       }
-      
+
       throw new FetchError(
-          response.status, 
-          `HTTP Request Failed: ${response.status} ${response.statusText}`, 
-          errorData
+        response.status,
+        `HTTP Request Failed: ${response.status} ${response.statusText}`,
+        errorData,
       );
     }
 
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
-        return response.json();
+      return response.json();
     }
     return response.text() as Promise<T>;
   }
@@ -89,14 +92,14 @@ export class HttpClient {
   }
 
   public async postForm<T = any>(
-    path: string, 
+    path: string,
     data: Record<string, any>,
-    config: RequestInit = {}
+    config: RequestInit = {},
   ): Promise<T> {
     const formBody = new URLSearchParams(data).toString();
     const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded', 
-        ...config.headers,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      ...config.headers,
     };
 
     const init: RequestInit = {
@@ -115,17 +118,17 @@ export class HttpClient {
       } catch (e) {
         errorData = await response.text();
       }
-      
+
       throw new FetchError(
-          response.status, 
-          `HTTP Request Failed: ${response.status} ${response.statusText}`, 
-          errorData
+        response.status,
+        `HTTP Request Failed: ${response.status} ${response.statusText}`,
+        errorData,
       );
     }
 
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
-        return response.json();
+      return response.json();
     }
     return response.text() as Promise<T>;
   }

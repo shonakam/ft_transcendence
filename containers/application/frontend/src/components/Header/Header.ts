@@ -7,7 +7,8 @@ export class Header implements Component {
 
   constructor() {
     this.el = document.createElement('header');
-    this.el.className = 'fixed top-0 left-0 right-0 z-10 flex justify-between items-center p-4 bg-gray-100';
+    this.el.className =
+      'fixed top-0 left-0 right-0 z-10 flex justify-between items-center p-4 bg-gray-100';
 
     const logo = new Logo('ft_transcendence', '/').getElement();
     const nav = new HeaderNav().getElement();

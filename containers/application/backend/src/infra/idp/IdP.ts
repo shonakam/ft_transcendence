@@ -1,10 +1,12 @@
-import { HttpClient } from "../http/client.ts";
-import { IdP42Service } from "./42.ts";
+import { HttpClient } from '../http/client.ts';
+import { IdP42Service } from './42.ts';
 
 export class IdP {
-  static get42(client: HttpClient) { return new IdP42Service(client) }
+  static get42(client: HttpClient) {
+    return new IdP42Service(client);
+  }
   static getGitHub(client: HttpClient) {}
-  static getGoogle(client: HttpClient) {}  
+  static getGoogle(client: HttpClient) {}
 
   public static getProviderService(providerName: string, client: HttpClient) {
     switch (providerName.toLowerCase()) {

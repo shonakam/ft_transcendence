@@ -1,4 +1,4 @@
-import { api } from '../../lib/httpClient'
+import { api } from '../../lib/httpClient';
 
 //　あとで必要な項目のみにする
 export interface UserResponse {

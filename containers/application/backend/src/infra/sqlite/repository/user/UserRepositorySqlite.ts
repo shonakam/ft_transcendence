@@ -20,7 +20,7 @@ export class UserRepositorySqlite implements UserRepository {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       withdrawnAt: row.withdrawn_at,
-    } as User
+    } as User;
   }
 
   async save(user: User): Promise<void> {
@@ -51,12 +51,18 @@ export class UserRepositorySqlite implements UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE id = ? AND withdrawn_at IS NULL`, [id]);
+    const row = await this.db.get(
+      `SELECT * FROM users WHERE id = ? AND withdrawn_at IS NULL`,
+      [id],
+    );
     return this.scan(row) ?? null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const row = await this.db.get(`SELECT * FROM users WHERE email = ? AND withdrawn_at IS NULL`, [email]);
+    const row = await this.db.get(
+      `SELECT * FROM users WHERE email = ? AND withdrawn_at IS NULL`,
+      [email],
+    );
     return this.scan(row) ?? null;
   }
 
@@ -66,14 +72,23 @@ export class UserRepositorySqlite implements UserRepository {
   // }
 
   /* logical delete */
-  async delete(id: string, deletedEmail: string, withdrawnAt: number): Promise<void> {
-    await this.db.run(`UPDATE users SET withdrawn_at = ?, email = ? WHERE id = ?`, [withdrawnAt, deletedEmail, id])
+  async delete(
+    id: string,
+    deletedEmail: string,
+    withdrawnAt: number,
+  ): Promise<void> {
+    await this.db.run(
+      `UPDATE users SET withdrawn_at = ?, email = ? WHERE id = ?`,
+      [withdrawnAt, deletedEmail, id],
+    );
   }
 
   async list(offset = 0, limit = 10): Promise<User[]> {
-    const rows = await this.db.all(`
+    const rows = await this.db.all(
+      `
       SELECT * FROM users WHERE withdrawn_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [limit, offset]);
-    return rows.map(row => this.scan(row));;
+      [limit, offset],
+    );
+    return rows.map((row) => this.scan(row));
   }
 }
