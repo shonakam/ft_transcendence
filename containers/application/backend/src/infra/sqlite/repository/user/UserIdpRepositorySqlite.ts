@@ -8,6 +8,19 @@ export class UserIdpRepositorySqlite implements UserIdpRepository {
     return getDb();
   }
 
+  private scan(row: any): UserIdp {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      provider: row.provider,
+      providerUserId: row.provider_user_id,
+      imagePath: row.image_path,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      withdrawnAt: row.withdrawn_at ?? null,
+    } as UserIdp;
+  }
+
   async save(userIdp: UserIdp): Promise<void> {
     await this.db.run(
       `INSERT INTO user_idps (id, user_id, provider, provider_user_id, image_path, created_at, updated_at, withdrawn_at)
@@ -35,15 +48,28 @@ export class UserIdpRepositorySqlite implements UserIdpRepository {
 
   async findById(id: string, provider: string): Promise<UserIdp | null> {
     const row = await this.db.get(
-      `SELECT * FROM user_idps 
+      `SELECT * FROM user_idps
        WHERE id = ?
        AND provider = ?
        AND withdrawn_at IS NULL`,
       [id, provider],
     );
-    return row ?? null;
+    return row ? this.scan(row) : null;
   }
 
+  async providerUserId(
+    providerUserId: string,
+    provider: string,
+  ): Promise<UserIdp | null> {
+    const row = await this.db.get(
+      `SELECT * FROM user_idps
+       WHERE provider_user_id = ?
+       AND provider = ?
+       AND withdrawn_at IS NULL`,
+      [providerUserId, provider],
+    );
+    return row ? this.scan(row) : null;
+  }
   /* physical delete */
   // async delete(id: string): Promise<void> {
   //   await this.db.run(`DELETE FROM users WHERE id = ?`, [id]);

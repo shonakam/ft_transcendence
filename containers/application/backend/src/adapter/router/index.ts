@@ -12,11 +12,11 @@ export async function registRouters(
 ) {
   await server.register(HealthController);
   await server.register(AuthController, {
-    prefix: '/api/v1/auth',
+    prefix: '/api/auth',
     useCases: appContainer.authUseCases,
   });
   await server.register(UserController, {
-    prefix: '/api/v1/users',
+    prefix: '/api/users',
     useCases: appContainer.userUseCases,
   });
   await server.register(ChatController, {

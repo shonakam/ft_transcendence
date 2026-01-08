@@ -59,6 +59,6 @@ export async function transaction<T>(
     return result;
   } catch (err) {
     await db.exec('ROLLBACK');
-    throw err;
+    throw new Error('Database operation failed')
   }
 }

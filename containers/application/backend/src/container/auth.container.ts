@@ -40,6 +40,7 @@ export async function initAuthUsecases() {
     userRepository,
     userIdpRepo,
     tokenService,
+    user2faRepository,
   );
   const logout = new LogoutUseCase(
     volatileDataRepositoryRedis,

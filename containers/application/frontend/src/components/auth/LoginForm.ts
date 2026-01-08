@@ -2,14 +2,15 @@ import { Component } from '../../interface/Component';
 import { toaster } from '../common/Toaster';
 import { login, loginRequestForm } from '../../services/auth/login';
 import { to } from '../../lib/to';
+import { loading } from '../common/Loading';
 
 export class LoginForm implements Component {
   private root: HTMLFormElement;
   private emailInput: HTMLInputElement;
   private passwordInput: HTMLInputElement;
   private submitButton: HTMLButtonElement;
+  private oidcButton: HTMLButtonElement;
   private switchButton: HTMLButtonElement;
-
   constructor() {
     this.root = document.createElement('form');
     this.root.className = 'space-y-4';
@@ -32,16 +33,38 @@ export class LoginForm implements Component {
     this.submitButton.className =
       'w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold';
 
+    const divider = document.createElement('div');
+    divider.className = 'flex items-center gap-3 my-2 text-white/40 text-sm';
+
+    const lineLeft = document.createElement('div');
+    lineLeft.className = 'flex-1 h-px bg-white/20';
+
+    const lineRight = document.createElement('div');
+    lineRight.className = 'flex-1 h-px bg-white/20';
+
+    const orText = document.createElement('span');
+    orText.textContent = 'OR';
+
+    divider.append(lineLeft, orText, lineRight);
+
     this.switchButton = document.createElement('button');
     this.switchButton.type = 'button';
     this.switchButton.textContent = '新規登録';
     this.switchButton.className =
       'w-full text-indigo-400 hover:underline text-sm';
 
+    this.oidcButton = document.createElement('button');
+    this.oidcButton.type = 'button';
+    this.oidcButton.textContent = '42 LOGIN';
+    this.oidcButton.className =
+      'w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold';
+
     this.root.append(
       this.emailInput,
       this.passwordInput,
       this.submitButton,
+      divider,
+      this.oidcButton,
       this.switchButton
     );
 
@@ -58,6 +81,16 @@ export class LoginForm implements Component {
       this.root.dispatchEvent(
         new CustomEvent('switchView', { detail: { view: 'signup' } })
       );
+    });
+
+    this.oidcButton.addEventListener('click', () => {
+      const params = new URLSearchParams({
+        client_id: import.meta.env.VITE_42_CLIENT_ID,
+        redirect_uri: import.meta.env.VITE_42_REDIRECT_URI,
+        response_type: 'code',
+      });
+
+      window.location.href = `https://api.intra.42.fr/oauth/authorize?${params.toString()}`;
     });
   }
 
@@ -90,6 +123,8 @@ export class LoginForm implements Component {
   }
 
   private setLoading(isLoading: boolean) {
+    if (isLoading) loading.show();
+    else loading.hide();
     this.submitButton.disabled = isLoading;
     this.submitButton.textContent = isLoading ? '認証中...' : 'ログイン';
   }
