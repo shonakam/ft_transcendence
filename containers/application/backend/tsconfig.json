@@ -1,20 +1,20 @@
 {
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "NodeNext",
-    "noEmit": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "./dist",
+    "baseUrl": ".",
     "types": [
       "node"
     ],
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "paths": {
+      "@shonakam/common/*": [
+        "../common/src/*"
+      ]
+    },
   },
-  "ts-node": {
-    "esm": true
-  }
+  "include": [
+    "src/**/*"
+  ]
 }

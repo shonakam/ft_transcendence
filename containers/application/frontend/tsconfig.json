@@ -1,20 +1,17 @@
 {
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
-  },
-  "ts-node": {
-    "esm": true
+    // "module": "esnext",
+    // "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@shonakam/common/*": [
+        "../common/src/*"
+      ]
+    }
   },
   "include": [
-    "./src"
+    "src/**/*"
   ]
 }

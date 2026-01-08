@@ -1,12 +1,12 @@
-import { Component } from '../interface/Component';
-import { AuthModal } from '../components/organisms/user/AuthModal';
+import { Component } from '../../interface/Component';
+import { AuthModal } from '../../components/organisms/user/AuthModal';
 
-import { GameCanvas } from '../components/game/GameCanvas';
-import { PongGame } from '../components/game/PongGame';
+import { GameCanvas } from '@shonakam/common/game/GameCanvas';
+import { PongGame } from '@shonakam/common/game/PongGame';
 
-import CONFIG from '../components/game/GameConfig';
+import CONFIG from '@shonakam/common/game/GameConfig';
 
-export class GamePage {
+export class RemoteGamePage {
   rootElement: HTMLElement;
   authModal: AuthModal;
   gameCanvas: GameCanvas;
