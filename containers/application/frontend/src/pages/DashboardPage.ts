@@ -3,6 +3,7 @@ import { Component } from '../interface/Component';
 import { UserResponse } from '../services/user/dashboard';
 import { design } from '../conf';
 import { MfaForm } from '../components/auth/MfaForm';
+import { router } from '../router/router';
 
 export type DashboardView = 'game' | 'chat' | 'mfa'
 
@@ -45,7 +46,9 @@ export class DashboardPage implements Component {
         element = this.mfaForm.getElement()
         break
       case 'game': break
-      case 'chat': break
+      case 'chat':
+        router.navigateTo('/chat');
+        return;
       default:
         element = this.el
         break
