@@ -1,19 +1,17 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"outDir": "./dist",
-		"baseUrl": ".",
-		"composite": true,
-		"declaration": true,
-		"declarationMap": true
+	},
+	"ts-node": {
+		"esm": true
 	},
 	"include": [
 		"src/**/*"
