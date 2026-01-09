@@ -1,5 +1,5 @@
 import { Component } from '../interface/Component';
-import { design } from '../conf';
+// import { design } from '../conf';
 import { ChatRoom } from '../types/chat';
 import { RoomList } from '../components/chat/RoomList';
 import { MessageBoard } from '../components/chat/MessageBoard';
@@ -46,6 +46,10 @@ export class ChatPage implements Component {
     });
 
     this.init();
+  }
+
+  public destroy(): void {
+    this.el.remove();
   }
 
   private async init() {

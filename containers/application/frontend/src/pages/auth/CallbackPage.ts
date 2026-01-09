@@ -1,10 +1,10 @@
-import { loading } from "../../components/common/loading";
+import { loading } from "../../components/common/Loading";
 import { toaster } from "../../components/common/Toaster";
 import { design } from "../../conf";
 import { Component } from "../../interface/Component";
 import { router } from "../../router/router";
 import { oidc, oidcRequestForm } from "../../services/auth/oidc";
-import { AuthPage } from "./AuthPage";
+// import { AuthPage } from "./AuthPage";
 
 export class CallbackPage implements Component {
 	private root: HTMLDivElement
@@ -15,6 +15,10 @@ export class CallbackPage implements Component {
 
 		this.handleCallback()
 	}
+
+  destroy(): void {
+    this.root.remove()
+  }
 
 	private async handleCallback() {
     const params = new URLSearchParams(window.location.search)

@@ -1,11 +1,13 @@
 import { routes } from './routes';
 import { Header } from '../components/Header/Header';
+import { Component } from 'src/interface/Component';
 
 const APP_ROOT_ID = 'app-root'; // アプリケーションがマウントされるルート要素を特定
 
 export class Router {
   private static instance: Router;
   private appRoot!: HTMLElement;
+  private currentPageComponent: Component | null = null;
 
   constructor() {
     if (Router.instance) return Router.instance;
@@ -41,26 +43,22 @@ export class Router {
 
   private renderContent() {
     const path = window.location.pathname;
-    const normalizedPath = path.replace(/\/+$/, '');
-    let PageComponent = routes[normalizedPath];
-    if (normalizedPath === '' && routes['/']){
-        history.replaceState(null, '', '/');
-        PageComponent = routes['/'];
+    let normalizedPath = path.replace(/\/+$/, '');
+    let PageComponent: Component | undefined;
+    if (normalizedPath === '' || normalizedPath === '/') {
+      history.replaceState(null, '', '/home');
+      normalizedPath = '/home';
     }
-    else if (PageComponent === undefined) {
-        history.replaceState(null, '', '/404');
-        PageComponent = routes['/404'];
+    PageComponent = routes[normalizedPath]();
+    if (PageComponent === undefined) {
+      history.replaceState(null, '', '/404');
+      PageComponent = routes['/404']();
     }
-    let mainElement = this.appRoot.querySelector('main');
-    if (!mainElement) {
-        mainElement = document.createElement('main');
-        this.appRoot.appendChild(mainElement);
-    }
+    if (this.currentPageComponent) this.currentPageComponent.destroy();
+    this.currentPageComponent = PageComponent;
     if (PageComponent) {
-        const newPageElement: HTMLElement = PageComponent().getElement();
-        this.appRoot.appendChild(newPageElement);
-    } else {
-        console.error('No PageComponent found for path:', path);
+      const newPageElement: HTMLElement = PageComponent.getElement();
+      this.appRoot.appendChild(newPageElement);
     }
   }
 

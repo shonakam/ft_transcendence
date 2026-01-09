@@ -13,8 +13,6 @@ import { CallbackPage } from '../pages/auth/CallbackPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 
 export const routes: Routes = {
-  '': () => new HomePage(),
-  '/': () => new HomePage(),
   '/home': () => new HomePage(),
   '/about': () => new AboutPage(),
   '/dashboard': () => new DashboardPage(),

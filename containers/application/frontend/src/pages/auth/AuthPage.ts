@@ -39,6 +39,10 @@ export class AuthPage implements Component {
     }
   }
 
+  public destroy(): void {
+    this.root.remove();
+  }
+
   private determineInitialView() {
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view') as AuthView;
