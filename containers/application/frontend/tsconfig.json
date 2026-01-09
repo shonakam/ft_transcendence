@@ -1,8 +1,17 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  // "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    // "module": "esnext",
-    // "moduleResolution": "bundler",
+    "target": "ES2022",
+
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
