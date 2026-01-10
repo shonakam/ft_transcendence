@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "Starting health check...💊"
           timeout 60s bash -c '
-          until curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health | grep -q "200"; do
+          until curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/health | grep -q "200"; do
             echo "Waiting for backend..."
             sleep 5
           done'
