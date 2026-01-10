@@ -105,3 +105,25 @@ services:
     tty: true
     networks:
       - transcendence-network
+
+# ====================
+# EXPORTER CONTAINERS
+# ====================
+  nginx_exporter:
+    init: true
+    container_name: ft-nginx-exporter
+    image: nginx/nginx-prometheus-exporter:1.5.0
+    command:
+      - -nginx.scrape-uri=http://ft-nginx:8081/stub_status
+    networks: 
+      - transcendence-network
+
+  redis_exporter:
+    init: true
+    container_name: ft-redis-exporter
+    image: oliver006/redis_exporter:v1.80.0-alpine
+    command:
+      - "--redis.addr=redis://redis:6379"
+    networks: 
+      - transcendence-network
+    

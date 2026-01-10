@@ -1,12 +1,12 @@
-process.on("uncaughtException", err => {
-  console.error("UNCAUGHT EXCEPTION:", err, typeof err)
-  console.error(err instanceof Error ? err.stack : err)
-})
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err, typeof err);
+  console.error(err instanceof Error ? err.stack : err);
+});
 
-process.on("unhandledRejection", reason => {
-  console.error("UNHANDLED REJECTION:", reason, typeof reason)
-  if (reason instanceof Error) console.error(reason.stack)
-})
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason, typeof reason);
+  if (reason instanceof Error) console.error(reason.stack);
+});
 
 import fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -15,7 +15,9 @@ import { registRouters } from './adapter/router/index.ts';
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
 import { initializeRedis } from './infra/redis/db.ts';
-import minilog, { TAG } from './utils/minilog.js';
+import minilog, { TAG } from './utils/minilog.ts';
+import { initPrometheus } from './infra/metric/prometheus.ts';
+import { registerMetricHooks } from './infra/metric/hook.ts';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -59,6 +61,10 @@ async function main() {
 
     minilog.i(TAG.SYSTEM, 'Initializing Redis...');
     await initializeRedis();
+
+    minilog.i(TAG.SYSTEM, 'Initializing Prometheus...');
+    initPrometheus();
+    registerMetricHooks(server);
 
     minilog.i(TAG.SYSTEM, 'Database and Redis initialized successfully.');
 

@@ -20,7 +20,9 @@ export async function initializeDatabase(): Promise<void> {
     const files: string[] = await fs.readdir(migrationsDir);
     const sqlFiles = files
       .filter((file: string) => file.endsWith('.sql'))
-      .sort((a: string, b: string) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+      .sort((a: string, b: string) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
+      );
 
     console.log(`Found ${sqlFiles.length} migration files.`);
 
@@ -59,6 +61,6 @@ export async function transaction<T>(
     return result;
   } catch (err) {
     await db.exec('ROLLBACK');
-    throw new Error('Database operation failed')
+    throw new Error('Database operation failed');
   }
 }
