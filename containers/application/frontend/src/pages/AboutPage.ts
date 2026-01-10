@@ -7,7 +7,8 @@ export class AboutPage implements Component {
   constructor() {
     this.rootElement = document.getElementById('app-root') as HTMLElement;
     this.el = document.createElement('main');
-    this.el.className = 'fixed inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-black overflow-hidden';
+    this.el.className =
+      'fixed inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-black overflow-hidden';
 
     this.el.innerHTML = `
       <div class="relative z-10 text-center px-6">

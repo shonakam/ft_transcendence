@@ -22,11 +22,15 @@ export class HomePage implements Component {
   }
 
   private initEventListeners(): void {
-    const loginButton = this.rootElement.querySelector<HTMLButtonElement>('#login-button');
-    const signupButton = this.rootElement.querySelector<HTMLButtonElement>('#signup-button');
+    const loginButton =
+      this.rootElement.querySelector<HTMLButtonElement>('#login-button');
+    const signupButton =
+      this.rootElement.querySelector<HTMLButtonElement>('#signup-button');
 
     loginButton?.addEventListener('click', () => this.authModal.open('login'));
-    signupButton?.addEventListener('click', () => this.authModal.open('signup'));
+    signupButton?.addEventListener('click', () =>
+      this.authModal.open('signup')
+    );
   }
 
   public getElement(): HTMLElement {

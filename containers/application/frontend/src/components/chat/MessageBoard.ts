@@ -25,7 +25,7 @@ export class MessageBoard implements Component {
     try {
       this.myUserInfo = await api.get<UserInfo>('users/me');
     } catch (error) {
-           console.error('Failed to get user info', error);
+      console.error('Failed to get user info', error);
     }
   }
 
@@ -51,19 +51,26 @@ export class MessageBoard implements Component {
       return;
     }
 
-    this.messages.forEach(msg => {
+    this.messages.forEach((msg) => {
       const isMe = msg.senderId === this.myUserInfo?.id;
       const bubble = document.createElement('div');
       bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'} items-end space-x-2`;
 
-      const time = new Date(msg.createdAt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const time = new Date(msg.createdAt * 1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
 
       const content = `
-        ${!isMe ? `
-          <button class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold border border-white/10 hover:bg-indigo-500/30 transition-colors avatar-btn" data-user-id="${msg.senderId}" data-username="User-${msg.senderId.slice(0,4)}">
+        ${
+          !isMe
+            ? `
+          <button class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold border border-white/10 hover:bg-indigo-500/30 transition-colors avatar-btn" data-user-id="${msg.senderId}" data-username="User-${msg.senderId.slice(0, 4)}">
             ${msg.senderId.slice(0, 2).toUpperCase()}
           </button>
-        ` : ''}
+        `
+            : ''
+        }
         <div class="max-w-[70%]">
           <div class="px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'} break-words">
             ${msg.content}
@@ -74,7 +81,9 @@ export class MessageBoard implements Component {
 
       bubble.innerHTML = content;
 
-      const avatarBtn = bubble.querySelector('.avatar-btn') as HTMLButtonElement;
+      const avatarBtn = bubble.querySelector(
+        '.avatar-btn'
+      ) as HTMLButtonElement;
       if (avatarBtn) {
         avatarBtn.onclick = (e: MouseEvent) => {
           e.stopPropagation();

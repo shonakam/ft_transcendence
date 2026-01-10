@@ -1,4 +1,3 @@
-import { GamePage } from "./GamePage";
+import { GamePage } from './GamePage';
 
-export class RemoteGamePage extends GamePage {
-}
+export class RemoteGamePage extends GamePage {}

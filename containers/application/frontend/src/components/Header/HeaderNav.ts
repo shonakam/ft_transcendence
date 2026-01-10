@@ -10,12 +10,12 @@ export class HeaderNav implements Component {
     this.el = document.createElement('nav');
     this.el.className = 'space-x-4';
 
-    this.el.appendChild(new NavLink('Home', '/home').getElement())
-    this.el.appendChild(new NavLink('About', '/about').getElement())
-    this.el.appendChild(new NavLink('LocalGame', '/game/local').getElement())
-    this.el.appendChild(new NavLink('RemoteGame', '/game/remote').getElement())
-    this.el.appendChild(new NavLink('Dashboard', '/dashboard').getElement())
-    this.el.appendChild(new NavLink('Auth', '/auth').getElement())
+    this.el.appendChild(new NavLink('Home', '/home').getElement());
+    this.el.appendChild(new NavLink('About', '/about').getElement());
+    this.el.appendChild(new NavLink('LocalGame', '/game/local').getElement());
+    this.el.appendChild(new NavLink('RemoteGame', '/game/remote').getElement());
+    this.el.appendChild(new NavLink('Dashboard', '/dashboard').getElement());
+    this.el.appendChild(new NavLink('Auth', '/auth').getElement());
 
     const logoutBtn = document.createElement('button');
     logoutBtn.textContent = 'Logout';
