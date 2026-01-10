@@ -62,10 +62,10 @@ ops-logs:
 	@docker compose -f $(OPS)/compose.yml logs -f
 
 shell-backend:
-	@docker compose -f $(APP)/compose.yml exec backend bash
+	@docker compose -f $(APP)/compose.yml exec backend sh
 
 shell-frontend:
-	@docker compose -f $(APP)/compose.yml exec frontend bash
+	@docker compose -f $(APP)/compose.yml exec frontend sh
 
 shell-grafana:
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml exec grafana bash

@@ -37,7 +37,9 @@ export class ChatRoomRepositorySqlite implements ChatRoomRepository {
   }
 
   async findById(id: string): Promise<ChatRoom | null> {
-    const row = await this.db.get(`SELECT * FROM chat_rooms WHERE id = ?`, [id]);
+    const row = await this.db.get(`SELECT * FROM chat_rooms WHERE id = ?`, [
+      id,
+    ]);
     if (!row) return null;
     return this.scan(row);
   }

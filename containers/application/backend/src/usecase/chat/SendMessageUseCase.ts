@@ -1,7 +1,10 @@
 import type { ChatMessageRepository } from '../../domain/chat/repository/ChatMessageRepository.ts';
 import type { ChatRoomRepository } from '../../domain/chat/repository/ChatRoomRepository.ts';
 import type { UserBlockRepository } from '../../domain/chat/repository/UserBlockRepository.ts';
-import type { ChatMessage, MessageType } from '../../domain/chat/entity/ChatMessage.ts';
+import type {
+  ChatMessage,
+  MessageType,
+} from '../../domain/chat/entity/ChatMessage.ts';
 
 export class SendMessageUseCase {
   constructor(

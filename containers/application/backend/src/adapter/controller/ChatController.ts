@@ -39,14 +39,20 @@ export default async function ChatController(
   server.post<{ Body: { targetUserId: string } }>(
     '/rooms/dm',
     { preHandler: authenticate },
-    async (req: FastifyRequest<{ Body: { targetUserId: string } }>, reply: FastifyReply) => {
+    async (
+      req: FastifyRequest<{ Body: { targetUserId: string } }>,
+      reply: FastifyReply,
+    ) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
         const { targetUserId } = req.body;
-        const room = await getOrCreateDMRoom.execute(userId.get(), targetUserId);
+        const room = await getOrCreateDMRoom.execute(
+          userId.get(),
+          targetUserId,
+        );
         reply.status(200).send(room);
       } catch (err: any) {
         reply.status(400).send({ error: err.message });
@@ -58,7 +64,10 @@ export default async function ChatController(
   server.get<{ Params: { roomId: string } }>(
     '/rooms/:roomId/messages',
     { preHandler: authenticate },
-    async (req: FastifyRequest<{ Params: { roomId: string } }>, reply: FastifyReply) => {
+    async (
+      req: FastifyRequest<{ Params: { roomId: string } }>,
+      reply: FastifyReply,
+    ) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -74,11 +83,17 @@ export default async function ChatController(
   );
 
   // POST /api/v1/chat/rooms/:roomId/messages
-  server.post<{ Params: { roomId: string }; Body: { content: string; messageType?: MessageType } }>(
+  server.post<{
+    Params: { roomId: string };
+    Body: { content: string; messageType?: MessageType };
+  }>(
     '/rooms/:roomId/messages',
     { preHandler: authenticate },
     async (
-      req: FastifyRequest<{ Params: { roomId: string }; Body: { content: string; messageType?: MessageType } }>,
+      req: FastifyRequest<{
+        Params: { roomId: string };
+        Body: { content: string; messageType?: MessageType };
+      }>,
       reply: FastifyReply,
     ) => {
       try {
@@ -88,7 +103,12 @@ export default async function ChatController(
         }
         const { roomId } = req.params;
         const { content, messageType } = req.body;
-        const message = await sendMessage.execute(userId.get(), roomId, content, messageType);
+        const message = await sendMessage.execute(
+          userId.get(),
+          roomId,
+          content,
+          messageType,
+        );
         reply.status(201).send(message);
       } catch (err: any) {
         reply.status(400).send({ error: err.message });
@@ -118,7 +138,10 @@ export default async function ChatController(
   server.post<{ Body: { blockedUserId: string } }>(
     '/blocks',
     { preHandler: authenticate },
-    async (req: FastifyRequest<{ Body: { blockedUserId: string } }>, reply: FastifyReply) => {
+    async (
+      req: FastifyRequest<{ Body: { blockedUserId: string } }>,
+      reply: FastifyReply,
+    ) => {
       try {
         const userId = req.authUserId;
         if (!userId) {
@@ -137,7 +160,10 @@ export default async function ChatController(
   server.delete<{ Params: { blockedUserId: string } }>(
     '/blocks/:blockedUserId',
     { preHandler: authenticate },
-    async (req: FastifyRequest<{ Params: { blockedUserId: string } }>, reply: FastifyReply) => {
+    async (
+      req: FastifyRequest<{ Params: { blockedUserId: string } }>,
+      reply: FastifyReply,
+    ) => {
       try {
         const userId = req.authUserId;
         if (!userId) {

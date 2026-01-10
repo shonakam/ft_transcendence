@@ -1,5 +1,5 @@
-import client from "prom-client";
+import client from 'prom-client';
 
 export function initPrometheus() {
-  client.collectDefaultMetrics({prefix: "ft_"});
+  client.collectDefaultMetrics({ prefix: 'ft_' });
 }
