@@ -27,6 +27,9 @@ volumes:
 ####
 
 services:
+  # ====================
+  # ELKSTACK CONTAINERS
+  # ====================
   setup:
     container_name: ft-setup
     image: docker.elastic.co/elasticsearch/elasticsearch:8.18.8
@@ -48,13 +51,13 @@ services:
 
   elasticsearch:
     init: true
+    container_name: ft-elasticsearch
     build:
       context: ./elk/elasticsearch
       dockerfile: Dockerfile
     depends_on:
      setup:
        condition: service_healthy
-    container_name: ft-elasticsearch
     volumes:
       - ft_certs:/usr/share/elasticsearch/config/certs
       - ft_esdata:/usr/share/elasticsearch/data
@@ -95,6 +98,7 @@ services:
 
   logstash:
     init: true
+    container_name: ft-logstash
     build:
       context: ./elk/logstash
       dockerfile: Dockerfile
@@ -105,16 +109,15 @@ services:
        condition: service_healthy
     labels:
      co.elastic.logs/module: logstash
-    container_name: ft-logstash
     networks:
       - transcendence-network
 
   kibana:
     init: true
+    container_name: ft-kibana
     build:
       context: ./elk/kibana
       dockerfile: Dockerfile
-    container_name: ft-kibana
     networks:
       - transcendence-network
     depends_on:
@@ -148,13 +151,14 @@ services:
       retries: 120
 
   metricbeat:
+    init: true
+    container_name: ft-metricbeat
     depends_on:
       elasticsearch:
         condition: service_healthy
       kibana:
         condition: service_healthy
     image: docker.elastic.co/beats/metricbeat:8.18.8
-    container_name: ft-metricbeat
     user: root
     volumes:
       - ft_certs:/usr/share/metricbeat/certs
@@ -194,5 +198,35 @@ services:
       - ELASTIC_HOSTS=https://ft-elasticsearch:9200
       - KIBANA_HOSTS=http://ft-kibana:5601
       - LOGSTASH_HOSTS=http://ft-logstash01:9600
+    networks:
+      - transcendence-network
+
+  # ====================
+  # METRIC CONTAINERS
+  # ====================
+  prometheus:
+    init: true
+    container_name: ft-prometheus
+    build:
+      context: ./metric/prometheus
+      dockerfile: Dockerfile
+    ports:
+      - 9090:9090
+    networks:
+      - transcendence-network
+
+  grafana:
+    init: true
+    container_name: ft-grafana
+    build:
+      context: ./metric/grafana
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_EMAIL=${GRAFANA_ADMIN_EMAIL}
     networks:
       - transcendence-network

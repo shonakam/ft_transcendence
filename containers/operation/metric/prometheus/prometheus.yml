@@ -1,0 +1,27 @@
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+
+global:
+    scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+    evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+    external_labels:
+      monitor: "codelab-monitor"
+
+rule_files:
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["ft-prometheus:9090"]
+  
+  - job_name: "nginx"
+    static_configs:
+      - targets: ["ft-nginx-exporter:9113"]
+
+  - job_name: "redis"
+    static_configs:
+      - targets: ["ft-redis-exporter:9121"]
+
+  - job_name: "backend"
+    metrics_path: /api/metrics
+    static_configs:
+      - targets: ["ft-backend:8080"]

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import minilog from '../../utils/minilog.ts';
+import client from "prom-client";
 
 export default async function HealthController(server: FastifyInstance) {
   server.get('/health', async () => ({
@@ -22,4 +23,10 @@ export default async function HealthController(server: FastifyInstance) {
     minilog.d('HEALTH', `Standard log check (debug)`);
     return { message: 'Standard log check' };
   });
+
+  server.get('/metrics', async (_, reply) => {
+    reply
+      .header("Content-Type", client.register.contentType)
+      .send(await client.register.metrics());
+  })
 }

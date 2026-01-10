@@ -10,6 +10,8 @@ export DATA_DIR := $(PWD)/$(APP)/sqlite/data
 # Orthodox recipes
 all: init-app up-app init-ops up-ops
 
+re: re-ops re-app
+
 init-app:
 	@cp -n $(APP)/.env.example $(APP)/.env.local || true
 
@@ -29,6 +31,8 @@ fclean-app:
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
+re-app: fclean-app up-app
+
 init-ops:
 	@cp -n $(OPS)/.env.example $(OPS)/.env.local || true
 
@@ -38,7 +42,7 @@ up-ops: init-ops
 		-X POST "http://localhost:5601/api/saved_objects/_import" \
 		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson
 
-down-ops: # TODO: Implementation pending
+down-ops:
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down
 
 clean-ops: # TODO: Implementation pending
@@ -52,13 +56,16 @@ re-ops: fclean-ops up-ops
 
 # --- Development Helpers ---
 app-logs:
-	@docker compose -f $(APP)/compose.yaml logs -f
+	@docker compose -f $(APP)/compose.yml logs -f
 
 ops-logs:
-	@docker compose -f $(OPS)/compose.yaml logs -f
+	@docker compose -f $(OPS)/compose.yml logs -f
 
 shell-backend:
-	@docker compose -f $(APP)/compose.yaml exec backend sh
+	@docker compose -f $(APP)/compose.yml exec backend bash
 
 shell-frontend:
-	@docker compose -f $(APP)/compose.yaml exec frontend sh
+	@docker compose -f $(APP)/compose.yml exec frontend bash
+
+shell-grafana:
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml exec grafana bash

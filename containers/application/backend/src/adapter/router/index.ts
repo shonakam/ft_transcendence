@@ -10,7 +10,7 @@ export async function registRouters(
   server: FastifyInstance,
   appContainer: AppContainer,
 ) {
-  await server.register(HealthController);
+  await server.register(HealthController, { prefix: '/api/' });
   await server.register(AuthController, {
     prefix: '/api/auth',
     useCases: appContainer.authUseCases,
