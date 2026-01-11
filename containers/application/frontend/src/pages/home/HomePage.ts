@@ -13,12 +13,16 @@ export class HomePage implements Component {
     this.el = document.createElement('main');
     this.authModal = new AuthModal();
 
-    this.el.innerHTML = homeTemplate;
+    this.render();
     this.initEventListeners();
   }
 
   public destroy(): void {
     this.el.remove();
+  }
+
+  private render(): void {
+    this.el.innerHTML = homeTemplate;
   }
 
   private initEventListeners(): void {
