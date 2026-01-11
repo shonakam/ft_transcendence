@@ -3,9 +3,11 @@ import { Component } from '../interface/Component';
 import { UserResponse } from '../services/user/dashboard';
 import { design } from '../conf';
 import { MfaForm } from '../components/auth/MfaForm';
+import { router } from '../router/router'; // Ensure this path is correct
 import Chart from 'chart.js/auto';
 
-export type DashboardView = 'user' | 'sessions' | 'mfa';
+// Added 'game' and 'chat' back to the types
+export type DashboardView = 'user' | 'sessions' | 'mfa' | 'game' | 'chat';
 
 interface GameHistoryItem {
   date: string;
@@ -34,6 +36,14 @@ export class DashboardPage implements Component {
   private modal: HTMLDivElement | null = null;
 
   constructor() {
+    // 1. Authentication Check
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      // Redirect to login if no token found
+      window.location.href = '/login';
+      return;
+    }
+
     this.el = document.createElement('main');
     this.el.className = design.bg;
     this.container = document.createElement('div');
@@ -48,7 +58,7 @@ export class DashboardPage implements Component {
 
   private async init() {
     try {
-      // Mock user data
+      // Mock user data (In production, replace with real API call)
       const user: UserResponse = {
         id: '1',
         username: 'demo_user',
@@ -79,18 +89,7 @@ export class DashboardPage implements Component {
         totalGames: allGames.length,
         wins: allGames.filter(g => g.result === 'Win').length,
         losses: allGames.filter(g => g.result === 'Loss').length,
-        winStreak: 3,
-        maxScore: Math.max(...allGames.map(g => g.userScore)),
-        avgScore: (allGames.reduce((a, b) => a + b.userScore, 0) / allGames.length).toFixed(2),
-        tournamentsPlayed: new Set(allGames.map(g => g.tournament)).size,
-        bestTournament: 'Spring Cup',
-        scoreTrend: allGames.slice(0, 10).map(g => g.userScore),
-        winRateTrend: allGames.map((g, i, arr) => {
-          const played = arr.slice(0, i + 1);
-          return Math.round((played.filter(x => x.result === 'Win').length / played.length) * 100);
-        }),
         allGames,
-        tournaments,
       };
       this.render(user, stats);
     } catch (error) {
@@ -103,17 +102,29 @@ export class DashboardPage implements Component {
     this.page = 1;
     if (view === 'mfa') {
       this.mfaForm.activate('setup');
+    } else if (view === 'game') {
+        window.location.href = '/game'; // Or router.navigate('/game')
+        return;
+    } else if (view === 'chat') {
+        window.location.href = '/chat'; // Or router.navigate('/chat')
+        return;
     }
     this.init();
   }
 
   private render(user: UserResponse, stats: any) {
     this.container.innerHTML = '';
+
+    // Navigation bar with all buttons restored
     const nav = document.createElement('div');
-    nav.className = 'flex gap-4 mb-6';
+    nav.className = 'flex flex-wrap gap-2 mb-6';
+
     const userTab = this.createTabButton('User Stats', this.currentView === 'user', () => this.switchView('user'));
     const sessionsTab = this.createTabButton('Game Sessions', this.currentView === 'sessions', () => this.switchView('sessions'));
-    nav.append(userTab, sessionsTab);
+    const gameTab = this.createTabButton('Play Game', this.currentView === 'game', () => this.switchView('game'));
+    const chatTab = this.createTabButton('Chat Room', this.currentView === 'chat', () => this.switchView('chat'));
+
+    nav.append(userTab, sessionsTab, gameTab, chatTab);
     this.container.appendChild(nav);
 
     if (this.currentView === 'user') {
@@ -140,11 +151,11 @@ export class DashboardPage implements Component {
     `;
 
     const chartPanel = document.createElement('div');
-    chartPanel.className = 'space-y-8 mb-8';
+    chartPanel.className = 'mb-8 bg-white/5 p-4 rounded-xl';
     const chartCanvas = document.createElement('canvas');
     chartPanel.appendChild(chartCanvas);
 
-    const mfaBtn = this.createMenuButton('🔒 Security Settings', () => this.switchView('mfa'));
+    const mfaBtn = this.createMenuButton('🔒 Security Settings (MFA)', () => this.switchView('mfa'));
     this.container.append(title, info, chartPanel, mfaBtn);
 
     setTimeout(() => {
@@ -154,7 +165,10 @@ export class DashboardPage implements Component {
           labels: ['Wins', 'Losses'],
           datasets: [{ data: [stats.wins, stats.losses], backgroundColor: ['#22c55e', '#ef4444'] }],
         },
-        options: { plugins: { legend: { labels: { color: '#fff' } } } }
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#fff' } } }
+        }
       });
     }, 0);
   }
@@ -189,7 +203,7 @@ export class DashboardPage implements Component {
 
   private createTabButton(text: string, active: boolean, onClick: () => void): HTMLButtonElement {
     const btn = document.createElement('button');
-    btn.className = `px-4 py-2 rounded-t transition-all ${active ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400'}`;
+    btn.className = `px-4 py-2 rounded transition-all ${active ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`;
     btn.textContent = text;
     btn.onclick = onClick;
     return btn;
