@@ -32,7 +32,6 @@ export class GameState {
   config: typeof CONFIG;
 
   // Game Metadata
-  lastFrameTime: number;
   // gameId: string | null;
   // startTime: number;
 
@@ -60,7 +59,6 @@ export class GameState {
     this.config = CONFIG;
 
     // Game Metadata
-    this.lastFrameTime = performance.now();
     // this.gameId = null;
     // this.startTime = Date.now();
   }

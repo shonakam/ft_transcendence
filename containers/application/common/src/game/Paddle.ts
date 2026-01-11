@@ -1,4 +1,4 @@
-import { Vector2 } from './interface/Vector2';
+import { Vector2 } from './types/Vector2';
 
 import CONFIG from './GameConfig';
 
@@ -24,5 +24,11 @@ export class Paddle {
     this.thickness = CONFIG.PADDLE_THICKNESS;
     this.length = CONFIG.PADDLE_LENGTH;
     this.speed = CONFIG.PADDLE_SPEED;
+  }
+
+  jsonify() {
+    return {
+      position: this.position,
+    };
   }
 }

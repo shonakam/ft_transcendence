@@ -1,17 +1,17 @@
 import { Component } from '../../interface/Component';
 
-import { GameCanvas } from '@shonakam/common/game/GameCanvas';
-import { PongGame } from '@shonakam/common/game/PongGame';
-
+import { GameCanvas } from '@shonakam/common/game/GameCanvas'
+import { LocalInputHandler } from '@shonakam/common/game/Inputs/localInputHandler';
+import { LocalPongGame } from '@shonakam/common/game/LocalPongGame';
 import CONFIG from '@shonakam/common/game/GameConfig';
-
 import gameTemplate from './game.html?raw';
 
 export class GamePage implements Component {
   private rootElement: HTMLElement;
   private el: HTMLElement;
   private gameCanvas: GameCanvas;
-  private pongGame: PongGame;
+  private inputHandler = new LocalInputHandler();
+  private pongGame: LocalPongGame;
 
   constructor() {
     this.rootElement = document.getElementById('app-root') as HTMLElement;
@@ -25,8 +25,8 @@ export class GamePage implements Component {
       CONFIG.CANVAS_HEIGHT
     );
 
-    this.pongGame = new PongGame(this.gameCanvas);
-    this.pongGame.initRenderer();
+    this.pongGame = new LocalPongGame(this.gameCanvas, this.inputHandler);
+    this.pongGame.initRender();
     this.addSpaceEventListener();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
