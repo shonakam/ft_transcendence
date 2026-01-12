@@ -34,7 +34,7 @@ export class GamePage implements Component {
   }
 
   public destroy(): void {
-    this.pongGame.destroy();
+    // this.pongGame.destroy();
     this.el.remove();
   }
 

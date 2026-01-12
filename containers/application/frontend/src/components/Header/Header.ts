@@ -17,6 +17,10 @@ export class Header implements Component {
     this.el.appendChild(nav);
   }
 
+  destroy(): void {
+    this.el.remove();
+  }
+
   public getElement(): HTMLElement {
     return this.el;
   }

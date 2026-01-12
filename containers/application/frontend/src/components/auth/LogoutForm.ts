@@ -1,6 +1,6 @@
 import { Component } from '../../interface/Component';
 import { logout } from '../../services/auth/logout';
-import { router } from '../../router/router';
+// import { router } from '../../router/router';
 
 export class LogoutConfirm implements Component {
   private root: HTMLElement;
@@ -26,6 +26,10 @@ export class LogoutConfirm implements Component {
     });
 
     this.root.append(message, logoutButton);
+  }
+
+  destroy(): void {
+    this.root.remove();
   }
 
   getElement(): HTMLElement {

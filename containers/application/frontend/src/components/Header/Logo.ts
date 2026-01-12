@@ -10,7 +10,12 @@ export class Logo implements Component {
     this.el.className = 'text-2xl font-bold';
   }
 
+  destroy(): void {
+    this.el.remove();
+  }
+
   public getElement(): HTMLAnchorElement {
     return this.el;
   }
+
 }

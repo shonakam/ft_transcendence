@@ -16,7 +16,6 @@ export class HeaderNav implements Component {
     this.el.appendChild(new NavLink('RemoteGame', '/game/remote').getElement());
     this.el.appendChild(new NavLink('Dashboard', '/dashboard').getElement());
     this.el.appendChild(new NavLink('Auth', '/auth').getElement());
-    this.el.appendChild(new NavLink('Game', '/game').getElement());
 
     const logoutBtn = document.createElement('button');
     logoutBtn.textContent = 'Logout';
@@ -31,6 +30,10 @@ export class HeaderNav implements Component {
     });
 
     this.el.appendChild(logoutBtn);
+  }
+
+  destroy(): void {
+    this.el.remove();
   }
 
   public getElement(): HTMLElement {

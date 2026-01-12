@@ -11,6 +11,7 @@ export class LoginForm implements Component {
   private submitButton: HTMLButtonElement;
   private oidcButton: HTMLButtonElement;
   private switchButton: HTMLButtonElement;
+
   constructor() {
     this.root = document.createElement('form');
     this.root.className = 'space-y-4';
@@ -69,6 +70,10 @@ export class LoginForm implements Component {
     );
 
     this.initEvents();
+  }
+
+  public destroy(): void {
+    this.root.remove();
   }
 
   private initEvents() {
