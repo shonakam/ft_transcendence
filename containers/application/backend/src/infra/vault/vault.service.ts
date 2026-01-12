@@ -46,4 +46,18 @@ export class VaultService {
       return null;
     }
   }
+
+  /**
+   * Delete secret data from a specific path
+   * 指定したパスのシークレットを削除する
+   */
+  async deleteSecret(path: string) {
+    try {
+      await this.vaultClient.delete(path);
+    } catch (err) {
+      // Log error but do not throw to prevent blocking the business flow
+      // エラーをログに記録するが、ビジネスフローを妨げないようにスローはしない
+      console.error(`Vault Delete Error at ${path}:`, err);
+    }
+  }
 }

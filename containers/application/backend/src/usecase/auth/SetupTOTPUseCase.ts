@@ -62,6 +62,9 @@ export class SetupTOTPUseCase {
       otpauth_url: true,
       issuer: config.auth.issuer,
     });
+
+    // Pass user.id to save secret in Vault
+    // Vaultに保存するためにuser.idを渡す
     await this.setTotpSecrete(user.id, user2fa, authUrl.base32);
 
     return { uri: authUrl.otpauth_url };

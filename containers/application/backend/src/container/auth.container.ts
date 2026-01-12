@@ -68,7 +68,11 @@ export async function initAuthUsecases() {
     user2faRepository,
     vaultService,
   );
-  const revokeTOTP = new RevokeTOTPUseCase(userRepository, user2faRepository);
+  const revokeTOTP = new RevokeTOTPUseCase(
+    userRepository,
+    user2faRepository,
+    vaultService
+  );
 
   return {
     login,
