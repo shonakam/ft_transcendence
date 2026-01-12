@@ -105,6 +105,18 @@ services:
     tty: true
     networks:
       - transcendence-network
+  vault:
+    image: hashicorp/vault:1.13.3
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root"
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - transcendence-network
 
 # ====================
 # EXPORTER CONTAINERS
@@ -115,7 +127,7 @@ services:
     image: nginx/nginx-prometheus-exporter:1.5.0
     command:
       - -nginx.scrape-uri=http://ft-nginx:8081/stub_status
-    networks: 
+    networks:
       - transcendence-network
 
   redis_exporter:
@@ -124,6 +136,5 @@ services:
     image: oliver006/redis_exporter:v1.80.0-alpine
     command:
       - "--redis.addr=redis://redis:6379"
-    networks: 
+    networks:
       - transcendence-network
-    
