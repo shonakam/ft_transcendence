@@ -72,6 +72,10 @@ export class SignupForm implements Component {
     this.initEvents();
   }
 
+  destroy(): void {
+    this.root.remove();
+  }
+
   private createInput(type: string, placeholder: string): HTMLInputElement {
     const input = document.createElement('input');
     input.type = type;
@@ -134,9 +138,9 @@ export class SignupForm implements Component {
             formData
           );
           imagePath = uploadRes.path;
-        } catch (error: any) {
+        } catch (error: unknown) {
           toaster.show(
-            error.message || '画像のアップロードに失敗しました。',
+            (error as Error).message || '画像のアップロードに失敗しました。',
             'error'
           );
           throw new Error('画像のアップロードに失敗しました。');
@@ -165,10 +169,10 @@ export class SignupForm implements Component {
           detail: { data: response },
         })
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup Error:', error);
       toaster.show(
-        error.message ||
+        (error as Error).message ||
           '登録に失敗しました。サーバーの状態を確認してください。',
         'error'
       );

@@ -79,6 +79,11 @@ export class RevokeMfaForm implements Component {
     });
   }
 
+
+  destroy(): void {
+    this.root.remove();
+  }
+
   private setLoading(isLoading: boolean) {
     this.submitButton.disabled = isLoading;
     this.submitButton.textContent = isLoading ? '解除中...' : '解除を実行する';

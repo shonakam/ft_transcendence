@@ -32,6 +32,10 @@ export class HeaderNav implements Component {
     this.el.appendChild(logoutBtn);
   }
 
+  destroy(): void {
+    this.el.remove();
+  }
+
   public getElement(): HTMLElement {
     return this.el;
   }

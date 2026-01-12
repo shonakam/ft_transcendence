@@ -70,6 +70,10 @@ export class MfaForm implements Component {
     this.initEvents();
   }
 
+  destroy(): void {
+    this.root.remove();
+  }
+
   private async fetchAndGenerateQrCode() {
     this.qrImage.style.opacity = '0.5';
     const [res, err] = await to(setupMfa());

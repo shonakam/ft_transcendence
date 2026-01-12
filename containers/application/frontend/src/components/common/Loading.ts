@@ -23,6 +23,10 @@ class Loading implements Component {
     this.root.remove();
   }
 
+  destroy(): void {
+    this.root.remove();
+  }
+
   getElement(): HTMLElement {
     return this.root;
   }
