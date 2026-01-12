@@ -5,6 +5,7 @@ import { User2faRepository } from '../../domain/user/repository/User2faRepositor
 import { User2fa } from '../../domain/user/entity/User2fa.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import speakeasy from 'speakeasy';
+import { VaultService } from '../../infra/vault/vault.service.ts';
 
 export interface SetupTOTPResponse {
   uri: string;
@@ -14,14 +15,20 @@ export class SetupTOTPUseCase {
     private userRepo: UserRepository,
     private tokenService: TokenService,
     private user2faRepository: User2faRepository,
+    private vaultService: VaultService,
   ) {}
 
-  private async setTotpSecrete(user2fa: User2fa, secret: string) {
+  private async setTotpSecrete(userId: string, user2fa: User2fa, secret: string) {
     const now = getUnixTimeMs();
 
+    // 1. Save state to DB (シークレットは除外してDBに状態を保存)
     user2fa.updatedAt = now;
-    user2fa.totpSeceret = secret;
     await this.user2faRepository.save(user2fa);
+
+    // 2. Save secret to Vault (Vaultにシークレットを保存)
+    await this.vaultService.setSecret(`secret/data/mfa/${userId}`, {
+      secret: secret,
+    });
   }
 
   async execute(accessToken: string): Promise<SetupTOTPResponse> {
@@ -55,7 +62,7 @@ export class SetupTOTPUseCase {
       otpauth_url: true,
       issuer: config.auth.issuer,
     });
-    await this.setTotpSecrete(user2fa, authUrl.base32);
+    await this.setTotpSecrete(user.id, user2fa, authUrl.base32);
 
     return { uri: authUrl.otpauth_url };
   }

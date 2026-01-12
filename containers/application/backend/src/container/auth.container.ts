@@ -11,6 +11,7 @@ import { VerifyTOTPUseCase } from '../usecase/auth/VerifyTOTPUseCase.ts';
 import { User2faRepositorySqlite } from '../infra/sqlite/repository/user/User2faRepositorySqlite.ts';
 import { SetupTOTPUseCase } from '../usecase/auth/SetupTOTPUseCase.ts';
 import { RevokeTOTPUseCase } from '../usecase/auth/RevokeTOTPUseCase.ts';
+import { VaultService } from '../infra/vault/vault.service.ts';
 
 export interface authUseCases {
   login: LoginUseCase;
@@ -28,6 +29,8 @@ export async function initAuthUsecases() {
   const volatileDataRepositoryRedis = new VolatileDataRepositoryRedis();
   const tokenService = new TokenService();
   const user2faRepository = new User2faRepositorySqlite();
+  const vaultService = new VaultService();
+  await vaultService.init();
 
   const login = new LoginUseCase(
     volatileDataRepositoryRedis,
@@ -56,12 +59,14 @@ export async function initAuthUsecases() {
     userRepository,
     tokenService,
     user2faRepository,
+    vaultService,
   );
   const verifyTOTP = new VerifyTOTPUseCase(
     volatileDataRepositoryRedis,
     userRepository,
     tokenService,
     user2faRepository,
+    vaultService,
   );
   const revokeTOTP = new RevokeTOTPUseCase(userRepository, user2faRepository);
 

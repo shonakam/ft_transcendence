@@ -1,8 +1,6 @@
-import { Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import * as vault from 'node-vault';
 
-@Injectable()
-export class VaultService implements OnModuleInit {
+export class VaultService {
   private vaultClient: vault.client;
 
   constructor() {
@@ -16,26 +14,24 @@ export class VaultService implements OnModuleInit {
   /**
    * Initialize and check connection to Vault
    */
-  async onModuleInit() {
+  async init() {
     try {
       await this.vaultClient.health();
       console.log('Vault: Connection established successfully.');
     } catch (err) {
-      // Vaultが起動していない場合にエラーを表示
       console.error('Vault: Initialization failed. Please ensure the Vault container is running.');
     }
   }
 
   /**
    * Save secret data to a specific path
-   * @param path e.g., 'secret/data/mfa/user-1'
-   * @param data Object to be stored
    */
   async setSecret(path: string, data: Record<string, any>) {
     try {
       return await this.vaultClient.write(path, data);
     } catch (err) {
-      throw new InternalServerErrorException('Vault Write Error: Could not save secret');
+      // General Error，without NestJS  InternalServerErrorException
+      throw new Error('Vault Write Error: Could not save secret');
     }
   }
 
@@ -47,7 +43,6 @@ export class VaultService implements OnModuleInit {
       const response = await this.vaultClient.read(path);
       return response.data;
     } catch (err) {
-      // データの取得に失敗した場合やパスが存在しない場合は null を返す
       return null;
     }
   }

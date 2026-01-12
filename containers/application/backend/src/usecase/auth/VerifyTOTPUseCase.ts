@@ -6,6 +6,7 @@ import { User2faRepository } from '../../domain/user/repository/User2faRepositor
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import speakeasy from 'speakeasy';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
+import { VaultService } from '../../infra/vault/vault.service.ts';
 
 export class VerifyTOTPUseCase {
   constructor(
@@ -13,6 +14,7 @@ export class VerifyTOTPUseCase {
     private userRepo: UserRepository,
     private tokenService: TokenService,
     private user2faRepository: User2faRepository,
+    private vaultService: VaultService,
   ) {}
 
   private getPayload(a: string, t: string) {
@@ -39,14 +41,25 @@ export class VerifyTOTPUseCase {
     }
 
     const user2fa = await this.user2faRepository.findById(payload.sub);
-    if (!user2fa?.totpSeceret) {
-      console.warn('VerifyTOTPUseCase: findById is failed.');
+    if (!user2fa) {
+      // ユーザーの2FA情報が見つからない場合
       throw new Error('Not registered.');
     }
 
-    if (
-      speakeasy.totp.verify({ secret: user2fa.totpSeceret, token: form.code })
-    ) {
+    // Get the actual secret from Vault
+    // Vaultから実際のシークレットを取得
+    const vaultData = await this.vaultService.getSecret(`secret/data/mfa/${payload.sub}`);
+    const totpSecret = vaultData?.secret;
+
+    if (!totpSecret) {
+      // Vaultにシークレットが存在しない場合
+      console.warn('VerifyTOTPUseCase: Secret not found in Vault.');
+      throw new Error('Secret not found in Vault.');
+    }
+
+    // Verify the TOTP code. Added '!' to fix the logic: throw error if verification FAILS.
+    // TOTPコードの検証。ロジックを修正：検証に失敗した場合（!）にエラーをスロー。
+    if (!speakeasy.totp.verify({ secret: totpSecret, token: form.code })) {
       console.warn('VerifyTOTPUseCase: invalid auth code.');
       throw new Error('Invalid auth code.');
     }
