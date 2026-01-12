@@ -12,6 +12,7 @@ all: init-app up-app init-ops up-ops
 
 re: re-ops re-app
 
+## Application Recipes
 init-app:
 	@cp -n $(APP)/.env.example $(APP)/.env.local || true
 

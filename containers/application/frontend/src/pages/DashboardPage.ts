@@ -56,6 +56,10 @@ export class DashboardPage implements Component {
     this.init();
   }
 
+  public destroy(): void {
+    this.el.remove();
+  }
+
   private async init() {
     try {
       // Mock user data (In production, replace with real API call)

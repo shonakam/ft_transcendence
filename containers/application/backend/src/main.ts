@@ -11,7 +11,10 @@ process.on('unhandledRejection', (reason) => {
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
+
 import { registRouters } from './adapter/router/index.ts';
+import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
+
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
 import { initializeRedis } from './infra/redis/db.ts';
@@ -54,6 +57,8 @@ async function main() {
   });
 
   await registRouters(server, container);
+
+  await registerWebSocket(server);
 
   try {
     minilog.i(TAG.SYSTEM, 'Initializing database...');

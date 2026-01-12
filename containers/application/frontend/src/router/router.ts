@@ -1,11 +1,13 @@
 import { routes } from './routes';
 import { Header } from '../components/Header/Header';
+import { Component } from 'src/interface/Component';
 
 const APP_ROOT_ID = 'app-root'; // アプリケーションがマウントされるルート要素を特定
 
 export class Router {
   private static instance: Router;
   private appRoot!: HTMLElement;
+  private currentPageComponent: Component | null = null;
 
   constructor() {
     if (Router.instance) return Router.instance;
@@ -33,31 +35,31 @@ export class Router {
     this.renderContent();
   }
 
-  private renderContent() {
-    const path = window.location.pathname;
-    const normalizedPath = path.replace(/\/+$/, '');
-    let PageComponent = routes[normalizedPath];
-    if (PageComponent === undefined) {
-      history.replaceState(null, '', '/404');
-      PageComponent = routes['/404'];
-    }
-    let mainElement = this.appRoot.querySelector('main');
-    if (!mainElement) {
-      mainElement = document.createElement('main');
-      this.appRoot.appendChild(mainElement);
-    }
-    if (PageComponent) {
-      const newPageElement: HTMLElement = PageComponent().getElement();
-      this.appRoot.appendChild(newPageElement);
-    } else {
-      console.error('No PageComponent found for path:', path);
-    }
-  }
-
   private renderInitialStructure() {
     if (this.appRoot.querySelector('header')) return;
     const header = new Header().getElement();
     this.appRoot.prepend(header);
+  }
+
+  private renderContent() {
+    const path = window.location.pathname;
+    let normalizedPath = path.replace(/\/+$/, '');
+    let PageComponent: Component | undefined;
+    if (normalizedPath === '' || normalizedPath === '/') {
+      history.replaceState(null, '', '/home');
+      normalizedPath = '/home';
+    }
+    PageComponent = routes[normalizedPath]();
+    if (PageComponent === undefined) {
+      history.replaceState(null, '', '/404');
+      PageComponent = routes['/404']();
+    }
+    if (this.currentPageComponent) this.currentPageComponent.destroy();
+    this.currentPageComponent = PageComponent;
+    if (PageComponent) {
+      const newPageElement: HTMLElement = PageComponent.getElement();
+      this.appRoot.appendChild(newPageElement);
+    }
   }
 
   private initListeners() {

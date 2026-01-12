@@ -1,0 +1,31 @@
+<div
+  class="fixed inset-0 items-center justify-center bg-gradient-to-br from-white via-gray-200 to-gray overflow-hidden"
+>
+  <div class="text-center pt-16">
+    <div class="mb-6"></div>
+    <h1 class="text-4xl font-bold mb-4">Solo Game Page</h1>
+    <p class="text-lg text-gray-700">This is the solo game page.</p>
+  </div>
+  <div class="scoreboard text-center mt-4">
+    <span id="score-left">0</span> : <span id="score-right">0</span><br />
+    <span id="winning-score" class="ml-4 text-gray-600"
+      >(First to ${CONFIG.WINNING_SCORE} wins)</span
+    ><br />
+    <span id="game-status" class="ml-4 text-gray-600">Status: Ready</span>
+  </div>
+  <div class="game-canvas flex justify-center mt-8">
+    <div
+      class="canvas-stack"
+      style="position: relative; width: 800px; height: 400px"
+    ></div>
+  </div>
+  <div class="text-center mt-8">
+    <p class="text-gray-600">
+      Left Player: <b>'W' / 'S'</b>, Right Player:
+      <b>'Up Arrow' / 'Down Arrow'</b> to move the paddles up and down.
+    </p>
+    <p class="text-gray-600">
+      Press <b>'Space'</b> to start/pause/resume the game.
+    </p>
+  </div>
+</div>

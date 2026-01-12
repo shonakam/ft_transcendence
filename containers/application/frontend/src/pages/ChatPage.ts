@@ -1,5 +1,5 @@
 import { Component } from '../interface/Component';
-import { design } from '../conf';
+// import { design } from '../conf';
 import { ChatRoom } from '../types/chat';
 import { RoomList } from '../components/chat/RoomList';
 import { MessageBoard } from '../components/chat/MessageBoard';
@@ -18,14 +18,17 @@ export class ChatPage implements Component {
     this.el.className = 'min-h-screen bg-slate-900 flex text-white';
 
     const sidebar = document.createElement('aside');
-    sidebar.className = 'w-64 border-r border-white/10 flex flex-col bg-slate-800/50';
+    sidebar.className =
+      'w-64 border-r border-white/10 flex flex-col bg-slate-800/50';
 
     const mainArea = document.createElement('section');
     mainArea.className = 'flex-1 flex flex-col relative';
 
     this.roomList = new RoomList((room) => this.switchRoom(room));
     this.messageBoard = new MessageBoard();
-    this.messageInput = new MessageInput((content: string) => this.handleSendMessage(content));
+    this.messageInput = new MessageInput((content: string) =>
+      this.handleSendMessage(content)
+    );
 
     sidebar.appendChild(this.roomList.getElement());
 
@@ -40,19 +43,23 @@ export class ChatPage implements Component {
     }) as EventListener);
 
     window.addEventListener('user-blocked', () => {
-        if (this.activeRoom) {
-            this.messageBoard.loadMessages(this.activeRoom.id);
-        }
+      if (this.activeRoom) {
+        this.messageBoard.loadMessages(this.activeRoom.id);
+      }
     });
 
     this.init();
+  }
+
+  public destroy(): void {
+    this.el.remove();
   }
 
   private async init() {
     await this.roomList.refresh();
     // Default to Global Chat if available
     const rooms = await chatService.getRooms();
-    const globalRoom = rooms.find(r => r.type === 'global');
+    const globalRoom = rooms.find((r) => r.type === 'global');
     if (globalRoom) {
       this.switchRoom(globalRoom);
     }

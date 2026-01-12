@@ -14,8 +14,15 @@ export class ChatService {
     return api.get<ChatMessage[]>(`chat/rooms/${roomId}/messages`);
   }
 
-  async sendMessage(roomId: string, content: string, messageType: string = 'text'): Promise<ChatMessage> {
-    return api.post<ChatMessage>(`chat/rooms/${roomId}/messages`, { content, messageType });
+  async sendMessage(
+    roomId: string,
+    content: string,
+    messageType: string = 'text'
+  ): Promise<ChatMessage> {
+    return api.post<ChatMessage>(`chat/rooms/${roomId}/messages`, {
+      content,
+      messageType,
+    });
   }
 
   async blockUser(blockedUserId: string): Promise<void> {

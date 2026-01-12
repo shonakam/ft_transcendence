@@ -38,13 +38,13 @@ export class RoomList implements Component {
     const container = this.el.querySelector('#room-items')!;
 
     // Sort: Global first, then others
-    const sortedRooms = [...this.rooms].sort((a,b) => {
+    const sortedRooms = [...this.rooms].sort((a, b) => {
       if (a.type === 'global') return -1;
       if (b.type === 'global') return 1;
       return 0;
     });
 
-    sortedRooms.forEach(room => {
+    sortedRooms.forEach((room) => {
       const item = document.createElement('button');
       const isActive = room.id === this.activeRoomId;
       item.className = `w-full text-left p-4 hover:bg-white/5 transition-colors border-b border-white/5 flex items-center space-x-3 ${isActive ? 'bg-indigo-600/20 border-r-2 border-r-indigo-500' : ''}`;

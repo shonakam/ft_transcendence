@@ -1,4 +1,4 @@
-import { Direction } from '../../types/Direction';
+import { Direction } from './types/Direction';
 import { GameState } from './GameState';
 
 interface InputState {
