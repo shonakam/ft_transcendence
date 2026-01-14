@@ -1,13 +1,12 @@
-import { GameCanvas } from './GameCanvas';
-import { GameState } from './GameState';
-import { PhysicsEngine } from './PhysicsEngine';
-import { CanvasRenderer } from './CanvasRenderer';
-import { InputHandler } from './interface/Input';
+import { GameCanvas } from '@shonakam/common/game/GameCanvas';
+import { GameState } from '@shonakam/common/game/GameState';
+import { PhysicsEngine } from '@shonakam/common/game/PhysicsEngine';
+import { checkGoalCollision } from '@shonakam/common/game/checkGoalCollision';
+import { CanvasRenderer } from '@shonakam/common/game/CanvasRenderer';
+import { InputHandler } from '@shonakam/common/game/interface/Input';
+import { Goal } from '@shonakam/common/game/types/Goal';
 
-import { PongGame } from './interface/PongGame';
-import { Goal } from './types/Goal';
-
-export class LocalPongGame implements PongGame {
+export class LocalPongGame {
   canvas: GameCanvas;
   input: InputHandler;
   state: GameState;
@@ -47,18 +46,25 @@ export class LocalPongGame implements PongGame {
     else dt = (currentTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = currentTime;
 
-    const goal = PhysicsEngine.update(dt, this.state, this.input);
-    this.updateScore(goal);
+    PhysicsEngine.update(dt, this.state, this.input);
+    const goal = checkGoalCollision(this.state.ball, this.state.config.CANVAS_WIDTH);
+    this.updateScoreStatus(goal);
     this.renderer.render();
     if (this.state.status === 'playing')
       window.requestAnimationFrame(this.loopCallback);
   }
 
-  updateScore(goal: Goal): void {
+  updateScoreStatus(goal: Goal): void {
     if (!goal) return;
+    this.state.setStatus('ready');
+    this.state.ball.reset();
     if (goal === 'left') this.state.incrementScore('left');
     else if (goal === 'right') this.state.incrementScore('right');
-    this.state.ball.reset();
-    this.state.setStatus('ready');
+    if (
+      this.state.scores[0] >= this.state.config.WINNING_SCORE ||
+      this.state.scores[1] >= this.state.config.WINNING_SCORE
+    ) {
+      this.state.setStatus('finished');
+    }
   }
 }

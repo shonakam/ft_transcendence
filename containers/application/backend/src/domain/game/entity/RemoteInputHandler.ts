@@ -1,4 +1,5 @@
-import { InputHandler, InputState } from '../interface/Input';
+import { WebSocket } from 'ws';
+import { InputHandler, InputState } from '@shonakam/common/game/interface/Input.ts';
 
 export class RemoteInputHandler implements InputHandler {
   private inputState: InputState;
