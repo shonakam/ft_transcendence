@@ -5,17 +5,15 @@ import { Ball } from './Ball';
 import { Paddle } from './Paddle';
 
 import { Direction } from './types/Direction';
-import { Goal } from './types/Goal';
 
 export class PhysicsEngine {
   static update(
     dt: number,
     state: GameState,
     inputHandler: InputHandler
-  ): Goal {
+  ): void {
     this.updatePaddles(dt, state, inputHandler);
     this.updateBall(dt, state.ball);
-    return this.checkCollisions(state);
   }
 
   // パドルの位置更新
@@ -55,16 +53,14 @@ export class PhysicsEngine {
   }
 
   // 衝突判定ラッパー
-  static checkCollisions(state: GameState): Goal {
+  static checkCollisions(state: GameState): void {
     const ball = state.ball;
     const paddles = state.paddles;
     const canvasHeight = state.config.CANVAS_HEIGHT;
-    const canvasWidth = state.config.CANVAS_WIDTH;
 
     this.checkHorizontalWallCollision(ball, canvasHeight);
     this.checkPaddleCollision(ball, paddles[0], 'left');
     this.checkPaddleCollision(ball, paddles[1], 'right');
-    return this.checkGoalCollision(ball, canvasWidth);
   }
 
   // 上下の壁での反射
@@ -113,16 +109,5 @@ export class PhysicsEngine {
     // } else if (side === 'right') {
     //   ball.position.x = paddleLeft - ball.radius;
     // }
-  }
-
-  // ゴール判定
-  static checkGoalCollision(ball: Ball, canvasWidth: number): Goal {
-    const ballLeft = ball.position.x - ball.radius;
-    const ballRight = ball.position.x + ball.radius;
-    const leftGoalX = 0;
-    const rightGoalX = canvasWidth;
-    if (leftGoalX < ballLeft && ballRight < rightGoalX) return 'none';
-    else if (ballLeft <= leftGoalX) return 'right';
-    else return 'left'; // if (rightGoalX <= ballRight)
   }
 }
