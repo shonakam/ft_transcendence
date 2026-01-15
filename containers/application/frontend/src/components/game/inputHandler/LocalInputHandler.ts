@@ -1,5 +1,5 @@
-import { InputState, InputHandler, PlayerInput } from '@shonakam/common/game/interface/Input';
-import { Direction } from '@shonakam/common/game/types/Direction';
+import { InputState, InputHandler, PlayerInput } from '@shonakam/common/index';
+import type { Direction } from '@shonakam/common/index';
 
 export class LocalInputHandler implements InputHandler {
   keys: Set<string>;
