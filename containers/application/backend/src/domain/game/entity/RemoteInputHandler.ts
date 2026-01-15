@@ -17,13 +17,13 @@ export class RemoteInputHandler implements InputHandler {
     const index = player === 'left' ? 0 : 1;
     this.webSockets[index] = sockets;
 
-    sockets.onmessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      this.inputState[player] = {
-        direction: data.direction,
-        isStartPressed: data.isStartPressed,
-      };
-    };
+    // sockets.onmessage = (event: MessageEvent) => {
+    //   const data = JSON.parse(event.data);
+    //   this.inputState[player] = {
+    //     direction: data.direction,
+    //     isStartPressed: data.isStartPressed,
+    //   };
+    // };
   }
   // setWebSocket(side: 'left' | 'right', sockets: (WebSocket | null)[]) {
   //   const index = side === 'left' ? 0 : 1;

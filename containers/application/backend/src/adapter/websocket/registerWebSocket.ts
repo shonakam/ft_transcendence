@@ -2,6 +2,10 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import ws from '@fastify/websocket';
 import { authenticate } from '../auth/authPreHandler.ts';
 import { chatWebSocketManager } from './ChatWebSocketManager.ts';
+import WebSocket from 'ws';
+
+import { GameSessionRegistry } from '../../domain/game/entity/GameSessionRegistry.ts';
+import { GameRequestHandler } from './game/GameRequestHandler.ts';
 
 export function registerWebSocket(fastify: FastifyInstance) {
   fastify.register(ws, {
@@ -44,15 +48,40 @@ export function registerWebSocket(fastify: FastifyInstance) {
       },
     );
 
-    fastify.get('/ws/game/remote', { websocket: true }, (connection: any) => {
-      const socket = connection?.socket || connection;
-      if (!socket || typeof socket.on !== 'function') return;
+    // fastify.get('/ws/*', { websocket: true }, (socket, req) => {
+    //   socket.on('message', (message: unknown) => {
+    //     console.log('Received message on /ws/*:', message);
+    //   });
+    // });
 
-      socket.on('message', (message: any) => {
-        // Game message handling
+    fastify.get('/ws/game/remote', { websocket: true }, (socket: WebSocket) => {
+      socket.on('message', (message: unknown) => {
+        const registry = new GameSessionRegistry();
+        onGameMessage(message, socket, registry);
+        // refresh game state logic here
       });
     });
+
+    // fastify.get('/ws/chat', { websocket: true }, (socket: WebSocket, req) => {
+    //   socket.on('message', (message: unknown) => {
+    //     onChatMessage(message, socket);
+    //     // chat handling logic here
+    //   });
+    // });
 
     console.log('WebSocket routes registered');
   });
 }
+
+function onGameMessage(
+  message: unknown,
+  socket: WebSocket,
+  registry: GameSessionRegistry,
+) {
+  // GameRequestHandler.handle(message, socket, registry);
+}
+
+// function onChatMessage(message: unknown, _socket: WebSocket) {
+//   console.log('Received chat message:', message);
+//   // Chat message handling logic here
+// }
