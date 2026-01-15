@@ -1,4 +1,4 @@
-import { Vector2 } from './types/Vector2';
+import { Vector2 } from './types/vector2';
 
 import CONFIG from './GameConfig';
 

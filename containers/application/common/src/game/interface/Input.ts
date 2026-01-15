@@ -1,4 +1,4 @@
-import { Direction } from '../types/Direction';
+import { Direction } from '../types/direction';
 
 export interface PlayerInput {
   direction: Direction;

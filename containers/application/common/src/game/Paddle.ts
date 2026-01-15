@@ -1,4 +1,5 @@
-import { Vector2 } from './types/Vector2';
+import type { Vector2 } from './types/vector2';
+import type { GameSide } from './types/gameSide';
 
 import CONFIG from './GameConfig';
 
@@ -8,7 +9,7 @@ export class Paddle {
   length: number;
   speed: number;
 
-  constructor(side: 'left' | 'right') {
+  constructor(side: GameSide) {
     const y = (CONFIG.CANVAS_HEIGHT - 100) / 2;
     if (side === 'left') {
       this.position = {

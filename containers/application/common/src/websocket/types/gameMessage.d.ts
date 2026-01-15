@@ -24,3 +24,4 @@ export type ServerMessage =
   // | WsMessage<'pong', { nonce: string }>
   // | WsMessage<'sync', { state: JsonObject; serverTime: number }>
   // | WsMessage<'custom', JsonObject>;
+

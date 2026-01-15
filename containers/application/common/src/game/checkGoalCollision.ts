@@ -1,7 +1,7 @@
 import { Ball } from './Ball';
-import type { Goal } from './types/Goal';
+import type { GameSide } from './types/gameSide';
 
-export function checkGoalCollision(ball: Ball, canvasWidth: number): Goal {
+export function checkGoalCollision(ball: Ball, canvasWidth: number): GameSide | 'none' {
   const ballLeft = ball.position.x - ball.radius;
   const ballRight = ball.position.x + ball.radius;
   const leftGoalX = 0;

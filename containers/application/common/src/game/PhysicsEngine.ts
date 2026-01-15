@@ -4,7 +4,8 @@ import { InputHandler } from './interface/Input';
 import { Ball } from './Ball';
 import { Paddle } from './Paddle';
 
-import { Direction } from './types/Direction';
+import { Direction } from './types/direction';
+import { GameSide } from './types/gameSide';
 
 export class PhysicsEngine {
   static update(
@@ -84,7 +85,7 @@ export class PhysicsEngine {
   static checkPaddleCollision(
     ball: Ball,
     paddle: Paddle,
-    side: 'left' | 'right'
+    side: GameSide
   ): void {
     if (side === 'right' && ball.velocity.x < 0) return;
     else if (side === 'left' && 0 < ball.velocity.x) return;

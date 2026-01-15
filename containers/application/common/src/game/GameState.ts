@@ -5,13 +5,15 @@
 import { Ball } from './Ball';
 import { Paddle } from './Paddle';
 
+import type { GameSide } from './types/gameSide';
+
 import CONFIG from './GameConfig';
 
 export class GameState {
   // BasicStatus
   status: 'ready' | 'playing' | 'paused' | 'finished';
-  winner: null | 'left' | 'right';
-  playerSide: 'left' | 'right' | 'both' | null;
+  winner: GameSide | null;
+  playerSide: GameSide | 'both' | null;
   onStatusChange: (status: 'ready' | 'playing' | 'paused' | 'finished') => void;
 
   // Game user info
@@ -68,7 +70,7 @@ export class GameState {
     this.onStatusChange(status);
   }
 
-  incrementScore(side: 'left' | 'right') {
+  incrementScore(side: GameSide) {
     if (side === 'left') this.scores[0]++;
     else if (side === 'right') this.scores[1]++;
     if (this.onScoreChange) this.onScoreChange(this.scores[0], this.scores[1]);
@@ -82,5 +84,19 @@ export class GameState {
     if (this.scores[0] >= this.config.WINNING_SCORE) this.winner = 'left';
     else if (this.scores[1] >= this.config.WINNING_SCORE) this.winner = 'right';
     this.setStatus('finished');
+  }
+
+  jsonify() {
+    return {
+      status: this.status,
+      winner: this.winner,
+      playerSide: this.playerSide,
+      leftUserAliasName: this.leftUserAliasName,
+      rightUserAliasName: this.rightUserAliasName,
+      scores: this.scores,
+      paddles: this.paddles.map((paddle) => paddle.jsonify()),
+      ball: this.ball.jsonify(),
+      config: this.config,
+    };
   }
 }
