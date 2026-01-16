@@ -1,15 +1,15 @@
-import { GameState } from '@shonakam/common/index';
+import { PongGame } from '@shonakam/common/index';
 
 import { GameCanvas } from '../game/canvas/GameCanvas';
+import { InputHandler } from '@shonakam/common/index';
+import { GameState } from '@shonakam/common/index';
 import { CanvasRenderer } from '../game/canvas/CanvasRenderer';
 
-import { PhysicsEngine } from '@shonakam/common/index';
-import { checkGoalCollision } from '@shonakam/common/index';
+import { checkGoalCollision, PhysicsEngine } from '@shonakam/common/index';
 
-import { InputHandler } from '@shonakam/common/index';
 import type { GameSide } from '@shonakam/common/game/types/gameSide';
 
-export class LocalPongGame {
+export class LocalPongGame implements PongGame {
   canvas: GameCanvas;
   input: InputHandler;
   state: GameState;
@@ -40,17 +40,21 @@ export class LocalPongGame {
   stop(): void {
     if (this.state.status !== 'playing') return;
     this.state.setStatus('paused');
+    this.lastFrameTime = null;
     this.renderer.render();
   }
 
   loop(currentTime: number): void {
+    if (this.lastFrameTime === null && this.state.status !== 'playing') return;
     let dt: number;
     if (this.lastFrameTime === null) dt = 0;
     else dt = (currentTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = currentTime;
-
     PhysicsEngine.update(dt, this.state, this.input);
-    const goal = checkGoalCollision(this.state.ball, this.state.config.CANVAS_WIDTH);
+    const goal = checkGoalCollision(
+      this.state.ball,
+      this.state.config.CANVAS_WIDTH
+    );
     this.updateScoreStatus(goal);
     this.renderer.render();
     if (this.state.status === 'playing')

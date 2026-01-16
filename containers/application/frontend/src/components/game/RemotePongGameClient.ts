@@ -1,16 +1,14 @@
-import { io, Socket } from 'socket.io-client';
-
-import { checkGoalCollision, GameState, PhysicsEngine } from '@shonakam/common/index';
+import { PongGame } from '@shonakam/common/index';
 
 import { GameCanvas } from './canvas/GameCanvas';
-import { CanvasRenderer } from '../../components/game/canvas/CanvasRenderer';
-
 import { InputHandler } from '@shonakam/common/index';
-
-import { PongGame } from '@shonakam/common/index';
-import { GameSide } from '@shonakam/common/game/types/gameSide';
-
+import { GameState } from '@shonakam/common/index';
+import { CanvasRenderer } from '../../components/game/canvas/CanvasRenderer';
 import { GameSocketClient } from './ws/GameSocketClient';
+
+import { checkGoalCollision, PhysicsEngine } from '@shonakam/common/index';
+
+import type { GameSide } from '@shonakam/common/game/types/gameSide';
 
 export class RemotePongGameClient implements PongGame {
   canvas: GameCanvas;
@@ -58,10 +56,13 @@ export class RemotePongGameClient implements PongGame {
     this.lastFrameTime = currentTime;
     this.socket.sendDemoRequest();
     PhysicsEngine.update(dt, this.state, this.input);
-    const side = checkGoalCollision(this.state.ball, this.state.config.CANVAS_WIDTH);
+    const side = checkGoalCollision(
+      this.state.ball,
+      this.state.config.CANVAS_WIDTH
+    );
     this.updateScore(side);
     this.renderer.render();
-    if (this.state.status === 'playing'){
+    if (this.state.status === 'playing') {
       window.requestAnimationFrame(this.loopCallback);
     }
   }
@@ -75,5 +76,4 @@ export class RemotePongGameClient implements PongGame {
   }
 
   sendInput(): void {}
-
 }
