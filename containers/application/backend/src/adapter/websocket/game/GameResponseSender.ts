@@ -1,38 +1,32 @@
+import type { Socket } from 'socket.io';
+import { container } from '../../../container/index.ts';
+
 import { GameState } from '@shonakam/common/game/GameState.ts';
-import { Goal } from '@shonakam/common/game/types/Goal.ts';
 
 export class GameResponseSender {
-  private socket: WebSocket;
 
-  constructor(socket: WebSocket) {
-    this.socket = socket;
+
+  static sendMessage(socket: Socket, message: string, payload: object): void {
+    socket.emit(message, payload);
   }
 
-  sendJson(message: string, data: object): void {
-    const fullMessage = {
-      type: message,
-      payload: data,
-    };
-    this.socket.send(JSON.stringify(fullMessage));
+  static sendGameGenerated(socket: Socket, state: GameState): void {
+    this.sendMessage(socket, 'gameGenerated', state.jsonify());
   }
 
-  sendGameGenerated(state: GameState): void {
-    this.sendJson('gameGenerated', state.jsonify());
+  static sendGameReady(socket:Socket): void {
+    this.sendMessage(socket, 'gameReady', {});
   }
 
-  sendGameReady(): void {
-    this.sendJson('gameReady', {});
+  static sendGameStart(socket: Socket): void {
+    this.sendMessage(socket, 'gameStart', {});
   }
 
-  sendGameStart(): void {
-    this.sendJson('gameStart', {});
+  static sendGameState(socket: Socket, state: GameState): void {
+    this.sendMessage(socket, 'gameState', state);
   }
 
-  sendGameState(state: GameState): void {
-    this.sendJson('gameState', state.jsonify());
-  }
-
-  sendScoreUpdate(goal: Goal): void {
-    // this.sendJson('scoreUpdate', goal);
+  static sendScoreUpdate(socket: Socket, scores: [left: number, right: number]): void {
+    this.sendMessage(socket, 'scoreUpdate', { scores });
   }
 }

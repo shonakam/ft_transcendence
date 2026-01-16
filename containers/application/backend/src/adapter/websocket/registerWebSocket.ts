@@ -5,13 +5,10 @@ import { chatWebSocketManager } from './ChatWebSocketManager.ts';
 import WebSocket from 'ws';
 
 import { GameSessionRegistry } from '../../domain/game/entity/GameSessionRegistry.ts';
+import { Server, Socket } from 'socket.io';
 import { GameRequestHandler } from './game/GameRequestHandler.ts';
 
-export function registerWebSocket(fastify: FastifyInstance) {
-  fastify.register(ws, {
-    options: { maxPayload: 1048576 },
-  });
-
+export function registerWebSocket(io: Server): void {
   fastify.register(async function (fastify: FastifyInstance) {
     fastify.get(
       '/ws/chat',
@@ -47,29 +44,47 @@ export function registerWebSocket(fastify: FastifyInstance) {
         });
       },
     );
+  });
 
-    // fastify.get('/ws/*', { websocket: true }, (socket, req) => {
-    //   socket.on('message', (message: unknown) => {
-    //     console.log('Received message on /ws/*:', message);
-    //   });
+  // fastify.get('/ws/*', { websocket: true }, (socket, req) => {
+  //   socket.on('message', (message: unknown) => {
+  //     console.log('Received message on /ws/*:', message);
+  //   });
+  // });
+
+  io.of('/game/remote').on('connection', (socket: Socket) => {
+    // client → server
+    socket.emit('connected', { message: 'WebSocket connection established' });
+
+    // socket.on('register', (payload: { userId: string }) => {
+    //   GameRequestHandler.handleRegister(socket, payload);
     // });
 
-    fastify.get('/ws/game/remote', { websocket: true }, (socket: WebSocket) => {
-      socket.on('message', (message: unknown) => {
-        const registry = new GameSessionRegistry();
-        onGameMessage(message, socket, registry);
-        // refresh game state logic here
-      });
+    // socket.on('createGame', () => {
+    //   GameRequestHandler.handleCreateGame(socket);
+    // });
+
+    // socket.on('join', (payload: { gameId: string, userId: number }) =>
+    //   GameRequestHandler.handleJoin(socket, payload),
+    // );
+
+    // socket.on('playerInput', (payload) =>
+    //   GameRequestHandler.handlePlayerInput(socket, payload),
+    // );
+
+    // socket.on('leave', (payload) =>
+    //   GameRequestHandler.handleLeave(socket, payload, registry),
+    // );
+    // socket.on('disconnect', () => {
+    //   registry.deleteUserSocketBySocket(socket);
+    // });
+    // socket.on('error', (err) => {
+    //   console.error('WebSocket error:', err);
+    // });
+    socket.on('demo', () => {
+      console.log('Received demo request from client');
+      socket.emit('demoResponse', { message: 'Demo response from server' });
     });
-
-    // fastify.get('/ws/chat', { websocket: true }, (socket: WebSocket, req) => {
-    //   socket.on('message', (message: unknown) => {
-    //     onChatMessage(message, socket);
-    //     // chat handling logic here
-    //   });
-    // });
-
-    console.log('WebSocket routes registered');
   });
 }
 
@@ -79,9 +94,7 @@ function onGameMessage(
   registry: GameSessionRegistry,
 ) {
   // GameRequestHandler.handle(message, socket, registry);
+  // io.of('/notifications').on('connection', (socket: Socket) => {
+  //   // Handle notification-specific events here
+  // });
 }
-
-// function onChatMessage(message: unknown, _socket: WebSocket) {
-//   console.log('Received chat message:', message);
-//   // Chat message handling logic here
-// }

@@ -13,6 +13,8 @@ import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 
 import { registRouters } from './adapter/router/index.ts';
+
+import { Server } from 'socket.io';
 import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
 
 import { container } from './container/index.js';
@@ -62,7 +64,12 @@ async function main() {
 
   await registRouters(server, container);
 
-  await registerWebSocket(server);
+  const ioServer = new Server(server.server, {
+    path: '/ws',
+    transports: ['websocket', 'polling'],
+    cors: { origin: 'https://transcendence.42.fr', credentials: true },
+  });
+  await registerWebSocket(ioServer);
 
   try {
     // Initialize Vault first (for secrets management)
