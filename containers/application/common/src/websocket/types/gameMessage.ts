@@ -25,3 +25,22 @@ export type ServerMessage =
   // | WsMessage<'sync', { state: JsonObject; serverTime: number }>
   // | WsMessage<'custom', JsonObject>;
 
+// // client -> server
+// export interface ClientToServerEvents {
+//   playerInput: PlayerInputPayload;
+//   joinRequest: { gameMode: string; options: JsonObject };
+//   join: { roomId: string };
+//   start: { roomId: string };
+//   leave: { roomId: string };
+//   ack: { type: string; nonce?: string };
+// }
+
+// // server -> client
+// export interface ServerToClientEvents {
+//   state: StatePayload;
+//   score: ScorePayload;
+//   start: { roomId: string; startedAt: number };
+//   stop: MatchReadyPayload;
+//   finish: { roomId: string; winner: PlayerSlot | null };
+//   error: ErrorPayload;
+// }
