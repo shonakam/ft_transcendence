@@ -53,6 +53,7 @@ services:
       - "${FRONTEND_EXTERNAL_PORT:-5173}:${FRONTEND_INTERNAL_PORT:-5173}"
     volumes:
       - ./frontend:/app
+      - ./common:/common
       - "/app/node_modules"
     env_file:
       - ./.env.local
@@ -70,6 +71,7 @@ services:
       - "${BACKEND_EXTERNAL_PORT:-8080}:${BACKEND_INTERNAL_PORT:-8080}"
     volumes:
       - ./backend:/app
+      - ./common:/common
       - storage:/var/lib/sqlite
       - "/app/node_modules"
     env_file:
