@@ -1,24 +1,23 @@
 import { Component } from '../../interface/Component';
 
-import { GameCanvas } from '@shonakam/common/game/GameCanvas'
-import { LocalInputHandler } from '@shonakam/common/game/Inputs/localInputHandler';
-import { LocalPongGame } from '@shonakam/common/game/LocalPongGame';
+import { GameCanvas } from '../../components/game/canvas/GameCanvas';
+import { LocalInputHandler } from '../../components/game/inputHandler/LocalInputHandler';
+import { LocalPongGame } from '../../components/game/LocalPongGame';
+
 import CONFIG from '@shonakam/common/game/GameConfig';
 import gameTemplate from './game.html?raw';
 
 export class GamePage implements Component {
-  private rootElement: HTMLElement;
-  private el: HTMLElement;
+  private rootElement: HTMLElement = document.getElementById(
+    'app-root'
+  ) as HTMLElement;
+  private el: HTMLElement = document.createElement('main');
   private gameCanvas: GameCanvas;
   private inputHandler = new LocalInputHandler();
   private pongGame: LocalPongGame;
 
   constructor() {
-    this.rootElement = document.getElementById('app-root') as HTMLElement;
-    this.el = document.createElement('main');
-
     this.el.innerHTML = gameTemplate;
-
     this.gameCanvas = new GameCanvas(
       this.el.querySelector('.canvas-stack') as HTMLElement,
       CONFIG.CANVAS_WIDTH,
