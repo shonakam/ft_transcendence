@@ -15,6 +15,7 @@ export class PhysicsEngine {
   ): void {
     this.updatePaddles(dt, state, inputHandler);
     this.updateBall(dt, state.ball);
+    this.checkCollisions(state);
   }
 
   // パドルの位置更新
