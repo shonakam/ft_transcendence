@@ -16,7 +16,6 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
-    "@fastify/websocket": "^11.2.0",
     "@shonakam/common": "file:../common",
     "fastify": "^5.6.0",
     "ioredis": "^5.8.2",
@@ -27,8 +26,7 @@
     "socket.io": "^4.8.3",
     "speakeasy": "^2.0.0",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "ws": "^8.19.0"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -36,7 +34,6 @@
     "@types/node": "^22.18.3",
     "@types/qrcode": "^1.5.6",
     "@types/speakeasy": "^2.0.10",
-    "@types/ws": "^8.18.1",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
