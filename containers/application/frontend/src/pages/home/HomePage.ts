@@ -1,18 +1,13 @@
 import { Component } from '../../interface/Component';
-import { AuthModal } from '../../components/organisms/user/AuthModal';
+import { router } from '../../router/router';
 
 import homeTemplate from './home.html?raw';
 
 export class HomePage implements Component {
-  private rootElement: HTMLElement;
   private el: HTMLElement;
-  private authModal: AuthModal;
 
   constructor() {
-    this.rootElement = document.getElementById('app-root') as HTMLElement;
     this.el = document.createElement('main');
-    this.authModal = new AuthModal();
-
     this.render();
     this.initEventListeners();
   }
@@ -26,15 +21,15 @@ export class HomePage implements Component {
   }
 
   private initEventListeners(): void {
-    const loginButton =
-      this.rootElement.querySelector<HTMLButtonElement>('#login-button');
-    const signupButton =
-      this.rootElement.querySelector<HTMLButtonElement>('#signup-button');
+    const loginButton = this.el.querySelector<HTMLButtonElement>('#login-button');
+    const signupButton = this.el.querySelector<HTMLButtonElement>('#signup-button');
 
-    loginButton?.addEventListener('click', () => this.authModal.open('login'));
-    signupButton?.addEventListener('click', () =>
-      this.authModal.open('signup')
-    );
+    loginButton?.addEventListener('click', () => {
+      router.navigateTo('/auth?view=login');
+    });
+    signupButton?.addEventListener('click', () => {
+      router.navigateTo('/auth?view=signup');
+    });
   }
 
   public getElement(): HTMLElement {
