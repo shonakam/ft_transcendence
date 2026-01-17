@@ -3,6 +3,7 @@ import HealthController from '../controller/HealthController.ts';
 import UserController from '../controller/UserController.ts';
 import AuthController from '../controller/AuthController.ts';
 import ChatController from '../controller/ChatController.ts';
+import VaultController from '../controller/VaultController.ts';
 import { AppContainer } from '../../container/index.ts';
 import { config } from '../../conf.ts';
 
@@ -23,4 +24,5 @@ export async function registRouters(
     prefix: '/api/v1/chat',
     useCases: appContainer.chatUseCases,
   });
+  await server.register(VaultController, { prefix: '/api/vault' });
 }
