@@ -10,7 +10,6 @@ export class User2faRepositorySqlite implements User2faRepository {
   }
 
   private scan(row: any): User2fa {
-    if (!row) return null as any;
     return {
       userId: row.user_id,
       totpSeceret: row.totp_secret,
@@ -39,7 +38,7 @@ export class User2faRepositorySqlite implements User2faRepository {
         ],
       );
     } catch (err) {
-      console.error('User2faRepositorySqlite.save: ', err, user2fa);
+      console.error('User2faRepositorySqlite.sacve: ', err, user2fa);
     }
   }
 
@@ -50,8 +49,8 @@ export class User2faRepositorySqlite implements User2faRepository {
         userId,
       ]);
     } catch (err) {
-      console.error('User2faRepositorySqlite.findById:', err);
+      console.error('User2faRepositorySqlite.sacve:', err);
     }
-    return row ? this.scan(row) : null;
+    return this.scan(row) ?? null;
   }
 }

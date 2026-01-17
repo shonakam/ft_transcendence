@@ -5,7 +5,6 @@ import { router } from '../../router/router';
 import { setupMfa } from '../../services/auth/setupMfa';
 import { toaster } from '../common/Toaster';
 
-// 注意：QRCode 库需要确保在项目中已安装
 // import QRCode from 'qrcode'
 
 export type MfaMode = 'setup' | 'verify';
@@ -33,6 +32,7 @@ export class MfaForm implements Component {
     const qrText = document.createElement('p');
     qrText.className = 'text-xs text-slate-400 text-center';
     qrText.textContent = '認証アプリでQRコードをスキャンしてください';
+    this.qrSection.append(this.qrImage, qrText);
 
     const refreshBtn = document.createElement('button');
     refreshBtn.type = 'button';
@@ -40,8 +40,7 @@ export class MfaForm implements Component {
       'text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors';
     refreshBtn.innerHTML = '<span>🔄</span> 再読み込み';
     refreshBtn.onclick = () => this.fetchAndGenerateQrCode();
-
-    this.qrSection.append(this.qrImage, qrText, refreshBtn);
+    this.qrSection.append(this.qrImage, refreshBtn);
 
     this.codeInput = document.createElement('input');
     this.codeInput.type = 'text';
@@ -59,13 +58,20 @@ export class MfaForm implements Component {
     this.cancelButton = document.createElement('button');
     this.cancelButton.type = 'button';
     this.cancelButton.className =
-      'w-full py-2 text-sm text-slate-400 hover:text-white transition-colors';
+      'w-full py-2 text-sm text-white hover:text-indigo-400 transition-colors mt-2 cursor-pointer';
     this.cancelButton.textContent = 'キャンセル';
 
     const buttonGroup = document.createElement('div');
     buttonGroup.className = 'flex flex-col space-y-2 mt-4';
+
+    this.submitButton.className =
+      'w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors';
+    this.cancelButton.className =
+      'w-full py-2 text-sm text-slate-400 hover:text-white transition-colors';
+
     buttonGroup.append(this.submitButton, this.cancelButton);
 
+    this.root.innerHTML = '';
     this.root.append(this.qrSection, this.codeInput, buttonGroup);
     this.initEvents();
   }
@@ -84,19 +90,16 @@ export class MfaForm implements Component {
       return toaster.show('QRコードの取得に失敗しました', 'error');
     }
 
-    // @ts-ignore: QRCode is usually globally available or imported
-    if (res && res.uri && typeof QRCode !== 'undefined') {
+    if (res && res.uri) {
       try {
-        // @ts-ignore
         const dataUrl = await QRCode.toDataURL(res.uri, {
           width: 200,
           margin: 2,
         });
         this.qrImage.src = dataUrl;
-        this.qrImage.style.opacity = '1';
       } catch (qrErr) {
         console.error('QR Generation failed', qrErr);
-        toaster.show('QRコードの生成に失败しました', 'error');
+        toaster.show('QRコードの生成に失敗しました', 'error');
       }
     }
   }

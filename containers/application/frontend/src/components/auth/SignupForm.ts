@@ -108,6 +108,13 @@ export class SignupForm implements Component {
     });
   }
 
+  /*
+    STEP
+     - フォームバリデーション
+     - 画像が選択された場合アップロード（パスを取得）
+     - ユーザー作成APIリクエスト
+     - 成功後にログインビューへ遷移
+   */
   private async handleSubmit() {
     const username = this.usernameInput.value;
     const email = this.emailInput.value;
