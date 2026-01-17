@@ -9,6 +9,8 @@ export const config = {
     jwtTmpAuthSecret:
       process.env.JWT_TMP_AUTH_SECRET ||
       'r2ke4j+PYjNzpcOHtO+As1kl1uHEDF/xE+zSo6HZL9k=',
+    // accessTokenTtlMs: 1000, // 1sec
+    // refreshTokenTtlMs: 5000, // 5sec
     accessTokenTtlMs: 900000, // 15min (15 * 60 * 1000)
     refreshTokenTtlMs: 86400000, // 1day (24 * 60 * 60 * 1000)
     issuer: process.env.JWT_ISSUER || 'https://api.transcendence.42.fr',
@@ -23,6 +25,12 @@ export const config = {
           clientId: process.env.VITE_42_CLIENT_ID || '',
           clientSecret: process.env.VITE_42_CLIENT_SECRET || '',
         },
+        // github: {
+        //   endpoint: ,
+        //   path: ,
+        //   clientId: ,
+        //   clientSecret: ,
+        // }
       },
     },
   },
@@ -39,7 +47,7 @@ export const config = {
         limit: 20,
       },
     },
-    game: {},
+    geme: {},
     chat: {},
     session: {},
   },
@@ -59,6 +67,7 @@ export const config = {
 export const cookieConfig = {
   secure: false,
   httpOnly: true,
+  // domain: 'api.transcendence.42.fr',
   path: '/',
   maxAge: 60 * 60 * 24 * 7,
 };

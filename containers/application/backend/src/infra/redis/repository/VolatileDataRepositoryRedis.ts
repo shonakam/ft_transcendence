@@ -41,6 +41,6 @@ export class VolatileDataRepositoryRedis {
   }
 
   async delete(key: string): Promise<void> {
-    await this.redis.del(key)
+    await this.redis.del(key);
   }
 }
