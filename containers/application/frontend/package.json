@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "main.ts",
   "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "concurrently \"npm:dev:css\" \"npm:dev:html\"",
     "dev:css": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch",
     "dev:html": "vite build --watch",

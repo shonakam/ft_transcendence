@@ -1,0 +1,29 @@
+.match::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -1.2rem;
+  width: 1.2rem;
+  height: 2px;
+  background: #999;
+}
+
+.match.has-connector::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: -20%;
+  width: 2px;
+  height: 145%;
+  background: #999;
+}
+
+.match.has-connector::after {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 50%;
+  width: 2rem;
+  height: 2px;
+  background: #999;
+}

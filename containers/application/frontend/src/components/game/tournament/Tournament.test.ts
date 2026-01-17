@@ -1,132 +1,75 @@
 import { Tournament } from './Tournament';
 
-describe('Tournament Class', () => {
-  let tournament: Tournament;
+const flattenSlots = (
+  round: NonNullable<ReturnType<Tournament['getState']>>['rounds'][number]
+) => round.flatMap((match) => [match.p1, match.p2]);
 
-  beforeEach(() => {
-    tournament = new Tournament();
-  });
+const sortedAliases = (
+  players: Array<{ alias: string; score: number } | null>
+) =>
+  players
+    .filter(
+      (player): player is { alias: string; score: number } => player !== null
+    )
+    .map((player) => player.alias)
+    .sort();
 
-  it('should add members correctly', () => {
-    tournament.addMember('Player1');
-    tournament.addMember('Player2');
-    expect(tournament.players.length).toBe(2);
-    expect(tournament.players[0].alias).toBe('Player1');
-    expect(tournament.players[1].alias).toBe('Player2');
-  });
-
-  it('should delete members correctly', () => {
-    tournament.addMember('Player1');
-    tournament.addMember('Player2');
-    tournament.deleteMember('Player1');
-    expect(tournament.players.length).toBe(1);
-    expect(tournament.players[0].alias).toBe('Player2');
-  });
-
-  it('should update status correctly', () => {
-    tournament.updateStatus('in_progress');
-    expect(tournament.status).toBe('in_progress');
-    tournament.updateStatus('completed');
-    expect(tournament.status).toBe('completed');
-  });
-});
-
-describe('Tournament.buildTournament', () => {
-  it('should build a tournament bracket correctly', () => {
+describe('Tournament', () => {
+  it('returns null before any bracket is created', () => {
     const tournament = new Tournament();
-    const playerAliases = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    playerAliases.forEach((alias) => tournament.addMember(alias));
 
-    const matches = tournament.buildTournament();
-
-    // 8 players, so 4 matches in round 0
-    const firstRoundMatches = matches.filter((m) => m.round === 0);
-    expect(firstRoundMatches.length).toBe(4);
-
-    const playersInFirstRound = firstRoundMatches
-      .flatMap((m) => m.players)
-      .filter((p) => p !== null);
-    expect(playersInFirstRound.length).toBe(8);
-
-    // No byes
-    const byes = firstRoundMatches
-      .flatMap((m) => m.players)
-      .filter((p) => p === null);
-    expect(byes.length).toBe(0);
-
-    // Check upper rounds
-    const secondRoundMatches = matches.filter((m) => m.round === 1);
-    expect(secondRoundMatches.length).toBe(2);
-
-    const finalRoundMatches = matches.filter((m) => m.round === 2);
-    expect(finalRoundMatches.length).toBe(1);
+    expect(tournament.getState()).toBeNull();
   });
 
-  it('should handle non-power of two players by adding byes', () => {
+  it('creates balanced rounds for a power-of-two roster', () => {
     const tournament = new Tournament();
-    const playerAliases = ['A', 'B', 'C', 'D', 'E'];
-    playerAliases.forEach((alias) => tournament.addMember(alias));
+    const players = Array.from(
+      { length: 8 },
+      (_, index) => `Player-${index + 1}`
+    );
 
-    const matches = tournament.buildTournament();
+    players.forEach((alias) => tournament.addMember(alias));
 
-    // There should be 8 players in the first round (3 byes)
-    const firstRoundMatches = matches.filter((m) => m.round === 0);
-    expect(firstRoundMatches.length).toBe(4);
-    const playersInFirstRound = firstRoundMatches
-      .flatMap((m) => m.players)
-      .filter((p) => p !== null);
-    expect(playersInFirstRound.length).toBe(5); // 5 actual players
+    expect(tournament.createInitialState()).toBe(true);
 
-    // Check that the byes are represented as nulls
-    const byes = firstRoundMatches
-      .flatMap((m) => m.players)
-      .filter((p) => p === null);
-    expect(byes.length).toBe(3);
-  });
+    const state = tournament.getState();
+    expect(state).not.toBeNull();
 
-  it('should return an empty array if there are no players', () => {
-    const tournament = new Tournament();
-    const matches = tournament.buildTournament();
-    expect(matches.length).toBe(0);
-  });
+    const roundSizes = state!.rounds.map((round) => round.length);
+    expect(roundSizes).toEqual([4, 2, 1]);
 
-  it('should create a single match if there are only two players', () => {
-    const tournament = new Tournament();
-    tournament.addMember('A');
-    tournament.addMember('B');
-    const matches = tournament.buildTournament();
-    expect(matches.length).toBe(1);
-    expect(matches[0].players.filter((p) => p !== null).length).toBe(2);
-    expect(matches[0].round).toBe(0);
-  });
+    const firstRoundAliases = sortedAliases(flattenSlots(state!.rounds[0]));
+    expect(firstRoundAliases).toEqual([...players].sort());
 
-  it('should allow deleting a member and reflect in the bracket', () => {
-    const tournament = new Tournament();
-    tournament.addMember('A');
-    tournament.addMember('B');
-    tournament.addMember('C');
-    tournament.deleteMember('B');
-    const matches = tournament.buildTournament();
-    const firstRoundMatches = matches.filter((m) => m.round === 0);
-    const playersInFirstRound = firstRoundMatches
-      .flatMap((m) => m.players)
-      .filter((p) => p !== null);
-    expect(playersInFirstRound.length).toBe(2);
-    expect(playersInFirstRound.some((p) => p && p.alias === 'B')).toBe(false);
-  });
-
-  it('should print all matches for visual inspection', () => {
-    const tournament = new Tournament();
-    const playerAliases = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    playerAliases.forEach((alias) => tournament.addMember(alias));
-    const matches = tournament.buildTournament();
-    matches.forEach((match, idx) => {
-      const playerNames = match.players
-        .map((p) => (p ? p.alias : 'BYE'))
-        .join(' vs ');
-
-      console.log(`Match ${idx}: Round ${match.round} - ${playerNames}`);
+    state!.rounds[0].forEach((match) => {
+      if (match.p1) {
+        expect(match.p1.score).toBe(0);
+      }
+      if (match.p2) {
+        expect(match.p2.score).toBe(0);
+      }
+      expect(match.winner).toBeNull();
     });
-    expect(matches.length).toBeGreaterThan(0);
+  });
+
+  it('pads entrants with byes up to the next power of two', () => {
+    const tournament = new Tournament();
+    const players = ['alpha', 'bravo', 'charlie'];
+    players.forEach((alias) => tournament.addMember(alias));
+
+    expect(tournament.createInitialState()).toBe(true);
+
+    const state = tournament.getState();
+    expect(state).not.toBeNull();
+
+    const roundSizes = state!.rounds.map((round) => round.length);
+    expect(roundSizes).toEqual([2, 1]);
+
+    const slots = flattenSlots(state!.rounds[0]);
+    const byeCount = slots.filter((player) => player === null).length;
+    expect(byeCount).toBe(1);
+
+    const aliases = sortedAliases(slots);
+    expect(aliases).toEqual([...players].sort());
   });
 });

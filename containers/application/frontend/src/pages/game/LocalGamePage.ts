@@ -7,6 +7,7 @@ import { LocalPongGame } from '../../components/game/LocalPongGame';
 import gameTemplate from './game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
+import { TournamentRender } from '../../components/game/tournament/TournamentRender';
 
 export class LocalGamePage implements Component {
   // private rootElement: HTMLElement = document.getElementById(
@@ -16,6 +17,8 @@ export class LocalGamePage implements Component {
   private gameCanvas: GameCanvas;
   private inputHandler = new LocalInputHandler();
   private pongGame: LocalPongGame;
+
+  private tournament: TournamentRender = new TournamentRender();
 
   constructor() {
     this.el.innerHTML = gameTemplate;
@@ -37,6 +40,15 @@ export class LocalGamePage implements Component {
     this.el.querySelector('#game-description')!.textContent =
       'This is the local multiplayer pong game.';
     this.updateWinningScore();
+    // FIX: temporary random players for testing
+    for (let i = 0; i < Math.floor(Math.random() * (8 - 2 + 1)) + 2; i++) {
+      this.tournament.logic.addMember(`Player ${i + 1}`);
+    }
+    this.tournament.logic.createInitialState();
+    this.tournament.render();
+    this.el
+      .querySelector('.tournament-section')!
+      .appendChild(this.tournament.getElement());
   }
 
   public destroy(): void {

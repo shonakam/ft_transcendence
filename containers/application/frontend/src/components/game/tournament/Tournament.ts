@@ -1,75 +1,83 @@
-type matchStatus = 'waiting' | 'in_progress' | 'completed';
-
 type Player = {
   alias: string;
-  // id: string;
-  // name: string;
+  score: number;
 };
 
 type Match = {
-  id: string;
-  round: number; // 0 = 1回戦
-  index: number; // そのラウンド内の順序
-  players: [Player | null, Player | null];
-  winner?: Player;
-  nextMatchId?: string; // 勝者が進む先
+  p1: Player | null;
+  p2: Player | null;
+  winner: 1 | 2 | null;
 };
 
+type TournamentState = {
+  rounds: Match[][];
+};
+
+function shuffle<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export class Tournament {
-  status: matchStatus = 'waiting';
-  players: Player[] = [];
+  private players: string[] = [];
+  private state: TournamentState | null = null;
 
   constructor() {}
 
   addMember(alias: string): void {
-    this.players.push({ alias });
+    this.players.push(alias);
   }
 
-  deleteMember(alias: string): void {
-    this.players = this.players.filter((player) => player.alias !== alias);
-  }
+  createInitialState(): boolean {
+    const slots: (string | null)[] = [...this.players];
 
-  updateStatus(newStatus: matchStatus): void {
-    this.status = newStatus;
-  }
-
-  private nextPowerOfTwo(n: number): number {
-    return 1 << Math.ceil(Math.log2(n));
-  }
-
-  buildTournament(): Match[] {
-    if (this.players.length < 2) {
-      return [];
+    // add byes to make the number of players a power of two
+    const targetSize =
+      slots.length <= 1 ? 1 : 2 ** Math.ceil(Math.log2(slots.length));
+    while (slots.length < targetSize) {
+      slots.push(null);
     }
-    const size = this.nextPowerOfTwo(this.players.length);
-    const rounds = Math.log2(size);
 
-    const matches: Match[] = [];
-    let matchId = 0;
+    // Shuffle including blanks
+    const shuffled = shuffle(slots);
 
-    // 1回戦
-    for (let i = 0; i < size / 2; i++) {
-      matches.push({
-        id: `m${matchId++}`,
-        round: 0,
-        index: i,
-        players: [this.players[i * 2] ?? null, this.players[i * 2 + 1] ?? null],
+    // Create first round
+    const firstRound: Match[] = [];
+
+    for (let i = 0; i < shuffled.length; i += 2) {
+      const alias1 = shuffled[i] ?? null;
+      const alias2 = shuffled[i + 1] ?? null;
+      firstRound.push({
+        p1: alias1 !== null ? { alias: alias1, score: 0 } : null,
+        p2: alias2 !== null ? { alias: alias2, score: 0 } : null,
+        winner: null,
       });
     }
 
-    // 上位ラウンド
-    for (let r = 1; r < rounds; r++) {
-      const prev = matches.filter((m) => m.round === r - 1);
-      for (let i = 0; i < prev.length / 2; i++) {
-        matches.push({
-          id: `m${matchId++}`,
-          round: r,
-          index: i,
-          players: [null, null],
-        });
-      }
+    // Create rounds array
+    const rounds: Match[][] = [firstRound];
+
+    let matches = firstRound.length;
+    while (matches > 1) {
+      matches = Math.ceil(matches / 2);
+      rounds.push(
+        Array.from({ length: matches }, () => ({
+          p1: null,
+          p2: null,
+          winner: null,
+        }))
+      );
     }
 
-    return matches;
+    this.state = { rounds };
+    return true;
+  }
+
+  getState(): TournamentState | null {
+    return this.state;
   }
 }
