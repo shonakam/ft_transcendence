@@ -42,7 +42,9 @@ export class VaultService {
       return true;
     } catch (err) {
       this.isConnected = false;
-      console.error('Vault: Initialization failed. Please ensure the Vault container is running and unsealed.');
+      console.error(
+        'Vault: Initialization failed. Please ensure the Vault container is running and unsealed.',
+      );
       return false;
     }
   }
@@ -60,7 +62,9 @@ export class VaultService {
   async setSecret(path: string, data: Record<string, any>) {
     try {
       // KV v2 uses secret/data/ prefix
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       return await this.vaultClient.write(kvPath, { data });
     } catch (err) {
       throw new Error(`Vault Write Error: Could not save secret to ${path}`);
@@ -72,7 +76,9 @@ export class VaultService {
    */
   async getSecret(path: string): Promise<Record<string, any> | null> {
     try {
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       const response = await this.vaultClient.read(kvPath);
       return response?.data?.data || null;
     } catch (err) {
@@ -85,7 +91,9 @@ export class VaultService {
    */
   async deleteSecret(path: string) {
     try {
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       await this.vaultClient.delete(kvPath);
     } catch (err) {
       console.error(`Vault Delete Error at ${path}:`, err);
@@ -137,7 +145,9 @@ export class VaultService {
       }
     }
     // Fallback to environment variables
-    console.warn('⚠️  Vault: OAuth credentials NOT loaded from Vault - using environment variables');
+    console.warn(
+      'Vault: OAuth credentials not found in Vault, using environment variables',
+    );
     return {
       client_id: process.env.VITE_42_CLIENT_ID || '',
       client_secret: process.env.VITE_42_CLIENT_SECRET || '',

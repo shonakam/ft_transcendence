@@ -7,8 +7,12 @@ export default async function VaultController(server: FastifyInstance) {
 
   // 存储 secret
   server.post('/api/vault/set-secret', async (request, reply) => {
-    const { path, data } = request.body as { path: string; data: Record<string, any> };
-    if (!path || !data) return reply.code(400).send({ error: 'path/data required' });
+    const { path, data } = request.body as {
+      path: string;
+      data: Record<string, any>;
+    };
+    if (!path || !data)
+      return reply.code(400).send({ error: 'path/data required' });
     await vaultService.setSecret(path, data);
     return { ok: true };
   });

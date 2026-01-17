@@ -37,7 +37,7 @@ export class LocalInputHandler implements InputHandler {
   }
 
   getRightDirection(): Direction {
-    if (this.keys.has('ArrowUp')|| this.keys.has('KeyI')) return 'up';
+    if (this.keys.has('ArrowUp') || this.keys.has('KeyI')) return 'up';
     if (this.keys.has('ArrowDown') || this.keys.has('KeyK')) return 'down';
     return 'none';
   }
