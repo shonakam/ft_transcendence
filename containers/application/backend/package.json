@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "nodemon --watch './src/**/*.ts' --exec 'node --trace-uncaught --trace-warnings --trace-exit --loader ts-node/esm' src/main.ts",
+    "dev": "nodemon --watch './src/**/*.ts' --exec \"tsx\" src/main.ts",
     "lint": "eslint --cache --ext .ts .",
     "lint:fix": "eslint --cache --fix --ext .ts .",
     "format": "prettier --write './src/**/*.ts'"
@@ -25,7 +25,8 @@
     "qrcode": "^1.5.4",
     "speakeasy": "^2.0.0",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -40,7 +41,6 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.1",
-    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }

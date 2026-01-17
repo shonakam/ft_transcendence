@@ -1,3 +1,10 @@
-certs
-certs/transcendence.42.fr.key
-certs/transcendence.42.fr.crt
+# Ignore all secrets and certificates
+*
+!.gitignore
+
+# Explicitly ignore Vault files
+certs/
+vault-config.hcl
+*.key
+*.crt
+*.pem
