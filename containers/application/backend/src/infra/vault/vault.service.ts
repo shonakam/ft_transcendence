@@ -1,6 +1,8 @@
-import vaultModule from 'node-vault';
-import https from 'https';
-const vault = vaultModule.default || vaultModule;
+import * as https from 'https';
+import * as vaultModule from 'node-vault';
+
+// Handle both ESM and CommonJS module formats
+const vault = (vaultModule as any).default || vaultModule;
 
 // 允许自签名证书（开发/评测环境）
 const agent = new https.Agent({ rejectUnauthorized: false });

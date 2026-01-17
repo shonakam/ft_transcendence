@@ -75,3 +75,6 @@ unseal-keys*
 # Backup files that might contain secrets
 *.bak
 *.backup
+*.sqlite-shm
+*.sqlite-wal
+containers/application/data/
