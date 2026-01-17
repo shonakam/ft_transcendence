@@ -38,3 +38,5 @@ test-results/
 
 # User-specific files
 *.code-workspace
+
+.vscode
