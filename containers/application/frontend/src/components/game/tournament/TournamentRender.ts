@@ -27,7 +27,7 @@ export class TournamentRender implements Component {
       return;
     }
 
-    state.rounds.forEach((round, roundIndex) => {
+    state.rounds.forEach((round) => {
       const col = document.createElement('div');
       col.className = 'flex flex-col gap-6 justify-around';
 
@@ -36,18 +36,18 @@ export class TournamentRender implements Component {
         card.className =
           'match border rounded p-2 w-36 text-sm relative bg-white';
 
-        if (roundIndex > 0) {
-          card.classList.add('has-connector', 'match-round-' + roundIndex);
-        }
+        // if (roundIndex > 0) {
+        //   card.classList.add('has-connector', 'match-round-' + roundIndex);
+        // }
 
         card.innerHTML = `
         <div class="flex justify-between">
-          <span>${match.p1?.alias ?? '—'}</span>
-          <span>${match.p1?.score ?? ''}</span>
+          <span>${match.p1?.alias ?? '-'}</span>
+          <span>${match.p1?.score ?? '-'}</span>
         </div>
         <div class="flex justify-between">
-          <span>${match.p2?.alias ?? '—'}</span>
-          <span>${match.p2?.score ?? ''}</span>
+          <span>${match.p2?.alias ?? '-'}</span>
+          <span>${match.p2?.score ?? '-'}</span>
         </div>
       `;
         col.appendChild(card);

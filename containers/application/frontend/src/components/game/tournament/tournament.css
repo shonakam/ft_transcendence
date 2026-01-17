@@ -8,6 +8,18 @@
   background: #999;
 }
 
+.match::before {
+  content: '';
+  position: absolute;
+  top: 45%;
+  right: -1.2rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: solid 2px #999;
+  border-bottom: solid 2px #999;
+  transform: rotate(-45deg);
+}
+
 .match.has-connector::before {
   content: '';
   position: absolute;
