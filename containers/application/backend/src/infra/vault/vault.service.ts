@@ -104,6 +104,7 @@ export class VaultService {
     if (this.isConnected) {
       const secrets = await this.getSecret('backend/jwt');
       if (secrets) {
+        console.log('Vault: ✅ JWT secrets loaded from Vault');
         return {
           access_secret: secrets.access_secret,
           refresh_secret: secrets.refresh_secret,
@@ -112,7 +113,7 @@ export class VaultService {
       }
     }
     // Fallback to environment variables
-    console.warn('Vault: JWT secrets not found in Vault, using environment variables');
+    console.warn('⚠️  Vault: JWT secrets NOT loaded from Vault - using environment variables (INSECURE for production!)');
     return {
       access_secret: process.env.JWT_ACCESS_SECRET || '',
       refresh_secret: process.env.JWT_REFRESH_SECRET || '',
@@ -128,6 +129,7 @@ export class VaultService {
     if (this.isConnected) {
       const secrets = await this.getSecret('backend/oauth');
       if (secrets) {
+        console.log('Vault: ✅ OAuth credentials loaded from Vault');
         return {
           client_id: secrets.client_id,
           client_secret: secrets.client_secret,
@@ -135,7 +137,7 @@ export class VaultService {
       }
     }
     // Fallback to environment variables
-    console.warn('Vault: OAuth credentials not found in Vault, using environment variables');
+    console.warn('⚠️  Vault: OAuth credentials NOT loaded from Vault - using environment variables');
     return {
       client_id: process.env.VITE_42_CLIENT_ID || '',
       client_secret: process.env.VITE_42_CLIENT_SECRET || '',
@@ -147,11 +149,13 @@ export class VaultService {
    */
   async getCookieSecret(): Promise<string> {
     if (this.isConnected) {
-      const secrets = await this.getSecret('shared/cookie');
+      const secrets = await this.getSecret('backend/cookie');
       if (secrets?.secret) {
+        console.log('Vault: ✅ Cookie secret loaded from Vault');
         return secrets.secret;
       }
     }
+    console.warn('⚠️  Vault: Cookie secret NOT loaded from Vault - using environment variable');
     return process.env.COOKIE_SECRET || '';
   }
 }
