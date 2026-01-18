@@ -120,6 +120,8 @@ export class LoginForm implements Component {
       );
     }
 
+    this.setLoading(false);
+
     this.root.dispatchEvent(
       new CustomEvent('loginSuccess', {
         detail: { data: response },

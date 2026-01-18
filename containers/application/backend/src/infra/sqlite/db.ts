@@ -60,6 +60,7 @@ export async function transaction<T>(
     await db.exec('COMMIT');
     return result;
   } catch (err) {
+    console.error('Transaction failed:', err);
     await db.exec('ROLLBACK');
     throw new Error('Database operation failed');
   }

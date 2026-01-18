@@ -25,8 +25,10 @@ export default async function UserController(
       reply.status(201).send(user);
     } catch (err: unknown) {
       if (err instanceof Error) {
+        console.error('Create User Error:', err.message);
         reply.status(400).send({ error: err.message });
       } else {
+        console.error('Create User Unknown Error:', err);
         reply.status(500).send({ message: 'Internal Server Error' });
       }
     }

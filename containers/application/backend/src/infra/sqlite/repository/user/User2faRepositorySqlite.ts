@@ -38,7 +38,8 @@ export class User2faRepositorySqlite implements User2faRepository {
         ],
       );
     } catch (err) {
-      console.error('User2faRepositorySqlite.sacve: ', err, user2fa);
+      console.error('User2faRepositorySqlite.save: ', err, user2fa);
+      throw err;
     }
   }
 

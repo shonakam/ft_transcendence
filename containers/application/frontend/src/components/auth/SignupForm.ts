@@ -163,7 +163,7 @@ export class SignupForm implements Component {
 
       const [response, err] = await to(createUser(requestData));
       if (err) {
-        return toaster.show('アカウントを作成に失敗しました。', 'error');
+        throw err;
       }
 
       toaster.show(
@@ -178,11 +178,11 @@ export class SignupForm implements Component {
       );
     } catch (error: unknown) {
       console.error('Signup Error:', error);
-      toaster.show(
+      const message =
+        (error as any)?.error ||
         (error as Error).message ||
-          '登録に失敗しました。サーバーの状態を確認してください。',
-        'error'
-      );
+        '登録に失敗しました。サーバーの状態を確認してください。';
+      toaster.show(message, 'error');
     } finally {
       this.setLoading(false);
     }

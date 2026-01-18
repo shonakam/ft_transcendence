@@ -24,8 +24,9 @@ export class UserRepositorySqlite implements UserRepository {
   }
 
   async save(user: User): Promise<void> {
-    await this.db.run(
-      `INSERT INTO users (id, email, username, password, image_path, is_2fa_enabled, created_at, updated_at, withdrawn_at)
+    try {
+      await this.db.run(
+        `INSERT INTO users (id, email, username, password, image_path, is_2fa_enabled, created_at, updated_at, withdrawn_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          email = excluded.email,
@@ -36,18 +37,24 @@ export class UserRepositorySqlite implements UserRepository {
          created_at = excluded.created_at,
          updated_at = excluded.updated_at,
          withdrawn_at = excluded.withdrawn_at`,
-      [
-        user.id,
-        user.email,
-        user.username,
-        user.password,
-        user.imagePath,
-        user.is2faEnabled,
-        user.createdAt,
-        user.updatedAt,
-        user.withdrawnAt,
-      ],
-    );
+        [
+          user.id,
+          user.email,
+          user.username,
+          user.password,
+          user.imagePath,
+          user.is2faEnabled,
+          user.createdAt,
+          user.updatedAt,
+          user.withdrawnAt,
+        ],
+      );
+    } catch (err: any) {
+      if (err.code === 'SQLITE_CONSTRAINT') {
+        throw new Error('User already exists (email or username is taken)');
+      }
+      throw err;
+    }
   }
 
   async findById(id: string): Promise<User | null> {
