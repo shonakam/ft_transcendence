@@ -21,7 +21,7 @@ export class MessageBoard implements Component {
     this.init();
   }
 
-  private async init() {
+  public async init() {
     try {
       this.myUserInfo = await api.get<UserInfo>('users/me');
     } catch (error) {
@@ -103,6 +103,10 @@ export class MessageBoard implements Component {
 
   private scrollToBottom() {
     this.el.scrollTop = this.el.scrollHeight;
+  }
+
+  public destroy(): void {
+    this.el.remove();
   }
 
   public getElement(): HTMLElement {

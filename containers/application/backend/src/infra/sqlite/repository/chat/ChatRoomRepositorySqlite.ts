@@ -75,4 +75,12 @@ export class ChatRoomRepositorySqlite implements ChatRoomRepository {
       [roomId, userId],
     );
   }
+
+  async findMembers(roomId: string): Promise<string[]> {
+    const rows = await this.db.all(
+      `SELECT user_id FROM chat_room_members WHERE room_id = ?`,
+      [roomId],
+    );
+    return rows.map((row) => row.user_id);
+  }
 }
