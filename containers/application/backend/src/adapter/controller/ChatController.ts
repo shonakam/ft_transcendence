@@ -17,7 +17,7 @@ export default async function ChatController(
     listBlockedUsers,
   } = opts.useCases;
 
-  // GET /api/v1/chat/rooms
+  // GET /api/chat/rooms
   server.get(
     '/rooms',
     { preHandler: authenticate },
@@ -35,7 +35,7 @@ export default async function ChatController(
     },
   );
 
-  // POST /api/v1/chat/rooms/dm
+  // POST /api/chat/rooms/dm
   server.post<{ Body: { targetUserId: string } }>(
     '/rooms/dm',
     { preHandler: authenticate },
@@ -60,7 +60,7 @@ export default async function ChatController(
     },
   );
 
-  // GET /api/v1/chat/rooms/:roomId/messages
+  // GET /api/chat/rooms/:roomId/messages
   server.get<{ Params: { roomId: string } }>(
     '/rooms/:roomId/messages',
     { preHandler: authenticate },
@@ -82,7 +82,7 @@ export default async function ChatController(
     },
   );
 
-  // POST /api/v1/chat/rooms/:roomId/messages
+  // POST /api/chat/rooms/:roomId/messages
   server.post<{
     Params: { roomId: string };
     Body: { content: string; messageType?: MessageType };
@@ -116,7 +116,7 @@ export default async function ChatController(
     },
   );
 
-  // GET /api/v1/chat/blocks
+  // GET /api/chat/blocks
   server.get(
     '/blocks',
     { preHandler: authenticate },
@@ -134,7 +134,7 @@ export default async function ChatController(
     },
   );
 
-  // POST /api/v1/chat/blocks
+  // POST /api/chat/blocks
   server.post<{ Body: { blockedUserId: string } }>(
     '/blocks',
     { preHandler: authenticate },
