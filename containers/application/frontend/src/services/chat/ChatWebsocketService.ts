@@ -33,7 +33,6 @@ export class ChatWebsocketService {
 
     this.socket.onmessage = (event) => {
       try {
-        console.log('ChatWebsocketService: Message received', event.data);
         const response: WsResponse = JSON.parse(event.data);
         this.listeners.forEach((listener) => listener(response));
       } catch (error) {

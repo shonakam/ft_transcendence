@@ -60,14 +60,14 @@ export class ChatPage implements Component {
   }
 
   private async init() {
-    console.log('ChatPage: Initializing...');
     chatWebsocketService.connect();
     this.unsubscribeWs = chatWebsocketService.subscribe((msg) => {
-      console.log('ChatPage: WS Message received', msg.type);
       if (msg.type === 'NEW_MESSAGE') {
         const newMsg = msg.data;
+        // Always refresh room list to show new DMs or update last message (if we had it)
+        this.roomList.refresh();
+
         if (this.activeRoom && newMsg.roomId === this.activeRoom.id) {
-          console.log('ChatPage: Updating message board for room', newMsg.roomId);
           this.messageBoard.loadMessages(this.activeRoom.id);
         }
       }
@@ -77,16 +77,15 @@ export class ChatPage implements Component {
     await this.roomList.refresh();
     // Default to Global Chat if available
     const rooms = await chatService.getRooms();
-    console.log('ChatPage: Rooms fetched', rooms.length);
     const globalRoom = rooms.find((r) => r.type === 'global');
     if (globalRoom) {
-      console.log('ChatPage: Switching to global room', globalRoom.id);
       this.switchRoom(globalRoom);
     }
   }
 
   private async switchRoom(room: ChatRoom) {
     this.activeRoom = room;
+    await this.roomList.refresh(); // Ensure the room exists in the sidebar
     this.roomList.setActiveRoom(room.id);
     await this.messageBoard.loadMessages(room.id);
   }

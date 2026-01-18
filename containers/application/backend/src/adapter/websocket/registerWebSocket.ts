@@ -30,11 +30,7 @@ export function registerWebSocket(fastify: FastifyInstance) {
         chatWebSocketManager.addConnection(userId, socket);
 
         socket.on('message', (message: any) => {
-          try {
-            console.log(`WS: Received message from ${userId}:`, message.toString());
-          } catch (e) {
-            console.error('WS: Failed to process message', e);
-          }
+          // Message handling if needed
         });
 
         socket.on('close', () => {
@@ -53,7 +49,7 @@ export function registerWebSocket(fastify: FastifyInstance) {
       if (!socket || typeof socket.on !== 'function') return;
 
       socket.on('message', (message: any) => {
-        console.log('WS Game: Received message:', message.toString());
+        // Game message handling
       });
     });
 
