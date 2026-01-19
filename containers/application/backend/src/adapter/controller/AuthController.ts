@@ -20,7 +20,6 @@ export default async function AuthController(
     revokeTOTP,
   } = opts.useCases;
 
-  // LOGIN
   server.post('/login', async (req, reply) => {
     try {
       const form = req.body as LoginForm;
@@ -47,7 +46,6 @@ export default async function AuthController(
     }
   });
 
-  // REFRESH
   server.post('/refresh', async (req, reply) => {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -70,7 +68,6 @@ export default async function AuthController(
     }
   });
 
-  // OIDC LOGIN
   server.post(
     '/login/oidc/:provider',
     async (req: FastifyRequest<{ Params: { provider: string } }>, reply) => {
@@ -89,7 +86,11 @@ export default async function AuthController(
         }
         reply.status(200).send(response);
       } catch (err: unknown) {
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
+        const clearOptions = {
+          ...cookieConfig,
+          maxAge: 0,
+          expires: new Date(0),
+        };
         reply
           .clearCookie('accessToken', clearOptions)
           .clearCookie('refreshToken', clearOptions)
@@ -103,8 +104,8 @@ export default async function AuthController(
     },
   );
 
-  // SETUP MFA
   server.get(
+    // '/setup-mfa/:factor',
     '/setup-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
@@ -121,8 +122,8 @@ export default async function AuthController(
     },
   );
 
-  // VERIFY MFA
   server.post(
+    // '/verify-mfa/:factor',
     '/verify-mfa/totp',
     async (req: FastifyRequest<{ Params: { factor: string } }>, reply) => {
       try {
@@ -139,7 +140,11 @@ export default async function AuthController(
         reply.setCookie('accessToken', response.accessToken, cookieConfig);
         reply.setCookie('refreshToken', response.refreshToken, cookieConfig);
 
-        const clearOptions = { ...cookieConfig, maxAge: 0, expires: new Date(0) };
+        const clearOptions = {
+          ...cookieConfig,
+          maxAge: 0,
+          expires: new Date(0),
+        };
         reply.clearCookie('tmpAuthToken', clearOptions);
 
         reply.status(200).send(response);
@@ -153,19 +158,21 @@ export default async function AuthController(
     },
   );
 
-  // REVOKE MFA
   server.delete(
+    // '/verify-mfa/:factor',
     '/revoke-mfa/totp',
     { preHandler: authenticate },
     async (req, reply) => {
       try {
         const trustedUserId = req.authUserId;
         if (trustedUserId === undefined) {
-          return reply.status(500).send({ message: 'Authentication data missing.' });
+          return reply
+            .status(500)
+            .send({ message: 'Authentication data missing.' });
         }
 
         await revokeTOTP.execute(trustedUserId);
-        reply.status(200).send();
+        reply.status(200);
       } catch (err: unknown) {
         if (err instanceof Error) {
           reply.status(400).send({ error: err.message });
@@ -176,7 +183,6 @@ export default async function AuthController(
     },
   );
 
-  // LOGOUT
   server.delete('/logout', async (req, reply) => {
     try {
       const accessToken = req.cookies.accessToken;

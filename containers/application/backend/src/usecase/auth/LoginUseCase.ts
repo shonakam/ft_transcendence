@@ -58,6 +58,10 @@ export class LoginUseCase {
     }
 
     const user2fa = await this.user2faRepository.findById(user.id);
+    // if (!user2fa?.totpSeceret) {
+    //   console.warn("VerifyTOTPUseCase: findById is failed.")
+    //   throw new Error("Not registered.")
+    // }
 
     console.log('user: ', user);
     return user2fa!.isTotpEnabled == 1
