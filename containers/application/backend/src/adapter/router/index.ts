@@ -21,7 +21,7 @@ export async function registRouters(
     useCases: appContainer.userUseCases,
   });
   await server.register(ChatController, {
-    prefix: '/api/v1/chat',
+    prefix: '/api/chat',
     useCases: appContainer.chatUseCases,
   });
   await server.register(VaultController, { prefix: '/api/vault' });

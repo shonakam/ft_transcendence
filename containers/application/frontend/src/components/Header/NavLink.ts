@@ -7,7 +7,11 @@ export class NavLink implements Component {
     this.el = document.createElement('a');
     this.el.href = href;
     this.el.textContent = text;
-    this.el.className = 'hover:text-blue-500';
+    this.el.className = 'text-slate-300 hover:text-white transition-colors font-medium text-sm';
+  }
+
+  public destroy(): void {
+    this.el.remove();
   }
 
   public getElement(): HTMLAnchorElement {

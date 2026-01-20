@@ -82,8 +82,8 @@ export class DashboardPage implements Component {
     const mfaBtn = this.createMenuButton('🔒 Security Settings', () =>
       this.switchView('mfa')
     );
-    const chatBtn = this.createMenuButton('💬 Chat Management', () =>
-      this.switchView('chat')
+    const chatBtn = this.createMenuButton('💬 Chat', () =>
+      router.navigateTo('/chat')
     );
     const gameBtn = this.createMenuButton('🎮 Game Start', () =>
       this.switchView('game')

@@ -6,4 +6,5 @@ export interface ChatRoomRepository {
   findUserRooms(userId: string): Promise<ChatRoom[]>;
   findDMRoom(userId1: string, userId2: string): Promise<ChatRoom | null>;
   addMember(roomId: string, userId: string): Promise<void>;
+  findMembers(roomId: string): Promise<string[]>;
 }
