@@ -31,6 +31,9 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    depends_on:
+      frontend:
+        condition: service_healthy
     container_name: ft-nginx
     ports:
       - "80:8080" # REDIRECT TO HTTPS
@@ -58,6 +61,11 @@ services:
       - "/app/node_modules"
     env_file:
       - ./.env.local
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/dist/index.html"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - transcendence-network
     <<: *logging
