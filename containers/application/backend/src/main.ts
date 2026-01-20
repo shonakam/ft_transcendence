@@ -18,9 +18,13 @@ import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
 import { initializeRedis } from './infra/redis/db.ts';
+import { VaultService } from './infra/vault/vault.service.ts';
 import minilog, { TAG } from './utils/minilog.ts';
 import { initPrometheus } from './infra/metric/prometheus.ts';
 import { registerMetricHooks } from './infra/metric/hook.ts';
+
+// Global Vault service instance
+export const vaultService = new VaultService();
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -61,6 +65,21 @@ async function main() {
   await registerWebSocket(server);
 
   try {
+    // Initialize Vault first (for secrets management)
+    minilog.i(TAG.SYSTEM, 'Initializing Vault...');
+    const vaultConnected = await vaultService.init();
+    const vaultRequired = process.env.VAULT_REQUIRED === 'true';
+    
+    if (vaultConnected) {
+      minilog.i(TAG.SYSTEM, '✅ Vault connected successfully - secrets will be loaded from Vault');
+    } else if (vaultRequired) {
+      minilog.e(TAG.SYSTEM, '❌ VAULT_REQUIRED=true but Vault is not available! Aborting startup.');
+      process.exit(1);
+    } else {
+      minilog.w(TAG.SYSTEM, '⚠️  Vault not available - falling back to environment variables');
+      minilog.w(TAG.SYSTEM, '⚠️  Set VAULT_REQUIRED=true in production to enforce Vault usage');
+    }
+
     minilog.i(TAG.SYSTEM, 'Initializing database...');
     await initializeDatabase();
 
