@@ -15,7 +15,8 @@ import cookie from '@fastify/cookie';
 import { registRouters } from './adapter/router/index.ts';
 
 import { Server } from 'socket.io';
-import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
+import { registerChatWebSocket } from './adapter/websocket/registerChatWebSocket.ts';
+import { registerGameWebSocket } from './adapter/websocket/registerGameWebSocket.ts';
 
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
@@ -69,22 +70,35 @@ async function main() {
     transports: ['websocket', 'polling'],
     cors: { origin: 'https://transcendence.42.fr', credentials: true },
   });
-  await registerWebSocket(ioServer);
+  await registerGameWebSocket(ioServer);
+  await registerChatWebSocket(server);
 
   try {
     // Initialize Vault first (for secrets management)
     minilog.i(TAG.SYSTEM, 'Initializing Vault...');
     const vaultConnected = await vaultService.init();
     const vaultRequired = process.env.VAULT_REQUIRED === 'true';
-    
+
     if (vaultConnected) {
-      minilog.i(TAG.SYSTEM, '✅ Vault connected successfully - secrets will be loaded from Vault');
+      minilog.i(
+        TAG.SYSTEM,
+        '✅ Vault connected successfully - secrets will be loaded from Vault',
+      );
     } else if (vaultRequired) {
-      minilog.e(TAG.SYSTEM, '❌ VAULT_REQUIRED=true but Vault is not available! Aborting startup.');
+      minilog.e(
+        TAG.SYSTEM,
+        '❌ VAULT_REQUIRED=true but Vault is not available! Aborting startup.',
+      );
       process.exit(1);
     } else {
-      minilog.w(TAG.SYSTEM, '⚠️  Vault not available - falling back to environment variables');
-      minilog.w(TAG.SYSTEM, '⚠️  Set VAULT_REQUIRED=true in production to enforce Vault usage');
+      minilog.w(
+        TAG.SYSTEM,
+        '⚠️  Vault not available - falling back to environment variables',
+      );
+      minilog.w(
+        TAG.SYSTEM,
+        '⚠️  Set VAULT_REQUIRED=true in production to enforce Vault usage',
+      );
     }
 
     minilog.i(TAG.SYSTEM, 'Initializing database...');
