@@ -1,8 +1,8 @@
 #!/bin/bash
 # =============================================================================
-# Vault 初始化脚本
-# 用途：在新环境中初始化 Vault 并存入必要的 secrets
-# 使用：./scripts/vault/init.sh
+# Vault Initialization Script
+# Purpose: Initialize Vault in a new environment and store necessary secrets
+# Usage: ./scripts/vault/init.sh
 # =============================================================================
 
 set -e
@@ -14,30 +14,30 @@ NC='\033[0m' # No Color
 
 echo ""
 echo "=========================================="
-echo "       Vault 初始化脚本"
+echo "       Vault Initialization Script"
 echo "=========================================="
 echo ""
 
-# 检查 Vault 容器是否运行
+# Check if Vault container is running
 if ! docker ps | grep -q "vault"; then
-    echo -e "${RED}❌ Vault 容器未运行${NC}"
-    echo "请先执行: docker compose up -d vault"
+    echo -e "${RED}❌ Vault container is not running${NC}"
+    echo "Run first: docker compose up -d vault"
     exit 1
 fi
 
-# 检查 Vault 状态
+# Check Vault status
 VAULT_STATUS=$(docker exec vault vault status -format=json 2>/dev/null || echo '{"initialized":false}')
 INITIALIZED=$(echo $VAULT_STATUS | jq -r '.initialized')
 SEALED=$(echo $VAULT_STATUS | jq -r '.sealed')
 
-echo "Vault 状态检查："
-echo "  - 已初始化: $INITIALIZED"
-echo "  - 已密封: $SEALED"
+echo "Vault Status Check:"
+echo "  - Initialized: $INITIALIZED"
+echo "  - Sealed: $SEALED"
 echo ""
 
-# ============= 初始化 =============
+# ============= Initialize =============
 if [ "$INITIALIZED" = "false" ]; then
-    echo -e "${YELLOW}🔧 Vault 未初始化，开始初始化...${NC}"
+    echo -e "${YELLOW}🔧 Vault not initialized, starting initialization...${NC}"
     
     INIT_OUTPUT=$(docker exec vault vault operator init -key-shares=1 -key-threshold=1 -format=json)
     
@@ -45,59 +45,59 @@ if [ "$INITIALIZED" = "false" ]; then
     ROOT_TOKEN=$(echo $INIT_OUTPUT | jq -r '.root_token')
     
     echo ""
-    echo -e "${GREEN}✅ 初始化成功！${NC}"
+    echo -e "${GREEN}✅ Initialization successful!${NC}"
     echo ""
     echo "=========================================="
-    echo -e "${RED}⚠️  请安全保存以下信息！${NC}"
+    echo -e "${RED}⚠️  Please save the information below safely!${NC}"
     echo "=========================================="
     echo "Unseal Key: $UNSEAL_KEY"
     echo "Root Token: $ROOT_TOKEN"
     echo "=========================================="
     echo ""
     
-    # 解封
-    echo "🔓 解封 Vault..."
+    # Unseal
+    echo "🔓 Unsealing Vault..."
     docker exec vault vault operator unseal $UNSEAL_KEY > /dev/null
-    echo -e "${GREEN}✅ 解封成功${NC}"
+    echo -e "${GREEN}✅ Unsealing successful${NC}"
     
     export VAULT_TOKEN=$ROOT_TOKEN
 else
-    echo -e "${GREEN}✅ Vault 已初始化${NC}"
+    echo -e "${GREEN}✅ Vault is already initialized${NC}"
     
-    # 检查是否需要解封
+    # Check if unseal is needed
     if [ "$SEALED" = "true" ]; then
         echo ""
-        echo -e "${YELLOW}⚠️  Vault 已密封，需要解封${NC}"
-        read -p "请输入 Unseal Key: " UNSEAL_KEY
+        echo -e "${YELLOW}⚠️  Vault is sealed, needs to be unsealed${NC}"
+        read -p "Please enter Unseal Key: " UNSEAL_KEY
         docker exec vault vault operator unseal $UNSEAL_KEY > /dev/null
-        echo -e "${GREEN}✅ 解封成功${NC}"
+        echo -e "${GREEN}✅ Unsealing successful${NC}"
     fi
     
-    # 获取 token
+    # Get token
     echo ""
-    read -p "请输入 Vault Root Token: " ROOT_TOKEN
+    read -p "Please enter Vault Root Token: " ROOT_TOKEN
     export VAULT_TOKEN=$ROOT_TOKEN
 fi
 
-# ============= 启用 KV Engine =============
+# ============= Enable KV Engine =============
 echo ""
-echo "📦 检查 KV secrets engine..."
+echo "📦 Checking KV secrets engine..."
 docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets enable -path=secret kv-v2 2>/dev/null && \
-    echo -e "${GREEN}✅ KV engine 已启用${NC}" || \
-    echo -e "${GREEN}✅ KV engine 已存在${NC}"
+    echo -e "${GREEN}✅ KV engine enabled${NC}" || \
+    echo -e "${GREEN}✅ KV engine already exists${NC}"
 
-# ============= 存入 Secrets =============
+# ============= Store Secrets =============
 echo ""
-echo "🔐 存入 Secrets..."
+echo "🔐 Storing Secrets..."
 
-# 检查是否已有 JWT secrets
+# Check if JWT secrets already exist
 EXISTING_JWT=$(docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv get secret/backend/jwt 2>/dev/null || echo "")
 
 if [ -z "$EXISTING_JWT" ]; then
     echo ""
-    echo "生成新的 JWT Secrets..."
+    echo "Generating new JWT Secrets..."
     
-    # 生成随机 secrets
+    # Generate random secrets
     JWT_ACCESS=$(openssl rand -base64 32)
     JWT_REFRESH=$(openssl rand -base64 32)
     JWT_TMP=$(openssl rand -base64 32)
@@ -107,50 +107,50 @@ if [ -z "$EXISTING_JWT" ]; then
         refresh_secret="$JWT_REFRESH" \
         tmp_auth_secret="$JWT_TMP" > /dev/null
     
-    echo -e "${GREEN}✅ JWT secrets 已生成并存入${NC}"
+    echo -e "${GREEN}✅ JWT secrets generated and stored${NC}"
 else
-    echo -e "${GREEN}✅ JWT secrets 已存在${NC}"
+    echo -e "${GREEN}✅ JWT secrets already exist${NC}"
 fi
 
-# 检查 42 OAuth
-EXISTING_OAUTH=$(docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv get secret/backend/42oauth 2>/dev/null || echo "")
+# Check 42 OAuth
+EXISTING_OAUTH=$(docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv get secret/backend/oauth 2>/dev/null || echo "")
 
 if [ -z "$EXISTING_OAUTH" ]; then
     echo ""
-    echo -e "${YELLOW}📝 需要配置 42 OAuth 凭证${NC}"
-    echo "（如果没有，可以直接按回车跳过，之后再配置）"
+    echo -e "${YELLOW}📝 Need to configure 42 OAuth credentials${NC}"
+    echo "(If you don't have them, just press Enter to skip, can configure later)"
     echo ""
     read -p "42 Client ID: " CLIENT_ID
     read -p "42 Client Secret: " CLIENT_SECRET
     
     if [ -n "$CLIENT_ID" ]; then
-        docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv put secret/backend/42oauth \
+        docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv put secret/backend/oauth \
             client_id="$CLIENT_ID" \
             client_secret="$CLIENT_SECRET" > /dev/null
-        echo -e "${GREEN}✅ 42 OAuth 已存入${NC}"
+        echo -e "${GREEN}✅ 42 OAuth stored${NC}"
     else
-        # 存入空占位
-        docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv put secret/backend/42oauth \
+        # Store empty placeholder
+        docker exec -e VAULT_TOKEN=$VAULT_TOKEN vault vault kv put secret/backend/oauth \
             client_id="" \
             client_secret="" > /dev/null
-        echo -e "${YELLOW}⚠️  已创建空占位，请稍后使用 put.sh 更新${NC}"
+        echo -e "${YELLOW}⚠️  Empty placeholder created, please update later using put.sh${NC}"
     fi
 else
-    echo -e "${GREEN}✅ 42 OAuth 已存在${NC}"
+    echo -e "${GREEN}✅ 42 OAuth already exists${NC}"
 fi
 
-# ============= 完成 =============
+# ============= Complete =============
 echo ""
 echo "=========================================="
-echo -e "${GREEN}✅ Vault 初始化完成！${NC}"
+echo -e "${GREEN}✅ Vault initialization complete!${NC}"
 echo "=========================================="
 echo ""
-echo "请将以下内容添加到 .env.local："
+echo "Please add the following to .env.local:"
 echo ""
 echo "VAULT_ENDPOINT=https://vault:8200"
 echo "VAULT_TOKEN=$ROOT_TOKEN"
 echo "VAULT_SKIP_VERIFY=true"
 echo ""
-echo "然后重启 backend："
+echo "Then restart backend:"
 echo "docker compose restart backend"
 echo ""
