@@ -12,6 +12,4 @@ export interface InputState {
 
 export interface InputHandler {
   getInput(): InputState | PlayerInput;
-  attach(): void;
-  detach(): void;
 }
