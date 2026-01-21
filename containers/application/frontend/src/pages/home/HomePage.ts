@@ -21,8 +21,10 @@ export class HomePage implements Component {
   }
 
   private initEventListeners(): void {
-    const loginButton = this.el.querySelector<HTMLButtonElement>('#login-button');
-    const signupButton = this.el.querySelector<HTMLButtonElement>('#signup-button');
+    const loginButton =
+      this.el.querySelector<HTMLButtonElement>('#login-button');
+    const signupButton =
+      this.el.querySelector<HTMLButtonElement>('#signup-button');
 
     loginButton?.addEventListener('click', () => {
       router.navigateTo('/auth?view=login');

@@ -17,5 +17,4 @@ export class Logo implements Component {
   public getElement(): HTMLAnchorElement {
     return this.el;
   }
-
 }

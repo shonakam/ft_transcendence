@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "outDir": "./dist",
@@ -20,7 +18,7 @@
       "@shonakam/common/*": [
         "../common/src/*"
       ]
-    }
+    },
   },
   "include": [
     "src/**/*"

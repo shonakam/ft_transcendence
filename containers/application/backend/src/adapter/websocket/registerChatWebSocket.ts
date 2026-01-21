@@ -3,7 +3,7 @@ import ws from '@fastify/websocket';
 import { authenticate } from '../auth/authPreHandler.ts';
 import { chatWebSocketManager } from './ChatWebSocketManager.ts';
 
-export function registerWebSocket(fastify: FastifyInstance) {
+export function registerChatWebSocket(fastify: FastifyInstance): void {
   fastify.register(ws, {
     options: { maxPayload: 1048576 },
   });
@@ -43,16 +43,6 @@ export function registerWebSocket(fastify: FastifyInstance) {
         });
       },
     );
-
-    fastify.get('/ws/game/remote', { websocket: true }, (connection: any) => {
-      const socket = connection?.socket || connection;
-      if (!socket || typeof socket.on !== 'function') return;
-
-      socket.on('message', (message: any) => {
-        // Game message handling
-      });
-    });
-
-    console.log('WebSocket routes registered');
+    console.log('Chat WebSocket routes registered');
   });
 }

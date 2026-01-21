@@ -163,7 +163,7 @@ export class SignupForm implements Component {
 
       const [response, err] = await to(createUser(requestData));
       if (err) {
-        return toaster.show('アカウントを作成に失敗しました。', 'error');
+        return toaster.show('アカウントの作成に失敗しました。', 'error');
       }
 
       toaster.show(
