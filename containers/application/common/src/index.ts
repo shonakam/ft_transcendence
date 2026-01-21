@@ -16,16 +16,4 @@ export * from './game/types/gameStatus'
 export * from './game/interface/Input'
 export * from './game/interface/PongGame'
 
-
-// - websocket exports
-export * from './websocket/GameClientMessenger'
-export * from './websocket/isJsonValue'
-export * from './websocket/isWsMessage'
-
-// types
-export * from './websocket/types/json'
-export * from './websocket/types/wsMessage'
-export * from './websocket/types/gameMessage'
-
-
 // tournament exports
