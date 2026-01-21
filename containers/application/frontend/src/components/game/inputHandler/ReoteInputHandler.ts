@@ -1,44 +1,62 @@
-import { InputHandler, InputState } from '@shonakam/common/index';
+import type { Socket } from 'socket.io-client';
+import { InputHandler, PlayerInput } from '@shonakam/common/index';
 
 export class RemoteInputHandler implements InputHandler {
-  private socket: WebSocket | null = null;
-  private abortController: AbortController | null = null;
-  private readonly handleMessage = (event: MessageEvent) => {
-    try {
-      const parsed = JSON.parse(event.data);
-      this.latestInput = parsed as InputState;
-    } catch (error) {
-      console.warn('Failed to parse remote input payload', error);
-    }
-  };
+  socket: Socket | null = null;
+  input: PlayerInput = { direction: 'none', isStartPressed: false };
 
-  latestInput: InputState;
-
-  constructor(initialSocket?: WebSocket) {
-    this.latestInput = {
-      left: { direction: 'none', isStartPressed: false },
-      right: { direction: 'none', isStartPressed: false },
-    };
-    if (initialSocket) this.attach(initialSocket);
+  constructor() {
+    this.attach();
   }
 
-  attach(socket: WebSocket): void {
-    this.detach();
-    this.socket = socket;
-    this.abortController = new AbortController();
-    this.socket.addEventListener('message', this.handleMessage, {
-      signal: this.abortController.signal,
+  attach(): void {
+    window.addEventListener('keydown', (e) => {
+      if (!this.isInputFocused()) return;
+      if (e.code === 'ArrowUp' || e.code === 'KeyI') {
+        this.input.direction = 'up';
+      } else if (e.code === 'ArrowDown' || e.code === 'KeyK') {
+        this.input.direction = 'down';
+      } else if (e.code === 'Space') {
+        this.input.isStartPressed = true;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (!this.isInputFocused()) return;
+      if (
+        e.code === 'ArrowUp' ||
+        e.code === 'ArrayDown' ||
+        e.code === 'KeyI' ||
+        e.code === 'KeyK'
+      )
+        this.input.direction = 'none';
     });
   }
 
-  detach(options?: { close?: boolean }): void {
-    this.abortController?.abort();
-    this.abortController = null;
-    if (options?.close && this.socket) this.socket.close();
-    this.socket = null;
+  detach(): void {
+    window.removeEventListener('keydown', () => {});
+    window.removeEventListener('keyup', () => {});
   }
 
-  getInput(): InputState {
-    return this.latestInput;
+  private isInputFocused(): boolean {
+    const active = document.activeElement;
+    if (!active) return true;
+    const tag = active.tagName.toLowerCase();
+    return tag !== 'input' && tag !== 'textarea';
+  }
+
+  getInput(): PlayerInput {
+    return this.input;
+  }
+
+  resetStartPressed(): void {
+    this.input.isStartPressed = false;
+  }
+
+  setSocket(socket: Socket): void {
+    this.socket = socket;
+  }
+
+  getSocket(): Socket | null {
+    return this.socket;
   }
 }

@@ -1,9 +1,6 @@
 import type { Socket } from 'socket.io';
-import {
-  InputHandler,
-  InputState,
-  PlayerInput,
-} from '@shonakam/common/index.ts';
+import { InputHandler } from '@shonakam/common/index.ts';
+import type { InputState, PlayerInput } from '@shonakam/common/index.ts';
 import type { GameSide } from '@shonakam/common/game/types/gameSide.d.ts';
 
 export class RemoteInputHandler implements InputHandler {
@@ -44,6 +41,12 @@ export class RemoteInputHandler implements InputHandler {
 
   public getSockets(): (Socket | null)[] {
     return this.sockets;
+  }
+
+  public getSideBySocket(socket: Socket): GameSide | null {
+    if (this.sockets[0] === socket) return 'left';
+    if (this.sockets[1] === socket) return 'right';
+    return null;
   }
 
   public updateFromWs(side: GameSide, input: PlayerInput): void {

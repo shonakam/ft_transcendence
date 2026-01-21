@@ -9,9 +9,9 @@ import { PhysicsEngine } from '@shonakam/common/game/PhysicsEngine.ts';
 import { checkGoalCollision } from '@shonakam/common/index.ts';
 
 import { GameSide } from '@shonakam/common/game/types/gameSide.ts';
-import { GameResponseSender } from '../../../adapter/websocket/game/GameResponseSender.ts';
+import { ResponseHandler } from '../../../adapter/websocket/game/ResponseHandler.ts';
 
-export class RemotePongGameServer implements PongGame {
+export class GameServer implements PongGame {
   input: RemoteInputHandler;
   state: GameState;
   lastFrameTime: number | null = null;
@@ -53,8 +53,8 @@ export class RemotePongGameServer implements PongGame {
     // send updated positions to clients here if needed
     this.updateScore(goal);
     const sockets: (Socket | null)[] = this.input.getSockets();
-    if (sockets[0]) GameResponseSender.sendGameState(sockets[0], this.state);
-    if (sockets[1]) GameResponseSender.sendGameState(sockets[1], this.state);
+    if (sockets[0]) ResponseHandler.state(sockets[0], this.state);
+    if (sockets[1]) ResponseHandler.state(sockets[1], this.state);
     if (this.state.status === 'playing')
       setTimeout(() => this.loop(performance.now()), 1000 / 60);
   }

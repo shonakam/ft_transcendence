@@ -3,10 +3,11 @@ import { Component } from '../../interface/Component';
 
 import { GameCanvas } from '../../components/game/canvas/GameCanvas';
 import { RemoteInputHandler } from '../../components/game/inputHandler/ReoteInputHandler';
-import { RemotePongGameClient } from '../../components/game/RemotePongGameClient';
+import { RemoteGame } from '../../components/game/RemoteGame';
 import gameTemplate from './game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
+import { start } from 'repl';
 
 export class RemoteGamePage implements Component {
   // private rootElement: HTMLElement = document.getElementById(
@@ -15,7 +16,7 @@ export class RemoteGamePage implements Component {
   private el: HTMLElement = document.createElement('main');
   private gameCanvas: GameCanvas;
   private inputHandler = new RemoteInputHandler();
-  private pongGame: RemotePongGameClient;
+  private pongGame: RemoteGame;
 
   constructor() {
     this.el.innerHTML = gameTemplate;
@@ -24,15 +25,11 @@ export class RemoteGamePage implements Component {
       CONFIG.CANVAS_WIDTH,
       CONFIG.CANVAS_HEIGHT
     );
-    this.pongGame = new RemotePongGameClient(
-      this.gameCanvas,
-      this.inputHandler
-    );
+    this.pongGame = new RemoteGame(this.gameCanvas, this.inputHandler);
     this.pongGame.initRender();
     this.render();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
-    this.pongGame.state.playerSide = 'both';
   }
 
   public render(): void {
@@ -43,34 +40,12 @@ export class RemoteGamePage implements Component {
   }
 
   public destroy(): void {
-    this.removeSpaceEventListener();
     this.el.remove();
   }
 
   public getElement(): HTMLElement {
-    this.addSpaceEventListener();
+    start();
     return this.el;
-  }
-
-  private keydownHandler = (event: KeyboardEvent) => {
-    if (event.code === 'Space') {
-      if (
-        this.pongGame.state.status === 'ready' ||
-        this.pongGame.state.status === 'paused'
-      ) {
-        this.pongGame.start();
-      } else if (this.pongGame.state.status === 'playing') {
-        this.pongGame.stop();
-      }
-    }
-  };
-
-  private addSpaceEventListener(): void {
-    window.addEventListener('keydown', this.keydownHandler);
-  }
-
-  private removeSpaceEventListener(): void {
-    window.removeEventListener('keydown', this.keydownHandler);
   }
 
   private updateWinningScore() {
