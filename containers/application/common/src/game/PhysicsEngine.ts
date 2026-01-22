@@ -29,6 +29,8 @@ export class PhysicsEngine {
     const input = inputHandler.getInput();
     const height = state.config.CANVAS_HEIGHT;
 
+    if (!('left' in input) || !('right' in input)) return;
+
     this.updatePaddle(dt, leftPaddle, height, input.left.direction);
     this.updatePaddle(dt, rightPaddle, height, input.right.direction);
   }
