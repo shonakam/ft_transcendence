@@ -7,4 +7,7 @@ certs/
 vault-config.hcl
 *.key
 *.crt
-*.pem
+
+certs
+certs/transcendence.42.fr.key
+certs/transcendence.42.fr.crt

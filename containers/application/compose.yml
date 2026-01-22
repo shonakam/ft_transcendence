@@ -63,9 +63,10 @@ services:
       - ./.env.local
     healthcheck:
       test: ["CMD", "test", "-f", "/app/dist/index.html"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 90s
     networks:
       - transcendence-network
     <<: *logging
