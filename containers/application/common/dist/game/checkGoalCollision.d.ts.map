@@ -1,1 +1,0 @@
-{"version":3,"file":"checkGoalCollision.d.ts","sourceRoot":"","sources":["../../src/game/checkGoalCollision.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,QAAQ,CAAC;AAC9B,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAEjD,wBAAgB,kBAAkB,CAAC,IAAI,EAAE,IAAI,EAAE,WAAW,EAAE,MAAM,GAAG,QAAQ,GAAG,MAAM,CAQrF"}
