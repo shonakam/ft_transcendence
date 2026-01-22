@@ -1,8 +1,8 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "src/main.ts",
   "type": "module",
+  "main": "src/main.ts",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "nodemon --watch './src/**/*.ts' --exec 'node --trace-uncaught --trace-warnings --trace-exit --loader ts-node/esm' src/main.ts",

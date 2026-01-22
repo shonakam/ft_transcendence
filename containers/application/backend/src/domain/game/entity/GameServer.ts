@@ -1,14 +1,12 @@
 import type { Socket } from 'socket.io';
 
-import { PongGame } from '@shonakam/common/index.ts';
-import { GameState } from '@shonakam/common/index.ts';
+import { PongGame } from '@shonakam/common/game/interface/PongGame';
+import { GameState } from '@shonakam/common/game/GameState';
+import { PhysicsEngine } from '@shonakam/common/game/PhysicsEngine';
+import { checkGoalCollision } from '@shonakam/common/game/checkGoalCollision';
+import { GameSide } from '@shonakam/common/game/types/gameSide';
 
 import { RemoteInputHandler } from './RemoteInputHandler.ts';
-
-import { PhysicsEngine } from '@shonakam/common/game/PhysicsEngine.ts';
-import { checkGoalCollision } from '@shonakam/common/index.ts';
-
-import { GameSide } from '@shonakam/common/game/types/gameSide.ts';
 import { ResponseHandler } from '../../../adapter/websocket/game/ResponseHandler.ts';
 
 export class GameServer implements PongGame {
