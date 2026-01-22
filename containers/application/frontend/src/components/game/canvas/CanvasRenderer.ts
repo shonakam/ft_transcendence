@@ -1,5 +1,5 @@
-import { GameState } from './GameState';
-import { GameCanvas } from './GameCanvas';
+import { GameState } from '@shonakam/common/game/GameState';
+import { GameCanvas } from '../canvas/GameCanvas';
 
 export class CanvasRenderer {
   canvas: GameCanvas;

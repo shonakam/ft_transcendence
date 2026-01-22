@@ -1,4 +1,5 @@
-import { Vector2 } from './interface/Vector2';
+import type { Vector2 } from './types/vector2';
+import type { GameSide } from './types/gameSide';
 
 import CONFIG from './GameConfig';
 
@@ -8,7 +9,7 @@ export class Paddle {
   length: number;
   speed: number;
 
-  constructor(side: 'left' | 'right') {
+  constructor(side: GameSide) {
     const y = (CONFIG.CANVAS_HEIGHT - 100) / 2;
     if (side === 'left') {
       this.position = {
@@ -24,5 +25,11 @@ export class Paddle {
     this.thickness = CONFIG.PADDLE_THICKNESS;
     this.length = CONFIG.PADDLE_LENGTH;
     this.speed = CONFIG.PADDLE_SPEED;
+  }
+
+  jsonify() {
+    return {
+      position: this.position,
+    };
   }
 }

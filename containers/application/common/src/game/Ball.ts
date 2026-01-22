@@ -1,4 +1,4 @@
-import { Vector2 } from './interface/Vector2';
+import { Vector2 } from './types/vector2';
 
 import CONFIG from './GameConfig';
 
@@ -31,6 +31,14 @@ export class Ball {
     this.velocity = {
       x: CONFIG.BALL_SPEED * Math.cos(randomAngle),
       y: CONFIG.BALL_SPEED * Math.sin(randomAngle),
+    };
+  }
+
+  jsonify() {
+    return {
+      position: this.position,
+      velocity: this.velocity,
+      radius: this.radius,
     };
   }
 }

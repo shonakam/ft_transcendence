@@ -79,7 +79,6 @@ export class RevokeMfaForm implements Component {
     });
   }
 
-
   destroy(): void {
     this.root.remove();
   }
