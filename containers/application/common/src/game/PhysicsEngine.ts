@@ -1,11 +1,11 @@
-import { GameState } from './GameState';
-import { InputHandler } from './interface/Input';
+import { GameState } from './GameState.ts';
+import { InputHandler } from './interface/Input.ts';
 
-import { Ball } from './Ball';
-import { Paddle } from './Paddle';
+import { Ball } from './Ball.ts';
+import { Paddle } from './Paddle.ts';
 
-import { Direction } from './types/direction';
-import { GameSide } from './types/gameSide';
+import { Direction } from './types/direction.ts';
+import { GameSide } from './types/gameSide.ts';
 
 export class PhysicsEngine {
   static update(

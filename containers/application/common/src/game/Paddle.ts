@@ -1,7 +1,7 @@
-import type { Vector2 } from './types/vector2';
-import type { GameSide } from './types/gameSide';
+import type { Vector2 } from './types/vector2.ts';
+import type { GameSide } from './types/gameSide.ts';
 
-import CONFIG from './GameConfig';
+import CONFIG from './GameConfig.ts';
 
 export class Paddle {
   position: Vector2;

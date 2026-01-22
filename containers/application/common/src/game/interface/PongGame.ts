@@ -1,5 +1,5 @@
-import { InputHandler } from './Input';
-import { GameState } from '../GameState';
+import { InputHandler } from './Input.ts';
+import { GameState } from '../GameState.ts';
 
 export interface PongGame {
   input?: InputHandler;
