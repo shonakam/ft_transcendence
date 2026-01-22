@@ -119,7 +119,7 @@ services:
       - transcendence-network
   vault:
     image: hashicorp/vault:1.13.3
-    container_name: vault
+    container_name: ft-vault
     ports:
       - '8200:8200'
     environment:
