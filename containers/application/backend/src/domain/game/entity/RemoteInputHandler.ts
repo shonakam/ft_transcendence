@@ -49,6 +49,23 @@ export class RemoteInputHandler implements InputHandler {
     return null;
   }
 
+  public removeSocket(socket: WebSocket): GameSide | null {
+    const side = this.getSideBySocket(socket);
+    if (side === null) return null;
+    const index = side === 'left' ? 0 : 1;
+    this.sockets[index] = null;
+    this.inputState[side] = { direction: 'none', isStartPressed: false };
+    return side;
+  }
+
+  public hasAnySocket(): boolean {
+    return this.sockets[0] !== null || this.sockets[1] !== null;
+  }
+
+  public resetStartPressed(side: GameSide): void {
+    this.inputState[side].isStartPressed = false;
+  }
+
   public updateFromWs(side: GameSide, input: PlayerInput): void {
     if (!this.validInput(input)) {
       console.error(

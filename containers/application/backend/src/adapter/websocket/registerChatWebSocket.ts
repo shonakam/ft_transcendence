@@ -4,7 +4,6 @@ import { chatWebSocketManager } from './ChatWebSocketManager.ts';
 import minilog from '../../utils/minilog.ts';
 
 export function registerChatWebSocket(fastify: FastifyInstance): void {
-  // main.ts で ws プラグインは既に登録済み
   fastify.register(async function (fastify: FastifyInstance) {
     fastify.get(
       '/ws/chat',

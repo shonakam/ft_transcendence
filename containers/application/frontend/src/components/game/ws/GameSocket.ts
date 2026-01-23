@@ -4,10 +4,24 @@ import type {
   ClientMessage,
   ServerMessage,
 } from '@shonakam/common';
+import { toaster } from '../../common/Toaster';
 
-type GameSocketCallbacks = {
-  onGameState: (state: GameState) => void;
-  onLog?: (message: string) => void;
+export type GameSocketCallbacks = {
+  onRegistered?: (userId: string) => void;
+  onGameGenerated?: (gameId: number, state: GameState) => void;
+  onPlayerAdded?: (gameId: number, side: 'left' | 'right') => void;
+  onOpponentJoined?: (gameId: number, opponentId: string) => void;
+  onGameReady?: (
+    gameId: number,
+    leftPlayer: string,
+    rightPlayer: string,
+    yourSide: 'left' | 'right'
+  ) => void;
+  onGameStart?: (gameId: number) => void;
+  onGameState?: (state: GameState) => void;
+  onPlayerLeft?: (gameId: number, playerId: string) => void;
+  onGameLeft?: (gameId: number) => void;
+  onError?: (message: string) => void;
 };
 
 export class GameSocket {
@@ -17,6 +31,7 @@ export class GameSocket {
   private socket: WebSocket | null = null;
   private callbacks: GameSocketCallbacks | null = null;
   private isConnecting = false;
+  private hasGameStarted = false; // ゲーム開始トースト用フラグ
 
   connect(callbacks: GameSocketCallbacks): void {
     if (this.socket || this.isConnecting) return;
@@ -27,11 +42,8 @@ export class GameSocket {
       this.registerEventListeners();
     } catch {
       this.isConnecting = false;
+      toaster.show('WebSocket接続に失敗しました', 'error');
     }
-  }
-
-  private log(message: string): void {
-    this.callbacks?.onLog?.(message);
   }
 
   private registerEventListeners(): void {
@@ -39,16 +51,18 @@ export class GameSocket {
 
     this.socket.addEventListener('open', () => {
       this.isConnecting = false;
-      this.log('Connected to game server');
+      toaster.show('ゲームサーバーに接続しました', 'success');
     });
 
     this.socket.addEventListener('close', () => {
       this.isConnecting = false;
-      this.log('Disconnected from game server');
+      this.socket = null;
+      toaster.show('ゲームサーバーから切断されました', 'info');
     });
 
     this.socket.addEventListener('error', () => {
       this.isConnecting = false;
+      toaster.show('WebSocket接続エラーが発生しました', 'error');
     });
 
     this.socket.addEventListener('message', (event) => {
@@ -68,26 +82,74 @@ export class GameSocket {
       case 'disconnected':
         break;
       case 'registered':
-        this.log(`Registered as user: ${message.payload.userId}`);
+        toaster.show(`ユーザー登録完了: ${message.payload.userId}`, 'success');
+        this.callbacks?.onRegistered?.(message.payload.userId);
         break;
       case 'unregistered':
         break;
       case 'gameGenerated':
-        this.callbacks?.onGameState(message.payload);
+        toaster.show(`ゲーム作成完了: ID ${message.payload.gameId}`, 'success');
+        this.callbacks?.onGameGenerated?.(
+          message.payload.gameId,
+          message.payload.state
+        );
         break;
       case 'playerAdded':
+        toaster.show(
+          `ゲーム ${message.payload.gameId} に参加しました`,
+          'success'
+        );
+        this.callbacks?.onPlayerAdded?.(
+          message.payload.gameId,
+          message.payload.side
+        );
+        break;
+      case 'opponentJoined':
+        toaster.show(
+          `${message.payload.opponentId} がゲームに参加しました`,
+          'info'
+        );
+        this.callbacks?.onOpponentJoined?.(
+          message.payload.gameId,
+          message.payload.opponentId
+        );
         break;
       case 'gameReady':
-        this.log('Game is ready');
+        toaster.show('ゲーム準備完了！スペースキーでスタート', 'info');
+        this.callbacks?.onGameReady?.(
+          message.payload.gameId,
+          message.payload.leftPlayer,
+          message.payload.rightPlayer,
+          message.payload.yourSide
+        );
         break;
       case 'gameStart':
-        this.log('Game started');
+        if (!this.hasGameStarted) {
+          toaster.show('ゲーム開始！', 'info');
+          this.hasGameStarted = true;
+        }
+        this.callbacks?.onGameStart?.(message.payload.gameId);
         break;
       case 'gameState':
-        this.callbacks?.onGameState(message.payload);
+        this.callbacks?.onGameState?.(message.payload);
         break;
       case 'error':
-        this.log(`Error: ${message.payload.message}`);
+        toaster.show(`エラー: ${message.payload.message}`, 'error');
+        this.callbacks?.onError?.(message.payload.message);
+        break;
+      case 'playerLeft':
+        toaster.show(
+          `${message.payload.playerId} がゲームから退出しました`,
+          'info'
+        );
+        this.callbacks?.onPlayerLeft?.(
+          message.payload.gameId,
+          message.payload.playerId
+        );
+        break;
+      case 'gameLeft':
+        toaster.show('ゲームから退出しました', 'info');
+        this.callbacks?.onGameLeft?.(message.payload.gameId);
         break;
       case 'demoResponse':
         break;

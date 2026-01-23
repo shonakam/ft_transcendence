@@ -11,53 +11,54 @@ interface GameEntry {
 
 export class GameSessionRegistry {
   // Game mappings
-  gameIdCounter: number = 0;
+  gameIdCounter: number = 1;
   gameIdToGameEntry = new Map<number, GameEntry>();
   socketToGameEntry = new Map<WebSocket, GameEntry>();
 
   constructor() {}
 
   // Game handler management
-  generateGame(socket: WebSocket): boolean {
+  generateGame(socket: WebSocket): number | null {
     if (this.socketToGameEntry.has(socket)) {
       console.error(
         'GameSessionRegistry: Game entry already exists for this socket',
       );
-      return false;
+      return null;
     }
     const inputHandler = new RemoteInputHandler();
     inputHandler.setWebSocket('left', socket);
     const gameServer = new GameServer(inputHandler);
+    const gameId = this.gameIdCounter;
     this.socketToGameEntry.set(socket, {
-      gameId: this.gameIdCounter,
+      gameId: gameId,
       gameServer: gameServer,
       inputHandler: inputHandler,
     });
     this.gameIdToGameEntry.set(
-      this.gameIdCounter,
+      gameId,
       this.socketToGameEntry.get(socket) as GameEntry,
     );
     this.gameIdCounter++;
-    return true;
+    return gameId;
   }
 
-  addUserToGame(socket: WebSocket, gameId: number): boolean {
+  addUserToGame(socket: WebSocket, gameId: number): number | null {
     const entry = this.gameIdToGameEntry.get(gameId);
     if (!entry) {
       console.error(
         `GameSessionRegistry: No game entry found for game ID ${gameId}`,
       );
-      return false;
+      return null;
     }
     if (this.socketToGameEntry.has(socket)) {
       console.error(
         'GameSessionRegistry: Socket already has an associated game entry',
       );
-      return false;
+      return null;
     }
     entry.inputHandler.setWebSocket('right', socket);
     this.socketToGameEntry.set(socket, entry);
-    return true;
+    return gameId;
   }
 
   getGameEntryBySocket(socket: WebSocket): GameEntry | null {

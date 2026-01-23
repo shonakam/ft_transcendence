@@ -6,6 +6,50 @@
     <h1 class="text-4xl font-bold mb-4"></h1>
     <p id="game-description" class="text-lg text-gray-700"></p>
   </div>
+
+  <!-- ゲーム情報表示エリア -->
+  <div class="info-section text-center mt-4 space-y-2">
+    <p id="user-info" class="text-gray-600">
+      ユーザー: <span id="user-id">未登録</span>
+    </p>
+    <p id="game-info" class="text-gray-600">
+      ゲームID: <span id="game-id">-</span>
+    </p>
+    <p id="match-info" class="text-xl font-bold text-gray-800">
+      <span id="match-display">-</span>
+    </p>
+  </div>
+
+  <!-- ゲーム操作ボタン -->
+  <div class="control-section flex justify-center gap-4 mt-6">
+    <button
+      id="create-game-btn"
+      class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition"
+    >
+      ゲーム作成
+    </button>
+    <div class="flex gap-2">
+      <input
+        id="join-game-input"
+        type="number"
+        placeholder="Game ID"
+        class="w-32 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+      <button
+        id="join-game-btn"
+        class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition"
+      >
+        参加
+      </button>
+    </div>
+    <button
+      id="leave-game-btn"
+      class="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition hidden"
+    >
+      退出
+    </button>
+  </div>
+
   <div class="scoreboard text-center mt-4">
     <span id="score-left">0</span> : <span id="score-right">0</span><br />
     <span id="winning-score" class="ml-4 text-gray-600"
@@ -21,11 +65,10 @@
   </div>
   <div class="text-center mt-8">
     <p class="text-gray-600">
-      Left Player: <b>'W' / 'S'</b>, Right Player:
-      <b>'Up Arrow' / 'Down Arrow'</b> to move the paddles up and down.
+      Use <b>'W' / 'S'</b> or <b>'↑' / '↓'</b> to move your paddle.
     </p>
     <p class="text-gray-600">
-      Press <b>'Space'</b> to start/pause/resume the game.
+      Both players press <b>'Space'</b> to start the game.
     </p>
   </div>
   <div class="tournament-section mt-12 px-4"></div>

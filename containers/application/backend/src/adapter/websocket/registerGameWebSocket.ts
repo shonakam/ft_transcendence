@@ -7,6 +7,8 @@ import type { ClientMessage } from '@shonakam/common';
 
 import minilog from '../../utils/minilog.ts';
 import { authenticate } from '../auth/authPreHandler.ts';
+import { container } from '../../container/index.ts';
+import UserId from '../../domain/user/vo/UserId.ts';
 
 export function registerGameWebSocket(fastify: FastifyInstance): void {
   fastify.register(async function (fastify: FastifyInstance) {
@@ -37,13 +39,20 @@ export function registerGameWebSocket(fastify: FastifyInstance): void {
           return;
         }
 
-        minilog.i('WebSocket/game', `User ${userId} connected to game`);
-        RequestHandler.registerUser(socket, userId);
+        // ユーザー名を取得して登録
+        (async () => {
+          const user = await container.userUseCases.getUser.execute(
+            UserId.from(userId),
+          );
+          const displayName = user?.username || userId;
+          minilog.i('WebSocket/game', `User ${displayName} connected to game`);
+          RequestHandler.registerUser(socket, displayName);
 
-        // 接続確認メッセージ送信
-        ResponseHandler.sendMessage(socket, 'connected', {
-          message: 'WebSocket connection established',
-        });
+          // 接続確認メッセージ送信
+          ResponseHandler.sendMessage(socket, 'connected', {
+            message: 'WebSocket connection established',
+          });
+        })();
 
         // メッセージハンドリング
         socket.on('message', (data: Buffer | string) => {

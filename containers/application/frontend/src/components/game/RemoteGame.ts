@@ -55,8 +55,16 @@ export class RemoteGame implements PongGame {
     this.state.ball.position.y = newState.ball.position.y;
     this.state.paddles[0].position.y = newState.paddles[0].position.y;
     this.state.paddles[1].position.y = newState.paddles[1].position.y;
+
+    // スコアが変わったらコールバックを呼び出す
+    const oldLeft = this.state.scores[0];
+    const oldRight = this.state.scores[1];
     this.state.scores[0] = newState.scores[0];
     this.state.scores[1] = newState.scores[1];
+    if (oldLeft !== newState.scores[0] || oldRight !== newState.scores[1]) {
+      this.state.onScoreChange(newState.scores[0], newState.scores[1]);
+    }
+
     if (newState.status !== this.state.status) {
       this.state.setStatus(newState.status);
     }

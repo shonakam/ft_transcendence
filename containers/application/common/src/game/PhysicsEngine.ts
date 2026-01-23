@@ -11,11 +11,14 @@ export class PhysicsEngine {
   static update(
     dt: number,
     state: GameState,
-    inputHandler: InputHandler
+    inputHandler: InputHandler,
+    paddleOnly: boolean = false
   ): void {
     this.updatePaddles(dt, state, inputHandler);
-    this.updateBall(dt, state.ball);
-    this.checkCollisions(state);
+    if (!paddleOnly) {
+      this.updateBall(dt, state.ball);
+      this.checkCollisions(state);
+    }
   }
 
   // パドルの位置更新

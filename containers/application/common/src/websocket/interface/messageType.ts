@@ -16,10 +16,21 @@ export type ServerMessage =
   | { type: 'disconnected'; payload: { message: string } }
   | { type: 'registered'; payload: { userId: string } }
   | { type: 'unregistered'; payload: { userId: string | null } }
-  | { type: 'gameGenerated'; payload: GameState }
-  | { type: 'playerAdded'; payload: { gameId: number } }
-  | { type: 'gameReady' }
-  | { type: 'gameStart' }
+  | { type: 'gameGenerated'; payload: { gameId: number; state: GameState } }
+  | { type: 'playerAdded'; payload: { gameId: number; side: 'left' | 'right' } }
+  | { type: 'opponentJoined'; payload: { gameId: number; opponentId: string } }
+  | {
+      type: 'gameReady';
+      payload: {
+        gameId: number;
+        leftPlayer: string;
+        rightPlayer: string;
+        yourSide: 'left' | 'right';
+      };
+    }
+  | { type: 'gameStart'; payload: { gameId: number } }
   | { type: 'gameState'; payload: GameState }
+  | { type: 'playerLeft'; payload: { gameId: number; playerId: string } }
+  | { type: 'gameLeft'; payload: { gameId: number } }
   | { type: 'error'; payload: { message: string } }
   | { type: 'demoResponse'; payload: { message: string } };

@@ -14,7 +14,8 @@ export class RemoteInputHandler implements InputHandler {
         this.input.direction = 'up';
       } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
         this.input.direction = 'down';
-      } else if (e.code === 'Space') {
+      } else if (e.code === 'Space' && !e.repeat) {
+        // e.repeat で押し続けによる連続発火を防ぐ
         this.input.isStartPressed = true;
       }
     });
@@ -27,6 +28,9 @@ export class RemoteInputHandler implements InputHandler {
         e.code === 'KeyS'
       )
         this.input.direction = 'none';
+      if (e.code === 'Space') {
+        this.input.isStartPressed = false;
+      }
     });
   }
 
