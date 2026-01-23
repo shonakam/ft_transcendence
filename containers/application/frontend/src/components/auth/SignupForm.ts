@@ -1,6 +1,6 @@
 import { Component } from '../../interface/Component';
 import { createUser, userCreateRequestForm } from '../../services/user/create';
-import { api } from '../../lib/httpClient';
+import { api, NetworkError } from '../../lib/httpClient';
 import { toaster } from '../common/Toaster';
 import { to } from '../../lib/to';
 
@@ -146,11 +146,18 @@ export class SignupForm implements Component {
           );
           imagePath = uploadRes.path;
         } catch (error: unknown) {
-          toaster.show(
-            (error as Error).message || '画像のアップロードに失敗しました。',
-            'error'
-          );
-          throw new Error('画像のアップロードに失敗しました。');
+          if (error instanceof NetworkError) {
+            toaster.show(
+              'サーバーに接続できません。ネットワーク接続を確認してください。',
+              'error'
+            );
+          } else {
+            toaster.show(
+              (error as Error).message || '画像のアップロードに失敗しました。',
+              'error'
+            );
+          }
+          throw error;
         }
       }
 
@@ -163,6 +170,12 @@ export class SignupForm implements Component {
 
       const [response, err] = await to(createUser(requestData));
       if (err) {
+        if (err instanceof NetworkError) {
+          return toaster.show(
+            'サーバーに接続できません。ネットワーク接続を確認してください。',
+            'error'
+          );
+        }
         return toaster.show('アカウントの作成に失敗しました。', 'error');
       }
 
@@ -178,11 +191,18 @@ export class SignupForm implements Component {
       );
     } catch (error: unknown) {
       console.error('Signup Error:', error);
-      toaster.show(
-        (error as Error).message ||
-          '登録に失敗しました。サーバーの状態を確認してください。',
-        'error'
-      );
+      if (error instanceof NetworkError) {
+        toaster.show(
+          'サーバーに接続できません。ネットワーク接続を確認してください。',
+          'error'
+        );
+      } else {
+        toaster.show(
+          (error as Error).message ||
+            '登録に失敗しました。サーバーの状態を確認してください。',
+          'error'
+        );
+      }
     } finally {
       this.setLoading(false);
     }

@@ -3,6 +3,7 @@ import { toaster } from '../common/Toaster';
 import { login, loginRequestForm } from '../../services/auth/login';
 import { to } from '../../lib/to';
 import { loading } from '../common/Loading';
+import { NetworkError } from '../../lib/httpClient';
 
 export class LoginForm implements Component {
   private root: HTMLFormElement;
@@ -114,6 +115,12 @@ export class LoginForm implements Component {
 
     if (err) {
       this.setLoading(false);
+      if (err instanceof NetworkError) {
+        return toaster.show(
+          'サーバーに接続できません。ネットワーク接続を確認してください。',
+          'error'
+        );
+      }
       return toaster.show(
         'ログインに失敗しました。メールアドレスかパスワードが違います。',
         'error'

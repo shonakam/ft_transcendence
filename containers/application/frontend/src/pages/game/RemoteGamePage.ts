@@ -23,6 +23,7 @@ export class RemoteGamePage implements Component {
   private mySide: 'left' | 'right' | null = null;
   private leftPlayer: string | null = null;
   private rightPlayer: string | null = null;
+  private pendingJoinGameId: number | null = null; // URLパラメータからの自動参加用
 
   constructor() {
     this.el.innerHTML = gameTemplate;
@@ -41,6 +42,7 @@ export class RemoteGamePage implements Component {
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
     this.initUIEventListeners();
+    this.checkUrlGameIdParam();
     this.socket.connect({
       onRegistered: (userId) => this.handleRegistered(userId),
       onGameGenerated: (gameId, state) =>
@@ -88,6 +90,11 @@ export class RemoteGamePage implements Component {
   // WebSocket コールバックハンドラ
   private handleRegistered(userId: string): void {
     this.userId = userId;
+    // URLパラメータからのゲームIDがあれば自動参加
+    if (this.pendingJoinGameId !== null) {
+      this.socket.sendJoinGame(this.pendingJoinGameId);
+      this.pendingJoinGameId = null;
+    }
   }
 
   private handleGameGenerated(gameId: number, state: GameState): void {
@@ -156,7 +163,8 @@ export class RemoteGamePage implements Component {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private handleError(_message: string): void {
-    // エラーは toaster で表示されるので、追加処理があれば書く
+    // エラーは toaster で表示されるので、URLパラメータをクリア
+    this.clearUrlGameIdParam();
   }
 
   // ゲーム状態をリセット
@@ -328,5 +336,33 @@ export class RemoteGamePage implements Component {
   private updateStatus(status: string) {
     this.el.querySelector('#game-status')!.textContent =
       `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+  }
+
+  // URLクエリパラメータからgameIdを取得して自動参加を準備
+  private checkUrlGameIdParam(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameIdStr = urlParams.get('gameId');
+    if (gameIdStr) {
+      const gameId = parseInt(gameIdStr, 10);
+      if (!isNaN(gameId) && gameId > 0) {
+        this.pendingJoinGameId = gameId;
+        // 入力欄にも反映
+        const joinInput = this.el.querySelector(
+          '#join-game-input'
+        ) as HTMLInputElement;
+        if (joinInput) {
+          joinInput.value = gameId.toString();
+        }
+      }
+    }
+  }
+
+  // URLからgameIdパラメータを削除
+  private clearUrlGameIdParam(): void {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('gameId')) {
+      url.searchParams.delete('gameId');
+      window.history.replaceState({}, '', url.pathname);
+    }
   }
 }

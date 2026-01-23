@@ -5,6 +5,7 @@ import type {
   ServerMessage,
 } from '@shonakam/common';
 import { toaster } from '../../common/Toaster';
+import { api } from '../../../lib/httpClient';
 
 export type GameSocketCallbacks = {
   onRegistered?: (userId: string) => void;
@@ -33,10 +34,18 @@ export class GameSocket {
   private isConnecting = false;
   private hasGameStarted = false; // ゲーム開始トースト用フラグ
 
-  connect(callbacks: GameSocketCallbacks): void {
+  async connect(callbacks: GameSocketCallbacks): Promise<void> {
     if (this.socket || this.isConnecting) return;
     this.callbacks = callbacks;
     this.isConnecting = true;
+
+    // WebSocket接続前にトークンをリフレッシュ（JWT期限切れ対策）
+    try {
+      await api.post('auth/refresh', {});
+    } catch {
+      // リフレッシュ失敗しても接続は試みる（サーバー側で判断）
+    }
+
     try {
       this.socket = new WebSocket(this.url);
       this.registerEventListeners();
@@ -54,10 +63,20 @@ export class GameSocket {
       toaster.show('ゲームサーバーに接続しました', 'success');
     });
 
-    this.socket.addEventListener('close', () => {
+    this.socket.addEventListener('close', (event) => {
       this.isConnecting = false;
       this.socket = null;
-      toaster.show('ゲームサーバーから切断されました', 'info');
+      // 1008 = Policy Violation (認証エラー)
+      // 1006 = Abnormal Closure (ネットワークエラーまたは認証前の拒否)
+      if (event.code === 1008 || event.code === 1006) {
+        toaster.show(
+          'ゲームサーバーへの接続が拒否されました。ログインし直してください。',
+          'error'
+        );
+      } else if (event.code !== 1000) {
+        // 1000 = Normal Closure
+        toaster.show('ゲームサーバーから切断されました', 'info');
+      }
     });
 
     this.socket.addEventListener('error', () => {
