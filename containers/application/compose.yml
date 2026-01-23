@@ -42,6 +42,9 @@ services:
     secrets:
       - nginx_certificate
       - nginx_private_key
+    depends_on:
+      - frontend
+      - backend
     <<: *logging
 
   frontend:
@@ -80,6 +83,8 @@ services:
     networks:
       - transcendence-network
     restart: unless-stopped
+    depends_on:
+      - redis
     <<: *logging
 
   database:
@@ -108,6 +113,7 @@ services:
     tty: true
     networks:
       - transcendence-network
+
   vault:
     image: hashicorp/vault:1.13.3
     container_name: vault
