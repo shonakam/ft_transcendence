@@ -9,6 +9,8 @@ export class RemoteInputHandler implements InputHandler {
     right: { direction: 'none', isStartPressed: false },
   };
   sockets: (WebSocket | null)[] = [null, null];
+  userIds: (string | null)[] = [null, null];
+  userAliases: (string | null)[] = [null, null];
 
   constructor() {}
 
@@ -74,6 +76,24 @@ export class RemoteInputHandler implements InputHandler {
       return;
     }
     this.inputState[side] = { ...input };
+  }
+
+  public setUserInfo(
+    side: GameSide,
+    userId: string,
+    alias?: string | null,
+  ): void {
+    const index = side === 'left' ? 0 : 1;
+    this.userIds[index] = userId;
+    this.userAliases[index] = alias ?? null;
+  }
+
+  public getUserIds(): (string | null)[] {
+    return this.userIds;
+  }
+
+  public getUserAliases(): (string | null)[] {
+    return this.userAliases;
   }
 
   private validInput(input: PlayerInput): boolean {

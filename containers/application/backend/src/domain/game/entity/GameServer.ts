@@ -1,4 +1,5 @@
 import type { WebSocket } from 'ws';
+import { container } from '../../../container/index.ts';
 
 import { PongGame } from '@shonakam/common';
 import { GameState } from '@shonakam/common';
@@ -108,11 +109,42 @@ export class GameServer implements PongGame {
       const sockets = this.input.getSockets();
       if (sockets[0]) ResponseHandler.state(sockets[0], this.state);
       if (sockets[1]) ResponseHandler.state(sockets[1], this.state);
+      this.state.setStatus('finished');
+      this.saveGameResult();
       return;
     }
 
     this.state.setStatus('ready');
     // ready ループを再開してパドル操作を維持
     this.startReadyLoop();
+  }
+
+  private async saveGameResult(): Promise<void> {
+    const register = container.gameUseCases.saveGameResult;
+
+    try {
+      const userIds = this.input.getUserIds();
+      const userAliases = this.input.getUserAliases();
+      const leftUserId = userIds[0];
+      const rightUserId = userIds[1];
+
+      // Only save if both players have IDs
+      if (!leftUserId || !rightUserId) {
+        return;
+      }
+
+      await register.execute({
+        leftUserId,
+        rightUserId,
+        leftAlias: userAliases[0],
+        rightAlias: userAliases[1],
+        leftScore: this.state.scores[0],
+        rightScore: this.state.scores[1],
+        winner: this.state.winner ?? 'left',
+        endedAt: Date.now(),
+      });
+    } catch (err) {
+      console.error('RemotePongGameServer: Failed to save game result:', err);
+    }
   }
 }
