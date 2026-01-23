@@ -15,4 +15,7 @@ export * from './game/types/gameStatus.ts';
 export * from './game/interface/Input.ts';
 export * from './game/interface/PongGame.ts';
 
+// websocket
+export * from './websocket/interface/messageType.ts';
+
 // tournament exports
