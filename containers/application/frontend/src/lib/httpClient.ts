@@ -113,7 +113,10 @@ async function httpClient<T>(
     const errorData = await response.json().catch(() => ({
       message: `HTTP Error ${response.status}: ${response.statusText}`,
     }));
-    const httpError = new HttpError(response.status, errorData.message || response.statusText);
+    const httpError = new HttpError(
+      response.status,
+      errorData.message || response.statusText
+    );
     return Promise.reject(httpError);
   } catch (error) {
     // ネットワークエラー（サーバーに届かない場合）
