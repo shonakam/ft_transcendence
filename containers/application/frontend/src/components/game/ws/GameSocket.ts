@@ -43,7 +43,13 @@ export class GameSocket {
     try {
       await api.post('auth/refresh', {});
     } catch {
-      // リフレッシュ失敗しても接続は試みる（サーバー側で判断）
+      // リフレッシュ失敗 = セッション期限切れ
+      this.isConnecting = false;
+      toaster.show(
+        'セッションが期限切れです。ログインし直してください。',
+        'error'
+      );
+      return;
     }
 
     try {
@@ -184,6 +190,17 @@ export class GameSocket {
   }
 
   // --- 公開メソッド ---
+
+  disconnect(): void {
+    if (this.socket) {
+      // 正常切断 (code 1000) でメッセージを出さない
+      this.socket.close(1000, 'User navigated away');
+      this.socket = null;
+    }
+    this.callbacks = null;
+    this.isConnecting = false;
+    this.hasGameStarted = false;
+  }
 
   getSocket(): WebSocket | null {
     return this.socket;

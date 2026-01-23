@@ -305,6 +305,7 @@ export class RemoteGamePage implements Component {
   }
 
   public destroy(): void {
+    this.socket.disconnect();
     this.el.remove();
   }
 
