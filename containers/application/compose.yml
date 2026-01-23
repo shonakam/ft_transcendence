@@ -119,7 +119,7 @@ services:
       - transcendence-network
   vault:
     image: hashicorp/vault:1.13.3
-    container_name: vault
+    container_name: ft-vault
     ports:
       - '8200:8200'
     environment:
@@ -130,10 +130,26 @@ services:
       - IPC_LOCK
     volumes:
       - ./.secrets/certs/vault:/vault/certs:ro
-      - ./.secrets/vault-config.hcl:/vault/config/vault.hcl:ro
+      - ./tools/vault-config-init.sh:/vault/vault-config-init.sh
       - vault-data:/vault/data
-    entrypoint: vault
-    command: ['server', '-config=/vault/config/vault.hcl']
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        mkdir -p /vault/config
+        cat > /vault/config/vault.hcl << 'VAULTEOF'
+        ui = true
+        listener "tcp" {
+          address     = "0.0.0.0:8200"
+          tls_cert_file = "/vault/certs/vault.crt"
+          tls_key_file  = "/vault/certs/vault.key"
+        }
+        storage "file" {
+          path = "/vault/data"
+        }
+        api_addr = "https://127.0.0.1:8200"
+        VAULTEOF
+        exec vault server -config=/vault/config/vault.hcl
     networks:
       - transcendence-network
 
