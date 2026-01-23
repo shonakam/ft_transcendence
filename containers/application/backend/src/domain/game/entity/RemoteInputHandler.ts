@@ -1,7 +1,7 @@
 import type { Socket } from 'socket.io';
-import { InputHandler } from '@shonakam/common/index.ts';
-import type { InputState, PlayerInput } from '@shonakam/common/index.ts';
-import type { GameSide } from '@shonakam/common/game/types/gameSide.d.ts';
+import { InputHandler } from '@shonakam/common';
+import type { InputState, PlayerInput } from '@shonakam/common';
+import type { GameSide } from '@shonakam/common';
 
 export class RemoteInputHandler implements InputHandler {
   inputState: InputState = {

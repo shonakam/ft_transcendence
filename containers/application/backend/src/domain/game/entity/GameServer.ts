@@ -1,10 +1,10 @@
 import type { Socket } from 'socket.io';
 
-import { PongGame } from '@shonakam/common/game/interface/PongGame';
-import { GameState } from '@shonakam/common/game/GameState';
-import { PhysicsEngine } from '@shonakam/common/game/PhysicsEngine';
-import { checkGoalCollision } from '@shonakam/common/game/checkGoalCollision';
-import { GameSide } from '@shonakam/common/game/types/gameSide';
+import { PongGame } from '@shonakam/common';
+import { GameState } from '@shonakam/common';
+import { PhysicsEngine } from '@shonakam/common';
+import { checkGoalCollision } from '@shonakam/common';
+import { GameSide } from '@shonakam/common';
 
 import { RemoteInputHandler } from './RemoteInputHandler.ts';
 import { ResponseHandler } from '../../../adapter/websocket/game/ResponseHandler.ts';

@@ -1,5 +1,5 @@
 import type { Socket } from 'socket.io';
-import { GameState } from '@shonakam/common/game/GameState.ts';
+import { GameState } from '@shonakam/common';
 
 export class ResponseHandler {
   // Generic message sender
