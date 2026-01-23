@@ -2,7 +2,7 @@
 import { Component } from '../../interface/Component';
 
 import { GameCanvas } from '../../components/game/canvas/GameCanvas';
-import { RemoteInputHandler } from '../../components/game/inputHandler/ReoteInputHandler';
+import { RemoteInputHandler } from '../../components/game/inputHandler/RemoteInputHandler';
 import { RemoteGame } from '../../components/game/RemoteGame';
 import gameTemplate from './game.html?raw';
 

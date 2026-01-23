@@ -5,7 +5,7 @@ import { GameState } from '@shonakam/common';
 import { CanvasRenderer } from '../../components/game/canvas/CanvasRenderer';
 import { GameSocket } from './ws/GameSocket';
 
-import { RemoteInputHandler } from './inputHandler/ReoteInputHandler';
+import { RemoteInputHandler } from './inputHandler/RemoteInputHandler';
 
 export class RemoteGame implements PongGame {
   canvas: GameCanvas;
