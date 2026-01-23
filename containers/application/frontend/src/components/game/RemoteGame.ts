@@ -1,4 +1,4 @@
-import type { PlayerInput } from '@shonakam/common';
+import type { PlayerInput, GameState as GameStateType } from '@shonakam/common';
 import { PongGame } from '@shonakam/common';
 import { GameCanvas } from './canvas/GameCanvas';
 import { GameState } from '@shonakam/common';
@@ -46,6 +46,20 @@ export class RemoteGame implements PongGame {
   stop(): void {
     if (this.state.status !== 'playing') return;
     this.state.setStatus('paused');
+    this.renderer.render();
+  }
+
+  updateState(newState: GameStateType): void {
+    // サーバーから受け取ったゲーム状態でローカル状態を更新
+    this.state.ball.position.x = newState.ball.position.x;
+    this.state.ball.position.y = newState.ball.position.y;
+    this.state.paddles[0].position.y = newState.paddles[0].position.y;
+    this.state.paddles[1].position.y = newState.paddles[1].position.y;
+    this.state.scores[0] = newState.scores[0];
+    this.state.scores[1] = newState.scores[1];
+    if (newState.status !== this.state.status) {
+      this.state.setStatus(newState.status);
+    }
     this.renderer.render();
   }
 

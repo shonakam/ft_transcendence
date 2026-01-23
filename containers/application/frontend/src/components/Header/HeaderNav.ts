@@ -20,7 +20,8 @@ export class HeaderNav implements Component {
 
     const logoutBtn = document.createElement('button');
     logoutBtn.textContent = 'Logout';
-    logoutBtn.className = 'text-slate-300 hover:text-white transition-colors font-medium text-sm'; // NavLinkのスタイルに合わせる
+    logoutBtn.className =
+      'text-slate-300 hover:text-white transition-colors font-medium text-sm'; // NavLinkのスタイルに合わせる
 
     logoutBtn.addEventListener('click', async () => {
       if (confirm('ログアウトしますか？')) {

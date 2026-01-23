@@ -8,7 +8,6 @@ import gameTemplate from './game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
 import { GameSocket } from '../../components/game/ws/GameSocket';
-import { io, Socket } from 'socket.io-client';
 
 export class RemoteGamePage implements Component {
   // private rootElement: HTMLElement = document.getElementById(
@@ -36,8 +35,10 @@ export class RemoteGamePage implements Component {
     this.render();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
-    this.socket.registerResponses();
-    this.socket.sendRegister('user-id-placeholder');
+    this.socket.connect({
+      onGameState: (state) => this.pongGame.updateState(state),
+      onLog: (message) => this.showLog(message),
+    });
   }
 
   public render(): void {
@@ -82,10 +83,12 @@ export class RemoteGamePage implements Component {
   }
 
   private showLog(message: string) {
-    const logEl = this.el.querySelector('#game-log')!;
-    const entry = document.createElement('p');
-    entry.textContent = message;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
+    const logEl = this.el.querySelector('#game-log');
+    if (logEl) {
+      const entry = document.createElement('p');
+      entry.textContent = message;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
   }
 }

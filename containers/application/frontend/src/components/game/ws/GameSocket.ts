@@ -1,124 +1,138 @@
-import { io, Socket } from 'socket.io-client';
-import type { GameState } from '@shonakam/common';
-import type { PlayerInput } from '@shonakam/common';
+import type {
+  GameState,
+  PlayerInput,
+  ClientMessage,
+  ServerMessage,
+} from '@shonakam/common';
 
-type GameSocketHandlers = {
-  onConnected?: () => void;
-  onDisconnected?: () => void;
-  onRegistered?: (gameId: number) => void;
-  onUnregistered?: (userId: string | null) => void;
-  onGameGenerated?: (state: GameState) => void;
-  onPlayerAdded?: (gameId: number) => void;
-  onGameReady?: () => void;
-  onGameStart?: () => void;
-  onGameState?: (state: GameState) => void;
-  onError?: (message: string) => void;
+type GameSocketCallbacks = {
+  onGameState: (state: GameState) => void;
+  onLog?: (message: string) => void;
 };
 
 export class GameSocket {
-  private readonly baseUrl = 'https://transcendence.42.fr';
-  private readonly options = {
-    path: '/ws/',
-    transports: ['websocket', 'polling'],
-    withCredentials: true,
-  };
-  private socket: Socket;
-  private handlers: GameSocketHandlers = {};
+  baseUrl: string = 'wss://transcendence.42.fr';
+  path: string = '/ws/game/remote';
+  url: string = this.baseUrl + this.path;
+  private socket: WebSocket | null = null;
+  private callbacks: GameSocketCallbacks | null = null;
+  private isConnecting = false;
 
-  constructor() {
-    const url = this.baseUrl + '/ws/game/remote';
-    this.socket = io(url, this.options);
-    if (this.socket == null) {
-      console.error('Failed to initialize WebSocket connection');
-      throw new Error('Failed to initialize WebSocket connection');
+  connect(callbacks: GameSocketCallbacks): void {
+    if (this.socket || this.isConnecting) return;
+    this.callbacks = callbacks;
+    this.isConnecting = true;
+    try {
+      this.socket = new WebSocket(this.url);
+      this.registerEventListeners();
+    } catch {
+      this.isConnecting = false;
     }
-    this.registerResponses();
-    console.log(`GameSocket initialized and attempting connection to ${url}`);
   }
 
-  setHandlers(handlers: GameSocketHandlers): void {
-    this.handlers = handlers;
+  private log(message: string): void {
+    this.callbacks?.onLog?.(message);
   }
 
-  registerResponses(): void {
-    this.socket.on('connected', () => {
-      console.log('Connected to game server via WebSocket');
-      if (this.handlers.onConnected) {
-        this.handlers.onConnected();
+  private registerEventListeners(): void {
+    if (!this.socket) return;
+
+    this.socket.addEventListener('open', () => {
+      this.isConnecting = false;
+      this.log('Connected to game server');
+    });
+
+    this.socket.addEventListener('close', () => {
+      this.isConnecting = false;
+      this.log('Disconnected from game server');
+    });
+
+    this.socket.addEventListener('error', () => {
+      this.isConnecting = false;
+    });
+
+    this.socket.addEventListener('message', (event) => {
+      try {
+        const message: ServerMessage = JSON.parse(event.data);
+        this.handleMessage(message);
+      } catch {
+        // パースエラーは無視
       }
     });
-    this.socket.on('disconnect', () => {
-      console.log('Disconnected from game server');
-      if (this.handlers.onDisconnected) {
-        this.handlers.onDisconnected();
-      }
-    });
-    this.socket.on('disconnected', () => {
-      console.log('Server confirmed disconnection');
-      // TODO: disconnection handling logic
-    });
-
-    this.socket.on('registered', (data: { gameId: number }) => {
-      // TODO: handle registration logic
-      console.log('Registered to game server with game ID:', data.gameId);
-    });
-    this.socket.on('unregistered', (data: { userId: string | null }) => {
-      // TODO: handle unregistration logic
-      console.log('Unregistered from game server for user ID:', data.userId);
-    });
-
-    this.socket.on('gameGenerated', (state: GameState) => {
-      // TODO: handle game generation logic
-      console.log('Game generated with initial state:', state);
-    });
-    this.socket.on('playerAdded', (data: { gameId: number }) => {
-      // TODO: handle player added logic
-      console.log('Player added to game with ID:', data.gameId);
-    });
-    this.socket.on('gameReady', () => {
-      console.log('Game is ready to start');
-    });
-    this.socket.on('gameStart', () => {
-      console.log('Game has started');
-    });
-    this.socket.on('gameState', (state: GameState) => {
-      console.log('Received game state from server:', state);
-    });
-
-    this.socket.on('error', (message: string) => {
-      console.error('WebSocket error from server:', message);
-    });
-    // demo
-    this.socket.on('demoResponse', (message: { message: string }) => {
-      console.log('Demo message from server:', message.message);
-    });
   }
 
-  getSocket(): Socket {
+  private handleMessage(message: ServerMessage): void {
+    switch (message.type) {
+      case 'connected':
+        break;
+      case 'disconnected':
+        break;
+      case 'registered':
+        this.log(`Registered as user: ${message.payload.userId}`);
+        break;
+      case 'unregistered':
+        break;
+      case 'gameGenerated':
+        this.callbacks?.onGameState(message.payload);
+        break;
+      case 'playerAdded':
+        break;
+      case 'gameReady':
+        this.log('Game is ready');
+        break;
+      case 'gameStart':
+        this.log('Game started');
+        break;
+      case 'gameState':
+        this.callbacks?.onGameState(message.payload);
+        break;
+      case 'error':
+        this.log(`Error: ${message.payload.message}`);
+        break;
+      case 'demoResponse':
+        break;
+      default:
+        break;
+    }
+  }
+
+  private send(message: ClientMessage): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(message));
+    }
+  }
+
+  // --- 公開メソッド ---
+
+  getSocket(): WebSocket | null {
     return this.socket;
   }
 
   sendRegister(userId: string): void {
-    this.socket.emit('register', { userId });
+    this.send({ type: 'register', payload: { userId } });
   }
 
   sendCreateGame(): void {
-    this.socket.emit('createGame');
+    this.send({ type: 'createGame' });
   }
 
   sendJoinGame(gameId: number): void {
-    this.socket.emit('join', { gameId });
+    this.send({ type: 'join', payload: { gameId } });
   }
 
   sendInput(input: PlayerInput): void {
-    this.socket.emit('playerInput', { input });
+    this.send({ type: 'playerInput', payload: { input } });
   }
 
   sendLeaveGame(): void {
-    this.socket.emit('leave');
+    this.send({ type: 'leave' });
   }
 
   sendDemoRequest(): void {
-    this.socket.emit('demo');
+    this.send({ type: 'demo' });
+  }
+
+  close(): void {
+    this.socket?.close();
   }
 }
