@@ -1,11 +1,10 @@
-import { PlayerInput, PongGame } from '@shonakam/common/index';
-
+import type { PlayerInput } from '@shonakam/common';
+import { PongGame } from '@shonakam/common';
 import { GameCanvas } from './canvas/GameCanvas';
-import { GameState } from '@shonakam/common/index';
+import { GameState } from '@shonakam/common';
 import { CanvasRenderer } from '../../components/game/canvas/CanvasRenderer';
 import { GameSocket } from './ws/GameSocket';
 
-import type { GameSide } from '@shonakam/common/game/types/gameSide';
 import { RemoteInputHandler } from './inputHandler/ReoteInputHandler';
 
 export class RemoteGame implements PongGame {
@@ -15,14 +14,18 @@ export class RemoteGame implements PongGame {
   renderer: CanvasRenderer;
   lastFrameTime: number | null = null;
   private readonly loopCallback: (time: number) => void;
+  socket: GameSocket;
 
-  socket: GameSocket = new GameSocket();
-
-  constructor(gameCanvas: GameCanvas, inputHandler: RemoteInputHandler) {
+  constructor(
+    gameCanvas: GameCanvas,
+    inputHandler: RemoteInputHandler,
+    socket: GameSocket
+  ) {
     this.canvas = gameCanvas;
     this.input = inputHandler;
     this.renderer = new CanvasRenderer(this.state, this.canvas);
     this.loopCallback = this.loop.bind(this);
+    this.socket = socket;
   }
 
   initRender(): void {
@@ -47,20 +50,13 @@ export class RemoteGame implements PongGame {
   }
 
   loop(): void {
-    this.sendInput();
+    const input: PlayerInput = this.input.getInput();
+    this.socket.sendInput(input);
     this.renderer.render();
     if (this.state.status !== 'finished') {
       window.requestAnimationFrame(this.loopCallback);
     }
   }
-
-  sendInput(): void {
-    const input = this.input.getInput() as PlayerInput;
-    const side: GameSide =
-      this.state.playerSide === 'both'
-        ? 'left'
-        : (this.state.playerSide as GameSide);
-    this.socket.sendInput(side, input);
-    this.input.resetStartPressed();
-  }
 }
+const remoteGameExport = RemoteGame;
+export default remoteGameExport;

@@ -7,16 +7,18 @@ import { RemoteGame } from '../../components/game/RemoteGame';
 import gameTemplate from './game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
-import { start } from 'repl';
+import { GameSocket } from '../../components/game/ws/GameSocket';
+import { io, Socket } from 'socket.io-client';
 
 export class RemoteGamePage implements Component {
   // private rootElement: HTMLElement = document.getElementById(
   // 'app-root'
   // ) as HTMLElement;
-  private el: HTMLElement = document.createElement('main');
-  private gameCanvas: GameCanvas;
-  private inputHandler = new RemoteInputHandler();
-  private pongGame: RemoteGame;
+  el: HTMLElement = document.createElement('main');
+  gameCanvas: GameCanvas;
+  inputHandler = new RemoteInputHandler();
+  pongGame: RemoteGame;
+  socket: GameSocket = new GameSocket();
 
   constructor() {
     this.el.innerHTML = gameTemplate;
@@ -25,11 +27,17 @@ export class RemoteGamePage implements Component {
       CONFIG.CANVAS_WIDTH,
       CONFIG.CANVAS_HEIGHT
     );
-    this.pongGame = new RemoteGame(this.gameCanvas, this.inputHandler);
+    this.pongGame = new RemoteGame(
+      this.gameCanvas,
+      this.inputHandler,
+      this.socket
+    );
     this.pongGame.initRender();
     this.render();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
     this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
+    this.socket.registerResponses();
+    this.socket.sendRegister('user-id-placeholder');
   }
 
   public render(): void {
@@ -44,7 +52,7 @@ export class RemoteGamePage implements Component {
   }
 
   public getElement(): HTMLElement {
-    start();
+    // this.pongGame.start();
     return this.el;
   }
 
@@ -71,5 +79,13 @@ export class RemoteGamePage implements Component {
   private updateStatus(status: string) {
     this.el.querySelector('#game-status')!.textContent =
       `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+  }
+
+  private showLog(message: string) {
+    const logEl = this.el.querySelector('#game-log')!;
+    const entry = document.createElement('p');
+    entry.textContent = message;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
   }
 }

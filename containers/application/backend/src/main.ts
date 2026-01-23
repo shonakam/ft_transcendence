@@ -66,11 +66,12 @@ async function main() {
   await registRouters(server, container);
 
   const ioServer = new Server(server.server, {
-    path: '/ws',
+    path: '/ws/',
     transports: ['websocket', 'polling'],
     cors: { origin: 'https://transcendence.42.fr', credentials: true },
   });
   await registerGameWebSocket(ioServer);
+
   await registerChatWebSocket(server);
 
   try {

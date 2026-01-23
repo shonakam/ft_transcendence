@@ -1,8 +1,6 @@
-import type { Socket } from 'socket.io-client';
-import { InputHandler, PlayerInput } from '@shonakam/common/index';
+import { InputHandler, PlayerInput } from '@shonakam/common';
 
 export class RemoteInputHandler implements InputHandler {
-  socket: Socket | null = null;
   input: PlayerInput = { direction: 'none', isStartPressed: false };
 
   constructor() {
@@ -12,9 +10,9 @@ export class RemoteInputHandler implements InputHandler {
   attach(): void {
     window.addEventListener('keydown', (e) => {
       if (!this.isInputFocused()) return;
-      if (e.code === 'ArrowUp' || e.code === 'KeyI') {
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
         this.input.direction = 'up';
-      } else if (e.code === 'ArrowDown' || e.code === 'KeyK') {
+      } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
         this.input.direction = 'down';
       } else if (e.code === 'Space') {
         this.input.isStartPressed = true;
@@ -24,9 +22,9 @@ export class RemoteInputHandler implements InputHandler {
       if (!this.isInputFocused()) return;
       if (
         e.code === 'ArrowUp' ||
-        e.code === 'ArrayDown' ||
-        e.code === 'KeyI' ||
-        e.code === 'KeyK'
+        e.code === 'ArrowDown' ||
+        e.code === 'KeyW' ||
+        e.code === 'KeyS'
       )
         this.input.direction = 'none';
     });
@@ -50,13 +48,5 @@ export class RemoteInputHandler implements InputHandler {
 
   resetStartPressed(): void {
     this.input.isStartPressed = false;
-  }
-
-  setSocket(socket: Socket): void {
-    this.socket = socket;
-  }
-
-  getSocket(): Socket | null {
-    return this.socket;
   }
 }

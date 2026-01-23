@@ -28,9 +28,7 @@ function registerRequestFunctions(socket: Socket): void {
   socket.on('playerInput', (payload: { side: GameSide; input: PlayerInput }) =>
     RequestHandler.input(socket, payload),
   );
-  socket.on('leave', () =>
-    RequestHandler.leaveGame(socket),
-  );
+  socket.on('leave', () => RequestHandler.leaveGame(socket));
 
   // Utility events
   socket.on('disconnect', () => {
@@ -38,8 +36,8 @@ function registerRequestFunctions(socket: Socket): void {
     // registry.deleteUserSocketBySocket(socket);
     socket.emit('disconnected', { message: 'WebSocket connection closed' });
   });
-  socket.on('error', (message) => {
-    console.error('WebSocket error:', message);
+  socket.on('error', (payload: { message: string }) => {
+    console.error('WebSocket error:', payload.message);
   });
   socket.on('demo', () => {
     console.log('Received demo request from client');
