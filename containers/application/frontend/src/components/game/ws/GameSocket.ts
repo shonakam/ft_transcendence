@@ -26,7 +26,7 @@ export type GameSocketCallbacks = {
 };
 
 export class GameSocket {
-  baseUrl: string = 'wss://transcendence.42.fr';
+  baseUrl: string = `wss://${window.location.host}`;
   path: string = '/ws/game/remote';
   url: string = this.baseUrl + this.path;
   private socket: WebSocket | null = null;
