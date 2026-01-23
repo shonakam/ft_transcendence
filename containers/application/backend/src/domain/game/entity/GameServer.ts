@@ -1,4 +1,4 @@
-import type { Socket } from 'socket.io';
+import type { WebSocket } from 'ws';
 
 import { PongGame } from '@shonakam/common';
 import { GameState } from '@shonakam/common';
@@ -50,7 +50,7 @@ export class GameServer implements PongGame {
 
     // send updated positions to clients here if needed
     this.updateScore(goal);
-    const sockets: (Socket | null)[] = this.input.getSockets();
+    const sockets: (WebSocket | null)[] = this.input.getSockets();
     if (sockets[0]) ResponseHandler.state(sockets[0], this.state);
     if (sockets[1]) ResponseHandler.state(sockets[1], this.state);
     if (this.state.status === 'playing')

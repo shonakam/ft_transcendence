@@ -1,4 +1,4 @@
-import type { Socket } from 'socket.io';
+import type { WebSocket } from 'ws';
 
 import { GameServer } from '../domain/game/entity/GameServer.ts';
 import { RemoteInputHandler } from '../domain/game/entity/RemoteInputHandler.ts';
@@ -13,12 +13,12 @@ export class GameSessionRegistry {
   // Game mappings
   gameIdCounter: number = 0;
   gameIdToGameEntry = new Map<number, GameEntry>();
-  socketToGameEntry = new Map<Socket, GameEntry>();
+  socketToGameEntry = new Map<WebSocket, GameEntry>();
 
   constructor() {}
 
   // Game handler management
-  generateGame(socket: Socket): boolean {
+  generateGame(socket: WebSocket): boolean {
     if (this.socketToGameEntry.has(socket)) {
       console.error(
         'GameSessionRegistry: Game entry already exists for this socket',
@@ -41,7 +41,7 @@ export class GameSessionRegistry {
     return true;
   }
 
-  addUserToGame(socket: Socket, gameId: number): boolean {
+  addUserToGame(socket: WebSocket, gameId: number): boolean {
     const entry = this.gameIdToGameEntry.get(gameId);
     if (!entry) {
       console.error(
@@ -60,21 +60,21 @@ export class GameSessionRegistry {
     return true;
   }
 
-  getGameEntryBySocket(socket: Socket): GameEntry | null {
+  getGameEntryBySocket(socket: WebSocket): GameEntry | null {
     return this.socketToGameEntry.get(socket) || null;
   }
 
-  getInputHandlerBySocket(socket: Socket): RemoteInputHandler | null {
+  getInputHandlerBySocket(socket: WebSocket): RemoteInputHandler | null {
     const entry = this.socketToGameEntry.get(socket);
     return entry ? entry.inputHandler : null;
   }
 
-  getGameServerBySocket(socket: Socket): GameServer | null {
+  getGameServerBySocket(socket: WebSocket): GameServer | null {
     const entry = this.socketToGameEntry.get(socket);
     return entry ? entry.gameServer : null;
   }
 
-  deleteGameBySocket(socket: Socket): boolean {
+  deleteGameBySocket(socket: WebSocket): boolean {
     const entry = this.socketToGameEntry.get(socket);
     if (!entry) {
       console.error(
@@ -98,13 +98,13 @@ export class GameSessionRegistry {
     this.socketToGameEntry.delete(
       [...this.socketToGameEntry.entries()].find(
         ([, value]) => value.gameId === gameId,
-      )?.[0] as Socket,
+      )?.[0] as WebSocket,
     );
     this.gameIdToGameEntry.delete(gameId);
     return true;
   }
 
-  deleteUserFromGame(socket: Socket): boolean {
+  deleteUserFromGame(socket: WebSocket): boolean {
     const entry = this.socketToGameEntry.get(socket);
     if (!entry) {
       console.error(

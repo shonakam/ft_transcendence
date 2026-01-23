@@ -1,4 +1,4 @@
-import type { Socket } from 'socket.io';
+import type { WebSocket } from 'ws';
 
 import { container } from '../../../container/index.ts';
 import { GameSocketRegistry } from '../../../container/GameSocketRegistry.ts';
@@ -6,29 +6,29 @@ import { GameSessionRegistry } from '../../../container/GameSessionRegistry.ts';
 
 import { ResponseHandler } from './ResponseHandler.ts';
 import { RemoteInputHandler } from '../../../domain/game/entity/RemoteInputHandler.ts';
-import { PlayerInput } from '@shonakam/common/index.ts';
+import { GameSide, PlayerInput } from '@shonakam/common/index.ts';
 
 import minilog, { TAG } from '../../../utils/minilog.ts';
 
 export class RequestHandler {
   // User registration
-  static registerUser(socket: Socket, payload: { userId: string }): void {
+  static registerUser(socket: WebSocket, userId: string): void {
     const socketRegistry = container.gameSocketRegistry;
-    const success = socketRegistry.addUserSocket(payload.userId, socket);
+    const success = socketRegistry.addUserSocket(userId, socket);
 
     if (success === false) {
-      this.errorLog(socket, `Failed to register user ${payload.userId}`);
+      this.errorLog(socket, `Failed to register user ${userId}`);
       return;
     }
-    ResponseHandler.registered(socket, payload.userId);
+    ResponseHandler.registered(socket, userId);
     minilog.i(
       TAG.GAME,
-      `RequestHandler: User ${payload.userId} registered successfully`,
+      `RequestHandler: User ${userId} registered successfully`,
     );
   }
 
   // User un-registration
-  static unRegisterUser(socket: Socket): void {
+  static unRegisterUser(socket: WebSocket): void {
     if (this.checkRegistration(socket) === false) return;
     if (this.checkGameExistence(socket) === true) {
       const gameRegistry = container.gameSessionRegistry;
@@ -50,10 +50,10 @@ export class RequestHandler {
     );
   }
 
-// --------
+  // --------
 
   // Game creation
-  static createGame(socket: Socket): void {
+  static createGame(socket: WebSocket): void {
     const gameRegistry = container.gameSessionRegistry;
     if (this.checkRegistration(socket) === false) {
       return;
@@ -70,11 +70,11 @@ export class RequestHandler {
   }
 
   // Invite player to game
-  static joinGame(socket: Socket, payload: { gameId: number }): void {
+  static joinGame(socket: WebSocket, gameId: number): void {
     if (this.checkRegistration(socket) === false) return;
     if (this.checkGameExistence(socket) === false) return;
     const gameRegistry = container.gameSessionRegistry;
-    const gameEntry = gameRegistry.addUserToGame(socket, payload.gameId);
+    const gameEntry = gameRegistry.addUserToGame(socket, gameId);
     if (gameEntry === null) {
       this.errorLog(socket, 'Failed to add user to the game.');
       return;
@@ -83,7 +83,7 @@ export class RequestHandler {
   }
 
   // Handle player input
-  static input(socket: Socket, payload: { input: PlayerInput }): void {
+  static input(socket: WebSocket, input: PlayerInput): void {
     if (this.checkRegistration(socket) === false) return;
     if (this.checkGameExistence(socket) === false) return;
     const inputHandler: RemoteInputHandler | null =
@@ -92,16 +92,17 @@ export class RequestHandler {
       this.errorLog(socket, 'No input handler found for this socket.');
       return;
     }
-    const side: 'left' | 'right' | null = inputHandler.getSideBySocket(socket);
-    if (side === null) {
+    const sideFromSocket: GameSide | null =
+      inputHandler.getSideBySocket(socket);
+    if (sideFromSocket === null) {
       this.errorLog(socket, 'Socket not associated with any game side.');
       return;
     }
-    inputHandler.updateFromWs(side, payload.input);
+    inputHandler.updateFromWs(sideFromSocket, input);
   }
 
   // Handle player leaving the game
-  static leaveGame(socket: Socket): void {
+  static leaveGame(socket: WebSocket): void {
     if (this.checkRegistration(socket) === false) return;
     if (this.checkGameExistence(socket) === false) return;
     const gameRegistry = container.gameSessionRegistry;
@@ -112,10 +113,10 @@ export class RequestHandler {
     minilog.i(TAG.GAME, 'RequestHandler: User left the game successfully');
   }
 
-// --------
+  // --------
 
   // Helper methods
-  static checkRegistration(socket: Socket): boolean {
+  static checkRegistration(socket: WebSocket): boolean {
     const socketRegistry: GameSocketRegistry = container.gameSocketRegistry;
     if (socketRegistry.getUserIdBySocket(socket) === null) {
       this.errorLog(socket, 'Socket not registered. Please register first.');
@@ -124,7 +125,7 @@ export class RequestHandler {
     return true;
   }
 
-  static checkGameExistence(socket: Socket): boolean {
+  static checkGameExistence(socket: WebSocket): boolean {
     const gameRegistry: GameSessionRegistry = container.gameSessionRegistry;
     if (gameRegistry.getGameEntryBySocket(socket) === null) {
       this.errorLog(socket, 'No game associated with this socket.');
@@ -133,7 +134,7 @@ export class RequestHandler {
     return true;
   }
 
-  static errorLog(socket: Socket, message: string): void {
+  static errorLog(socket: WebSocket, message: string): void {
     ResponseHandler.sendMessage(socket, 'error', {
       message: `RequestHandler: ${message}`,
     });

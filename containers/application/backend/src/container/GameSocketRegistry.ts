@@ -1,14 +1,14 @@
-import type { Socket } from 'socket.io';
+import type { WebSocket } from 'ws';
 
 export class GameSocketRegistry {
   // User and socket mappings
-  socketToUserId = new Map<Socket, string>();
-  userIdToSocket = new Map<string, Socket>();
+  socketToUserId = new Map<WebSocket, string>();
+  userIdToSocket = new Map<string, WebSocket>();
 
   constructor() {}
 
   // User socket management
-  addUserSocket(userId: string, socket: Socket): boolean {
+  addUserSocket(userId: string, socket: WebSocket): boolean {
     if (this.userIdToSocket.has(userId) || this.socketToUserId.has(socket)) {
       console.error(`GameSessionRegistry: User ${userId} already registered`);
       return false;
@@ -18,29 +18,29 @@ export class GameSocketRegistry {
     return true;
   }
 
-  getUserSocket(userId: string): Socket | null {
+  getUserSocket(userId: string): WebSocket | null {
     return this.userIdToSocket.get(userId) || null;
   }
 
-  getUserIdBySocket(socket: Socket): string | null {
+  getUserIdBySocket(socket: WebSocket): string | null {
     return this.socketToUserId.get(socket) || null;
   }
 
   deleteSocketByUserId(userId: string): boolean {
     if (
       !this.userIdToSocket.has(userId) ||
-      !this.socketToUserId.has(this.userIdToSocket.get(userId) as Socket)
+      !this.socketToUserId.has(this.userIdToSocket.get(userId) as WebSocket)
     ) {
       console.error(`GameSessionRegistry: No socket found for user ${userId}`);
       return false;
     }
-    const socket = this.userIdToSocket.get(userId) as Socket;
+    const socket = this.userIdToSocket.get(userId) as WebSocket;
     this.userIdToSocket.delete(userId);
     this.socketToUserId.delete(socket);
     return true;
   }
 
-  deleteUserBySocket(socket: Socket): boolean {
+  deleteUserBySocket(socket: WebSocket): boolean {
     const userId = this.socketToUserId.get(socket);
     if (!userId) {
       console.error(

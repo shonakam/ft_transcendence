@@ -1,49 +1,51 @@
-import type { Socket } from 'socket.io';
 import { GameState } from '@shonakam/common';
+import type { WebSocket } from 'ws';
 
 export class ResponseHandler {
-  // Generic message sender
-  static sendMessage(socket: Socket, message: string, payload: object): void {
-    socket.emit(message, payload);
+  // Generic message sender - JSON プロトコルで送信
+  static sendMessage(socket: WebSocket, type: string, payload: object): void {
+    if (socket.readyState === socket.OPEN) {
+      socket.send(JSON.stringify({ type, payload }));
+    }
   }
 
   // Specific response methods
-  static registered(socket: Socket, userId: string): void {
+  static registered(socket: WebSocket, userId: string): void {
     this.sendMessage(socket, 'registered', { userId });
   }
 
-  static unregistered(socket: Socket, userId: string | null): void {
+  static unregistered(socket: WebSocket, userId: string | null): void {
     this.sendMessage(socket, 'unregistered', { userId });
   }
 
-  static generated(socket: Socket, state: GameState): void {
+  static generated(socket: WebSocket, state: GameState): void {
     this.sendMessage(socket, 'gameGenerated', state);
   }
 
-  static added(socket: Socket, gameId: number): void {
+  static added(socket: WebSocket, gameId: number): void {
     this.sendMessage(socket, 'playerAdded', { gameId });
   }
 
-  static ready(socket: Socket): void {
+  static ready(socket: WebSocket): void {
     this.sendMessage(socket, 'gameReady', {});
   }
 
-  static start(socket: Socket): void {
+  static start(socket: WebSocket): void {
     this.sendMessage(socket, 'gameStart', {});
   }
 
-  static state(socket: Socket, state: GameState): void {
+  static state(socket: WebSocket, state: GameState): void {
     this.sendMessage(socket, 'gameState', state);
   }
 
   static sendScoreUpdate(
-    socket: Socket,
+    socket: WebSocket,
     scores: [left: number, right: number],
   ): void {
     this.sendMessage(socket, 'scoreUpdate', { scores });
   }
 
-  static error(socket: Socket, message: string): void {
+  static error(socket: WebSocket, message: string): void {
     this.sendMessage(socket, 'error', { message });
   }
 }
