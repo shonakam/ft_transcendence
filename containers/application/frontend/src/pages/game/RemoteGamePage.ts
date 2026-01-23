@@ -88,14 +88,13 @@ export class RemoteGamePage implements Component {
   // WebSocket コールバックハンドラ
   private handleRegistered(userId: string): void {
     this.userId = userId;
-    this.updateUserIdDisplay();
   }
 
   private handleGameGenerated(gameId: number, state: GameState): void {
     this.currentGameId = gameId;
     this.mySide = 'left'; // ゲーム作成者は左
     this.leftPlayer = this.userId;
-    this.updateGameIdDisplay();
+    this.updateGameIdInput();
     this.updateMatchDisplay();
     this.pongGame.updateState(state);
     this.disableGameControls();
@@ -106,7 +105,7 @@ export class RemoteGamePage implements Component {
   private handlePlayerAdded(gameId: number, side: 'left' | 'right'): void {
     this.currentGameId = gameId;
     this.mySide = side;
-    this.updateGameIdDisplay();
+    this.updateGameIdInput();
     this.disableGameControls();
     // 入力送信ループを開始
     this.pongGame.start();
@@ -127,13 +126,13 @@ export class RemoteGamePage implements Component {
     this.mySide = yourSide;
     this.leftPlayer = leftPlayer;
     this.rightPlayer = rightPlayer;
-    this.updateGameIdDisplay();
+    this.updateGameIdInput();
     this.updateMatchDisplay();
   }
 
   private handleGameStart(gameId: number): void {
     this.currentGameId = gameId;
-    this.updateGameIdDisplay();
+    this.updateGameIdInput();
     // ゲーム開始後は退出ボタンを非表示
     this.hideLeaveButton();
   }
@@ -166,7 +165,7 @@ export class RemoteGamePage implements Component {
     this.mySide = null;
     this.leftPlayer = null;
     this.rightPlayer = null;
-    this.updateGameIdDisplay();
+    this.clearGameIdInput();
     this.updateMatchDisplay();
     this.enableGameControls();
     this.hideLeaveButton();
@@ -227,31 +226,44 @@ export class RemoteGamePage implements Component {
     }
   }
 
-  // 退出ボタン表示
+  // 退出ボタン有効化
   private showLeaveButton(): void {
-    const leaveBtn = this.el.querySelector('#leave-game-btn');
-    leaveBtn?.classList.remove('hidden');
-  }
-
-  // 退出ボタン非表示
-  private hideLeaveButton(): void {
-    const leaveBtn = this.el.querySelector('#leave-game-btn');
-    leaveBtn?.classList.add('hidden');
-  }
-
-  // UI更新メソッド
-  private updateUserIdDisplay(): void {
-    const userIdEl = this.el.querySelector('#user-id');
-    if (userIdEl) {
-      userIdEl.textContent = this.userId || '未登録';
+    const leaveBtn = this.el.querySelector(
+      '#leave-game-btn'
+    ) as HTMLButtonElement;
+    if (leaveBtn) {
+      leaveBtn.disabled = false;
+      leaveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
   }
 
-  private updateGameIdDisplay(): void {
-    const gameIdEl = this.el.querySelector('#game-id');
-    if (gameIdEl) {
-      gameIdEl.textContent =
-        this.currentGameId !== null ? String(this.currentGameId) : '-';
+  // 退出ボタン無効化
+  private hideLeaveButton(): void {
+    const leaveBtn = this.el.querySelector(
+      '#leave-game-btn'
+    ) as HTMLButtonElement;
+    if (leaveBtn) {
+      leaveBtn.disabled = true;
+      leaveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  }
+
+  // UI更新メソッド
+  private updateGameIdInput(): void {
+    const joinInput = this.el.querySelector(
+      '#join-game-input'
+    ) as HTMLInputElement;
+    if (joinInput && this.currentGameId !== null) {
+      joinInput.value = String(this.currentGameId);
+    }
+  }
+
+  private clearGameIdInput(): void {
+    const joinInput = this.el.querySelector(
+      '#join-game-input'
+    ) as HTMLInputElement;
+    if (joinInput) {
+      joinInput.value = '';
     }
   }
 

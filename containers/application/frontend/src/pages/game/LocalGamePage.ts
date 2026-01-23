@@ -39,6 +39,10 @@ export class LocalGamePage implements Component {
     this.el.querySelector('h1')!.textContent = 'Local Pong Game';
     this.el.querySelector('#game-description')!.textContent =
       'This is the local multiplayer pong game.';
+    // Hide remote game controls (create/join/leave buttons)
+    this.el.querySelector('.control-section')!.classList.add('hidden');
+    // Hide match info (remote game only)
+    this.el.querySelector('#match-info')!.classList.add('hidden');
     this.updateWinningScore();
     // FIX: temporary random players for testing
     for (let i = 0; i < Math.floor(Math.random() * (8 - 2 + 1)) + 2; i++) {

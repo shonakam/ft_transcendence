@@ -1,75 +1,90 @@
 <div
-  class="fixed inset-0 items-center justify-center bg-gradient-to-br from-white via-gray-200 to-gray overflow-hidden"
+  class="fixed inset-0 flex flex-col items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto"
 >
-  <div class="text-center pt-16">
-    <div class="mb-6"></div>
-    <h1 class="text-4xl font-bold mb-4"></h1>
-    <p id="game-description" class="text-lg text-gray-700"></p>
-  </div>
+  <!-- subtle noise -->
+  <div class="absolute inset-0 opacity-20 bg-[url('/noise.png')]"></div>
 
-  <!-- ゲーム情報表示エリア -->
-  <div class="info-section text-center mt-4 space-y-2">
-    <p id="user-info" class="text-gray-600">
-      ユーザー: <span id="user-id">未登録</span>
-    </p>
-    <p id="game-info" class="text-gray-600">
-      ゲームID: <span id="game-id">-</span>
-    </p>
-    <p id="match-info" class="text-xl font-bold text-gray-800">
-      <span id="match-display">-</span>
-    </p>
-  </div>
+  <!-- content wrapper -->
+  <div class="relative z-10 w-full max-w-4xl px-6 pt-24 pb-16">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2"></h1>
+      <p id="game-description" class="text-lg text-gray-400"></p>
+    </div>
 
-  <!-- ゲーム操作ボタン -->
-  <div class="control-section flex justify-center gap-4 mt-6">
-    <button
-      id="create-game-btn"
-      class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition"
-    >
-      ゲーム作成
-    </button>
-    <div class="flex gap-2">
-      <input
-        id="join-game-input"
-        type="number"
-        placeholder="Game ID"
-        class="w-32 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      />
+    <!-- ゲーム操作ボタン -->
+    <div class="control-section flex flex-wrap justify-center gap-4 mb-6">
       <button
-        id="join-game-btn"
-        class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition"
+        id="create-game-btn"
+        class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all shadow-lg active:scale-95"
       >
-        参加
+        ゲーム作成
+      </button>
+      <div class="flex gap-2">
+        <input
+          id="join-game-input"
+          type="number"
+          placeholder="Game ID"
+          class="w-28 px-3 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+        <button
+          id="join-game-btn"
+          class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-lg active:scale-95"
+        >
+          参加
+        </button>
+      </div>
+      <button
+        id="leave-game-btn"
+        class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold transition-all shadow-lg active:scale-95 opacity-50 cursor-not-allowed"
+        disabled
+      >
+        退出
       </button>
     </div>
-    <button
-      id="leave-game-btn"
-      class="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition hidden"
-    >
-      退出
-    </button>
-  </div>
 
-  <div class="scoreboard text-center mt-4">
-    <span id="score-left">0</span> : <span id="score-right">0</span><br />
-    <span id="winning-score" class="ml-4 text-gray-600"
-      >(First to ${CONFIG.WINNING_SCORE} wins)</span
-    ><br />
-    <span id="game-status" class="ml-4 text-gray-600">Status: Ready</span>
-  </div>
-  <div class="game-canvas flex justify-center mt-8">
+    <!-- スコアボード -->
     <div
-      class="canvas-stack"
-      style="position: relative; width: 800px; height: 400px"
-    ></div>
+      class="scoreboard bg-white/10 backdrop-blur rounded-xl p-4 mb-6 text-center"
+    >
+      <!-- マッチ情報 -->
+      <div id="match-info" class="mb-3">
+        <span id="match-display" class="text-lg font-bold text-white">-</span>
+      </div>
+      <!-- スコア -->
+      <div class="text-4xl font-bold text-white mb-2">
+        <span id="score-left">0</span>
+        <span class="text-gray-500 mx-4">:</span>
+        <span id="score-right">0</span>
+      </div>
+      <p id="winning-score" class="text-gray-400 text-sm">
+        (First to ${CONFIG.WINNING_SCORE} wins)
+      </p>
+      <p id="game-status" class="text-gray-400 text-sm mt-1">Status: Ready</p>
+    </div>
+
+    <!-- ゲームキャンバス -->
+    <div class="game-canvas flex justify-center mb-8">
+      <div
+        class="canvas-stack rounded-xl overflow-hidden shadow-2xl"
+        style="position: relative; width: 800px; height: 400px"
+      ></div>
+    </div>
+
+    <!-- 操作説明 -->
+    <div class="text-center text-gray-400 space-y-1">
+      <p>
+        Use <span class="text-white font-medium">'W' / 'S'</span> or
+        <span class="text-white font-medium">'↑' / '↓'</span> to move your
+        paddle.
+      </p>
+      <p>
+        Both players press
+        <span class="text-white font-medium">'Space'</span> to start the game.
+      </p>
+    </div>
+
+    <!-- トーナメントセクション -->
+    <div class="tournament-section mt-12"></div>
   </div>
-  <div class="text-center mt-8">
-    <p class="text-gray-600">
-      Use <b>'W' / 'S'</b> or <b>'↑' / '↓'</b> to move your paddle.
-    </p>
-    <p class="text-gray-600">
-      Both players press <b>'Space'</b> to start the game.
-    </p>
-  </div>
-  <div class="tournament-section mt-12 px-4"></div>
 </div>
