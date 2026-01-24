@@ -4,6 +4,7 @@ import { UserResponse } from '../services/user/dashboard';
 import { design } from '../conf';
 import { MfaForm } from '../components/auth/MfaForm';
 import { router } from '../router/router';
+import { toaster } from '../components/common/Toaster';
 
 export type DashboardView = 'game' | 'chat' | 'mfa';
 
@@ -38,7 +39,7 @@ export class DashboardPage implements Component {
       const user = await api.get<UserResponse>('users/me');
       this.render(user);
     } catch (error) {
-      console.error('ユーザー情報の取得に失敗しました', error);
+      toaster.show('ユーザー情報の取得に失敗しました', 'error');
     }
   }
 

@@ -27,7 +27,6 @@ export class ChatWebsocketService {
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
-      console.log('ChatWebsocketService: Connected');
       this.isConnected = true;
     };
 
@@ -36,15 +35,11 @@ export class ChatWebsocketService {
         const response: WsResponse = JSON.parse(event.data);
         this.listeners.forEach((listener) => listener(response));
       } catch (error) {
-        console.error(
-          'ChatWebsocketService: Failed to parse WS message',
-          error
-        );
+        // Parse error ignored
       }
     };
 
     this.socket.onclose = () => {
-      console.log('ChatWebsocketService: Disconnected');
       this.socket = null;
       this.isConnected = false;
       // Reconnect after 3 seconds
@@ -52,7 +47,6 @@ export class ChatWebsocketService {
     };
 
     this.socket.onerror = (error) => {
-      console.error('ChatWebsocketService: WebSocket error', error);
     };
   }
 

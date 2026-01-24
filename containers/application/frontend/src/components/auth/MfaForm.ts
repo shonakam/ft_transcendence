@@ -86,7 +86,6 @@ export class MfaForm implements Component {
 
     if (err) {
       this.qrImage.style.opacity = '1';
-      console.warn('MFA Setup Error:', err);
       return toaster.show('QRコードの取得に失敗しました', 'error');
     }
 
@@ -98,7 +97,6 @@ export class MfaForm implements Component {
         });
         this.qrImage.src = dataUrl;
       } catch (qrErr) {
-        console.error('QR Generation failed', qrErr);
         toaster.show('QRコードの生成に失敗しました', 'error');
       }
     }
