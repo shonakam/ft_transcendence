@@ -17,6 +17,18 @@ export interface GetStatsParams {
   offset?: number;
 }
 
+export interface SaveGameResultParams {
+  gameId?: string;
+  leftUserId: string;
+  rightUserId: string;
+  leftAlias?: string | null;
+  rightAlias?: string | null;
+  leftScore: number;
+  rightScore: number;
+  winner: 'left' | 'right';
+  endedAt?: number;
+}
+
 export async function getGameStats(
   params?: GetStatsParams
 ): Promise<GameRecord[]> {
@@ -28,4 +40,10 @@ export async function getGameStats(
   const endpoint = query ? `game/stats?${query}` : 'game/stats';
 
   return api.get<GameRecord[]>(endpoint);
+}
+
+export async function saveGameResult(
+  params: SaveGameResultParams
+): Promise<GameRecord[]> {
+  return api.post<GameRecord[]>('game/stats', params);
 }

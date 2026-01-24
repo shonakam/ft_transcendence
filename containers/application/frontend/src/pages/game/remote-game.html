@@ -8,8 +8,12 @@
   <div class="relative z-10 w-full max-w-4xl px-6 pt-24 pb-16">
     <!-- Header -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2"></h1>
-      <p id="game-description" class="text-lg text-gray-400"></p>
+      <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">
+        Remote Pong Game
+      </h1>
+      <p id="game-description" class="text-lg text-gray-400">
+        Play against an opponent online
+      </p>
     </div>
 
     <!-- ゲーム操作ボタン -->
@@ -57,9 +61,7 @@
         <span class="text-gray-500 mx-4">:</span>
         <span id="score-right">0</span>
       </div>
-      <p id="winning-score" class="text-gray-400 text-sm">
-        (First to ${CONFIG.WINNING_SCORE} wins)
-      </p>
+      <p id="winning-score" class="text-gray-400 text-sm">(First to 5 wins)</p>
       <p id="game-status" class="text-gray-400 text-sm mt-1">Status: Ready</p>
     </div>
 
@@ -72,27 +74,10 @@
     </div>
 
     <!-- 操作説明 -->
-    <div id="controls-info" class="text-center text-gray-400 space-y-1">
-      <p>
-        Use <span class="text-white font-medium">'W' / 'S'</span> or
-        <span class="text-white font-medium">'↑' / '↓'</span> to move your
-        paddle.
-      </p>
-      <p>
-        Both players press
-        <span class="text-white font-medium">'Space'</span> to start the game.
-      </p>
-    </div>
-
-    <!-- ローカル操作説明 -->
-    <p id="local-controls-info" class="hidden text-center text-gray-400">
-      Left: <span class="text-white font-medium">W/S</span> | Right:
-      <span class="text-white font-medium">↑/↓</span> or
-      <span class="text-white font-medium">I/K</span> |
+    <p class="text-center text-gray-400">
+      <span class="text-white font-medium">W/S</span> or
+      <span class="text-white font-medium">↑/↓</span> to move |
       <span class="text-white font-medium">Space</span> to start
     </p>
-
-    <!-- トーナメントセクション -->
-    <div class="tournament-section mt-12"></div>
   </div>
 </div>
