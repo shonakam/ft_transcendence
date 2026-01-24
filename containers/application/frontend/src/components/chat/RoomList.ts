@@ -1,6 +1,7 @@
 import { Component } from '../../interface/Component';
 import { ChatRoom } from '../../types/chat';
 import { chatService } from '../../services/chat/ChatService';
+import { toaster } from '../common/Toaster';
 
 export class RoomList implements Component {
   private el: HTMLElement;
@@ -20,7 +21,7 @@ export class RoomList implements Component {
       this.rooms = await chatService.getRooms();
       this.render();
     } catch (error) {
-      console.error('Failed to fetch rooms', error);
+      toaster.show('Failed to fetch rooms', 'error');
     }
   }
 
