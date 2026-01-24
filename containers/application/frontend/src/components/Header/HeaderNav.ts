@@ -66,6 +66,7 @@ export class HeaderNav implements Component {
       if (confirm('ログアウトしますか？')) {
         await logout().catch(() => {});
         authStore.setLoggedOut();
+        window.sessionStorage.clear()
         router.navigateTo('/auth?view=login');
       }
     });

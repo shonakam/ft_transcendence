@@ -34,6 +34,8 @@ export class UpdateForm implements Component {
 
     if (user) {
       this.previewImage.src = user.imagePath ? `/api/${user.imagePath}` : this.DEFAULT_IMAGE;
+    } else {
+      this.previewImage.src = this.DEFAULT_IMAGE;
     }
 
     this.imageInput = document.createElement('input');
