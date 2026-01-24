@@ -9,6 +9,7 @@ import gameTemplate from './game.html?raw';
 import CONFIG from '@shonakam/common/game/GameConfig';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import type { GameState } from '@shonakam/common';
+import type { GameState } from '@shonakam/common';
 
 export class RemoteGamePage implements Component {
   el: HTMLElement = document.createElement('main');
@@ -366,4 +367,5 @@ export class RemoteGamePage implements Component {
       window.history.replaceState({}, '', url.pathname);
     }
   }
+
 }

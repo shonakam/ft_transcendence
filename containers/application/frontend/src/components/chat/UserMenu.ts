@@ -1,12 +1,19 @@
 import { Component } from '../../interface/Component';
 import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
+import { GameSocket } from '../../components/game/ws/GameSocket';
 
 export class UserMenu implements Component {
   private static instance: UserMenu | null = null;
   private el: HTMLElement;
   private currentUserId: string | null = null;
   private currentUsername: string | null = null;
+
+  private handleOutsideClick = (e: MouseEvent) => {
+    if (this.el && !this.el.contains(e.target as Node)) {
+      this.hide();
+    }
+  };
 
   constructor() {
     this.el = document.createElement('div');
@@ -15,11 +22,15 @@ export class UserMenu implements Component {
     document.body.appendChild(this.el);
 
     // Close on click outside
-    document.addEventListener('click', (e: MouseEvent) => {
-      if (!this.el.contains(e.target as Node)) {
-        this.hide();
-      }
-    });
+    document.addEventListener('click', this.handleOutsideClick);
+  }
+
+  public destroy(): void {
+    document.removeEventListener('click', this.handleOutsideClick);
+    this.el.remove();
+    if (UserMenu.instance === this) {
+      UserMenu.instance = null;
+    }
   }
 
   public static getInstance(): UserMenu {
@@ -68,6 +79,19 @@ export class UserMenu implements Component {
       this.hide();
     });
 
+    const inviteBtn = this.createOption(
+      '🏓 Invite to Game',
+      async () => {
+        if (!this.currentUserId) return;
+        // Don't invite yourself
+        if (this.currentUserId === (window as any).currentUser?.id) return;
+
+        // Create game and send invite without navigating
+        await this.createGameAndInvite(this.currentUserId);
+        this.hide();
+      }
+    );
+
     const blockBtn = this.createOption(
       '🚫 Block User',
       async () => {
@@ -89,7 +113,7 @@ export class UserMenu implements Component {
       'text-red-400 hover:bg-red-500/10'
     );
 
-    this.el.append(label, dmBtn, blockBtn);
+    this.el.append(label, dmBtn, inviteBtn, blockBtn);
   }
 
   private createOption(
@@ -109,5 +133,57 @@ export class UserMenu implements Component {
 
   public getElement(): HTMLElement {
     return this.el;
+  }
+
+  private async createGameAndInvite(targetUserId: string) {
+    const socket = new GameSocket();
+
+    const gameCreated = new Promise<number>((resolve, reject) => {
+      // Set timeout to avoid hanging
+      const timeout = setTimeout(() => {
+        socket.disconnect();
+        reject(new Error('Game creation timed out'));
+      }, 5000);
+
+      socket.connect({
+        onRegistered: () => {
+          // Once registered, create the game
+          socket.sendCreateGame();
+        },
+        onGameGenerated: (gameId: number) => {
+          clearTimeout(timeout);
+          resolve(gameId);
+        },
+        onError: (err) => {
+          clearTimeout(timeout);
+          reject(new Error(err));
+        },
+        // We need to implement other required methods of GameSocketCallbacks interface even if empty
+         onPlayerAdded: () => {},
+         onOpponentJoined: () => {},
+         onGameReady: () => {},
+         onGameStart: () => {},
+         onGameState: () => {},
+         onPlayerLeft: () => {},
+         onGameLeft: () => {},
+      });
+    });
+
+    try {
+      const gameId = await gameCreated;
+      
+      // Send invitation
+      const room = await chatService.getOrCreateDMRoom(targetUserId);
+      const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
+      await chatService.sendMessage(room.id, inviteLink, 'invitation');
+      
+      console.log(`Game ${gameId} created and invitation sent to ${targetUserId}`);
+
+      socket.disconnect();
+
+    } catch (error) {
+      console.error('Failed to create game and invite', error);
+      socket.disconnect();
+    }
   }
 }
