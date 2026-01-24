@@ -18,7 +18,10 @@ export class UserInfoComponent implements Component {
 	imgContainer.className = 'flex justify-center mb-6';
 	
 	const img = document.createElement('img');
-	img.src = (user.imagePath) ? `/api/${user.imagePath}` : this.DEFAULT_IMAGE;
+	img.src = (user.imagePath) 
+    ? (user.imagePath! == '/assets/default-profile.png') ? '/assets/default-profile.png' : `/api/${user.imagePath}`
+    : this.DEFAULT_IMAGE;
+
     img.alt = `${user.username} profile`;
 	img.className = 'w-24 h-24 rounded-full object-cover border-4 border-white/10 shadow-lg';
 	imgContainer.appendChild(img);

@@ -86,7 +86,6 @@ async function main() {
 
   await server_conf(server);
   await registRouters(server, container);
-  await registerWebSocket(server);
   const ioServer = new Server(server.server, {
     path: '/ws',
     transports: ['websocket', 'polling'],
