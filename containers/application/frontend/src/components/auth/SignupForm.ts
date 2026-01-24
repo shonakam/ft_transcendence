@@ -1,6 +1,6 @@
 import { Component } from '../../interface/Component';
 import { createUser, userCreateRequestForm } from '../../services/user/create';
-import { api } from '../../lib/httpClient';
+import { api, NetworkError } from '../../lib/httpClient';
 import { toaster } from '../common/Toaster';
 import { to } from '../../lib/to';
 
@@ -113,6 +113,12 @@ export class SignupForm implements Component {
 
       const [response, err] = await to(createUser(requestData));
       if (err) {
+        if (err instanceof NetworkError) {
+          return toaster.show(
+            'サーバーに接続できません。ネットワーク接続を確認してください。',
+            'error'
+          );
+        }
         const message = (err as any).error || (err as any).message || '予期せぬエラーが発生しました';
         return toaster.show(`${message}`, 'error');
       }
@@ -129,11 +135,18 @@ export class SignupForm implements Component {
       );
     } catch (error: unknown) {
       console.error('Signup Error:', error);
-      toaster.show(
-        (error as Error).message ||
-          '登録に失敗しました。サーバーの状態を確認してください。',
-        'error'
-      );
+      if (error instanceof NetworkError) {
+        toaster.show(
+          'サーバーに接続できません。ネットワーク接続を確認してください。',
+          'error'
+        );
+      } else {
+        toaster.show(
+          (error as Error).message ||
+            '登録に失敗しました。サーバーの状態を確認してください。',
+          'error'
+        );
+      }
     } finally {
       this.setLoading(false);
     }

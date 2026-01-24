@@ -1,13 +1,9 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import ws from '@fastify/websocket';
 import { authenticate } from '../auth/authPreHandler.ts';
 import { chatWebSocketManager } from './ChatWebSocketManager.ts';
+import minilog from '../../utils/minilog.ts';
 
 export function registerChatWebSocket(fastify: FastifyInstance): void {
-  fastify.register(ws, {
-    options: { maxPayload: 1048576 },
-  });
-
   fastify.register(async function (fastify: FastifyInstance) {
     fastify.get(
       '/ws/chat',
@@ -15,18 +11,18 @@ export function registerChatWebSocket(fastify: FastifyInstance): void {
       (connection: any, req: FastifyRequest) => {
         const socket = connection?.socket || connection;
         if (!socket || typeof socket.on !== 'function') {
-          console.error('WS: Invalid socket object received');
+          minilog.e('WebSocket/chat', 'Invalid socket object received');
           return;
         }
 
         const userId = req.authUserId?.get();
         if (!userId) {
-          console.warn('WS: Unauthorized connection attempt');
+          minilog.w('WebSocket/chat', 'Unauthorized connection attempt');
           socket.close();
           return;
         }
 
-        console.log(`WS: User ${userId} connected to chat`);
+        minilog.i('WebSocket/chat', `User ${userId} connected to chat`);
         chatWebSocketManager.addConnection(userId, socket);
 
         socket.on('message', (message: any) => {
@@ -34,15 +30,18 @@ export function registerChatWebSocket(fastify: FastifyInstance): void {
         });
 
         socket.on('close', () => {
-          console.log(`WS: User ${userId} disconnected`);
+          minilog.i('WebSocket/chat', `User ${userId} disconnected`);
           chatWebSocketManager.removeConnection(userId, socket);
         });
 
         socket.on('error', (err: any) => {
-          console.error(`WS: Socket error for user ${userId}:`, err);
+          minilog.e(
+            'WebSocket/chat',
+            `Socket error for user ${userId}: ${err}`,
+          );
         });
       },
     );
-    console.log('Chat WebSocket routes registered');
+    minilog.i('WebSocket', 'Chat WebSocket routes registered');
   });
 }

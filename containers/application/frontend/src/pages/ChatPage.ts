@@ -17,7 +17,8 @@ export class ChatPage implements Component {
 
   constructor() {
     this.el = document.createElement('main');
-    this.el.className = 'h-screen w-full bg-slate-900 flex text-white pt-20 overflow-hidden';
+    this.el.className =
+      'h-screen w-full bg-slate-900 flex text-white pt-20 overflow-hidden';
 
     const sidebar = document.createElement('aside');
     sidebar.className =

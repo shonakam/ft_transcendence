@@ -1,8 +1,12 @@
 import { routes } from './routes';
 import { Header } from '../components/Header/Header';
 import { Component } from 'src/interface/Component';
+import { authStore } from '../store/authStore';
 
 const APP_ROOT_ID = 'app-root'; // アプリケーションがマウントされるルート要素を特定
+
+// 認証が必要なパス
+const protectedPaths = ['/game/remote', '/dashboard', '/chat'];
 
 export class Router {
   private static instance: Router;
@@ -49,6 +53,13 @@ export class Router {
       history.replaceState(null, '', '/home');
       normalizedPath = '/home';
     }
+
+    // 認証が必要なパスにアクセスした場合、ログインしていなければリダイレクト
+    if (protectedPaths.includes(normalizedPath) && !authStore.isLoggedIn()) {
+      history.replaceState(null, '', '/auth?view=login');
+      normalizedPath = '/auth';
+    }
+
     PageComponent = routes[normalizedPath]();
     if (PageComponent === undefined) {
       history.replaceState(null, '', '/404');

@@ -1,5 +1,5 @@
-import { Ball } from './Ball';
-import type { GameSide } from './types/gameSide';
+import { Ball } from './Ball.ts';
+import type { GameSide } from './types/gameSide.ts';
 
 export function checkGoalCollision(ball: Ball, canvasWidth: number): GameSide | 'none' {
   const ballLeft = ball.position.x - ball.radius;

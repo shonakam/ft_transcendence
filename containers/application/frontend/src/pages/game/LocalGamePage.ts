@@ -3,7 +3,7 @@ import { Component } from '../../interface/Component';
 
 import { GameCanvas } from '../../components/game/canvas/GameCanvas';
 import { LocalInputHandler } from '../../components/game/inputHandler/LocalInputHandler';
-import { LocalPongGame } from '../../components/game/LocalPongGame';
+import { LocalGame } from '../../components/game/LocalGame';
 import gameTemplate from './game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
@@ -16,7 +16,7 @@ export class LocalGamePage implements Component {
   private el: HTMLElement = document.createElement('main');
   private gameCanvas: GameCanvas;
   private inputHandler = new LocalInputHandler();
-  private pongGame: LocalPongGame;
+  private pongGame: LocalGame;
 
   private tournament: TournamentRender = new TournamentRender();
 
@@ -27,7 +27,7 @@ export class LocalGamePage implements Component {
       CONFIG.CANVAS_WIDTH,
       CONFIG.CANVAS_HEIGHT
     );
-    this.pongGame = new LocalPongGame(this.gameCanvas, this.inputHandler);
+    this.pongGame = new LocalGame(this.gameCanvas, this.inputHandler);
     this.pongGame.initRender();
     this.render();
     this.pongGame.state.onScoreChange = this.updateScore.bind(this);
@@ -39,6 +39,10 @@ export class LocalGamePage implements Component {
     this.el.querySelector('h1')!.textContent = 'Local Pong Game';
     this.el.querySelector('#game-description')!.textContent =
       'This is the local multiplayer pong game.';
+    // Hide remote game controls (create/join/leave buttons)
+    this.el.querySelector('.control-section')!.classList.add('hidden');
+    // Hide match info (remote game only)
+    this.el.querySelector('#match-info')!.classList.add('hidden');
     this.updateWinningScore();
     // FIX: temporary random players for testing
     for (let i = 0; i < Math.floor(Math.random() * (8 - 2 + 1)) + 2; i++) {

@@ -1,31 +1,21 @@
 // - game exports
-export * from './game/GameState'
-export * from './game/GameConfig'
+export * from './game/GameState.ts';
+export * from './game/GameConfig.ts';
 
-export * from './game/checkGoalCollision'
-export * from './game/PhysicsEngine'
-
-export * from './game/Ball'
-export * from './game/Paddle'
+export * from './game/checkGoalCollision.ts';
+export * from './game/PhysicsEngine.ts';
+export * from './game/Ball.ts';
+export * from './game/Paddle.ts';
 // types
-export * from './game/types/vector2'
-export * from './game/types/direction'
-export * from './game/types/gameSide'
-export * from './game/types/gameStatus'
+export * from './game/types/vector2.ts';
+export * from './game/types/direction.ts';
+export * from './game/types/gameSide.ts';
+export * from './game/types/gameStatus.ts';
 // interfaces
-export * from './game/interface/Input'
-export * from './game/interface/PongGame'
+export * from './game/interface/Input.ts';
+export * from './game/interface/PongGame.ts';
 
-
-// - websocket exports
-export * from './websocket/GameClientMessenger'
-export * from './websocket/isJsonValue'
-export * from './websocket/isWsMessage'
-
-// types
-export * from './websocket/types/json'
-export * from './websocket/types/wsMessage'
-export * from './websocket/types/gameMessage'
-
+// websocket
+export * from './websocket/interface/messageType.ts';
 
 // tournament exports

@@ -4,6 +4,7 @@ import { SignupForm } from '../../components/auth/SignupForm';
 import { MfaForm } from '../../components/auth/MfaForm';
 import { router } from '../../router/router';
 import { design } from '../../conf';
+import { authStore } from '../../store/authStore';
 
 export type AuthView = 'login' | 'signup' | 'mfa';
 
@@ -66,16 +67,20 @@ export class AuthPage implements Component {
         this.updateUrl('login');
       });
 
-    this.loginForm.getElement().addEventListener('loginSuccess', (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const data = customEvent.detail.data;
-      if (data.tmpAuthToken) {
-        this.switchView('mfa');
-        this.updateUrl('mfa');
-      } else {
-        router.navigateTo('/dashboard');
-      }
-    });
+    this.loginForm
+      .getElement()
+      .addEventListener('loginSuccess', async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        const data = customEvent.detail.data;
+        if (data.tmpAuthToken) {
+          this.switchView('mfa');
+          this.updateUrl('mfa');
+        } else {
+          // ユーザー情報を取得して認証状態を更新
+          await authStore.checkAuthStatus();
+          router.navigateTo('/dashboard');
+        }
+      });
 
     this.signupForm.getElement().addEventListener('switchView', handleSwitch);
     this.loginForm.getElement().addEventListener('switchView', handleSwitch);

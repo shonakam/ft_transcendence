@@ -1,10 +1,34 @@
 {
   "name": "@shonakam/common",
   "version": "1.0.0",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "dependencies": {
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./src/*.ts",
+      "default": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    "./*.ts": {
+      "import": "./src/*.ts",
+      "default": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    }
   },
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "lint": "eslint --cache --ext .ts .",
+    "lint:fix": "eslint --cache --fix --ext .ts .",
+    "format": "prettier --write './src/**/*.ts'"
+  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "eslint": "^9.35.0",

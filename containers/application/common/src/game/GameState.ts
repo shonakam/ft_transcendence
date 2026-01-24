@@ -2,13 +2,13 @@
  * GameState.ts
  */
 
-import { Ball } from './Ball';
-import { Paddle } from './Paddle';
+import { Ball } from './Ball.ts';
+import { Paddle } from './Paddle.ts';
 
-import type { GameStatus } from './types/gameStatus';
-import type { GameSide } from './types/gameSide';
+import type { GameStatus } from './types/gameStatus.ts';
+import type { GameSide } from './types/gameSide.ts';
 
-import CONFIG from './GameConfig';
+import CONFIG from './GameConfig.ts';
 
 export class GameState {
   // BasicStatus

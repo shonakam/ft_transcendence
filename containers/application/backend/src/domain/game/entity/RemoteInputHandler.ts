@@ -1,17 +1,14 @@
-import type { Socket } from 'socket.io';
-import {
-  InputHandler,
-  InputState,
-  PlayerInput,
-} from '@shonakam/common/index.ts';
-import type { GameSide } from '@shonakam/common/game/types/gameSide.d.ts';
+import type { WebSocket } from 'ws';
+import { InputHandler } from '@shonakam/common';
+import type { InputState, PlayerInput } from '@shonakam/common';
+import type { GameSide } from '@shonakam/common';
 
 export class RemoteInputHandler implements InputHandler {
   inputState: InputState = {
     left: { direction: 'none', isStartPressed: false },
     right: { direction: 'none', isStartPressed: false },
   };
-  sockets: (Socket | null)[] = [null, null];
+  sockets: (WebSocket | null)[] = [null, null];
 
   constructor() {}
 
@@ -19,7 +16,7 @@ export class RemoteInputHandler implements InputHandler {
     return this.inputState;
   }
 
-  public setWebSocket(side: 'left' | 'right', socket: Socket): boolean {
+  public setWebSocket(side: 'left' | 'right', socket: WebSocket): boolean {
     const index = side === 'left' ? 0 : 1;
     if (!socket) return false;
     if (this.sockets[index] === socket) return true;
@@ -37,13 +34,36 @@ export class RemoteInputHandler implements InputHandler {
     return this.isSocketSet('left') && this.isSocketSet('right');
   }
 
-  public getSocket(side: GameSide): Socket | null {
+  public getSocket(side: GameSide): WebSocket | null {
     const index = side === 'left' ? 0 : 1;
     return this.sockets[index];
   }
 
-  public getSockets(): (Socket | null)[] {
+  public getSockets(): (WebSocket | null)[] {
     return this.sockets;
+  }
+
+  public getSideBySocket(socket: WebSocket): GameSide | null {
+    if (this.sockets[0] === socket) return 'left';
+    if (this.sockets[1] === socket) return 'right';
+    return null;
+  }
+
+  public removeSocket(socket: WebSocket): GameSide | null {
+    const side = this.getSideBySocket(socket);
+    if (side === null) return null;
+    const index = side === 'left' ? 0 : 1;
+    this.sockets[index] = null;
+    this.inputState[side] = { direction: 'none', isStartPressed: false };
+    return side;
+  }
+
+  public hasAnySocket(): boolean {
+    return this.sockets[0] !== null || this.sockets[1] !== null;
+  }
+
+  public resetStartPressed(side: GameSide): void {
+    this.inputState[side].isStartPressed = false;
   }
 
   public updateFromWs(side: GameSide, input: PlayerInput): void {
