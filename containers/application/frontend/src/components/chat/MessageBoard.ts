@@ -3,6 +3,7 @@ import { ChatMessage } from '../../types/chat';
 import { chatService } from '../../services/chat/ChatService';
 import { api } from '../../lib/httpClient';
 import { UserMenu } from './UserMenu';
+import { toaster } from '../common/Toaster';
 
 interface UserInfo {
   id: string;
@@ -25,7 +26,7 @@ export class MessageBoard implements Component {
     try {
       this.myUserInfo = await api.get<UserInfo>('users/me');
     } catch (error) {
-      console.error('Failed to get user info', error);
+      toaster.show('Failed to get user info', 'error');
     }
   }
 
@@ -36,7 +37,7 @@ export class MessageBoard implements Component {
       this.render();
       this.scrollToBottom();
     } catch (error) {
-      console.error('Failed to load messages', error);
+      toaster.show('Failed to load messages', 'error');
     }
   }
 

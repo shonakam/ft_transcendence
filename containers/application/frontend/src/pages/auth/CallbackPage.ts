@@ -4,7 +4,6 @@ import { design } from '../../conf';
 import { Component } from '../../interface/Component';
 import { router } from '../../router/router';
 import { oidc, oidcRequestForm } from '../../services/auth/oidc';
-// import { AuthPage } from "./AuthPage";
 
 export class CallbackPage implements Component {
   private root: HTMLDivElement;
@@ -45,7 +44,6 @@ export class CallbackPage implements Component {
       router.navigateTo('/auth');
     } catch (err) {
       loading.hide();
-      console.error(err);
       toaster.show('Login failed', 'error');
       router.navigateTo('/auth');
     }

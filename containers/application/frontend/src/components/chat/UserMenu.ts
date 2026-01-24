@@ -3,6 +3,7 @@ import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import { getUserById } from '../../services/user/dashboard';
+import { toaster } from '../common/Toaster';
 
 export class UserMenu implements Component {
   private static instance: UserMenu | null = null;
@@ -57,7 +58,7 @@ export class UserMenu implements Component {
         this.render();
       }
     } catch (error) {
-      console.error('Failed to fetch user info in UserMenu', error);
+      toaster.show('Failed to fetch user info', 'error');
     }
   }
 
@@ -77,16 +78,14 @@ export class UserMenu implements Component {
       if (!this.currentUserId) return;
       try {
         const room = await chatService.getOrCreateDMRoom(this.currentUserId);
-        // We might need a way to tell ChatPage to switch, but since they are on the same page,
-        // maybe we can just use a location check or an event.
-        // For now, let's navigate to /chat if not there, otherwise we might need an event system.
+
         if (window.location.pathname !== '/chat') {
           router.navigateTo('/chat');
         }
         // Dispatch custom event for ChatPage to listen
         window.dispatchEvent(new CustomEvent('switch-room', { detail: room }));
       } catch (error) {
-        console.error('Failed to open DM', error);
+        toaster.show('Failed to open DM', 'error');
       }
       this.hide();
     });
@@ -117,7 +116,7 @@ export class UserMenu implements Component {
               new CustomEvent('user-blocked', { detail: this.currentUserId })
             );
           } catch (error) {
-            console.error('Failed to block user', error);
+            toaster.show('Failed to block user', 'error');
           }
         }
         this.hide();
@@ -189,12 +188,11 @@ export class UserMenu implements Component {
       const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
       await chatService.sendMessage(room.id, inviteLink, 'invitation');
       
-      console.log(`Game ${gameId} created and invitation sent to ${targetUserId}`);
 
       socket.disconnect();
 
     } catch (error) {
-      console.error('Failed to create game and invite', error);
+      toaster.show('Failed to create game invitation', 'error');
       socket.disconnect();
     }
   }
