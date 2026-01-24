@@ -1,4 +1,5 @@
 import type { WebSocket } from 'ws';
+import minilog, { TAG } from '../utils/minilog.ts';
 
 import { GameServer } from '../domain/game/entity/GameServer.ts';
 import { RemoteInputHandler } from '../domain/game/entity/RemoteInputHandler.ts';
@@ -20,7 +21,8 @@ export class GameSessionRegistry {
   // Game handler management
   generateGame(socket: WebSocket): number | null {
     if (this.socketToGameEntry.has(socket)) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         'GameSessionRegistry: Game entry already exists for this socket',
       );
       return null;
@@ -42,23 +44,36 @@ export class GameSessionRegistry {
     return gameId;
   }
 
-  addUserToGame(socket: WebSocket, gameId: number): number | null {
+  addUserToGame(
+    socket: WebSocket,
+    gameId: number,
+  ): { gameId: number; side: string } | null {
     const entry = this.gameIdToGameEntry.get(gameId);
     if (!entry) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         `GameSessionRegistry: No game entry found for game ID ${gameId}`,
       );
       return null;
     }
     if (this.socketToGameEntry.has(socket)) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         'GameSessionRegistry: Socket already has an associated game entry',
       );
       return null;
     }
-    entry.inputHandler.setWebSocket('right', socket);
+
+    const side = !entry.inputHandler.isSocketSet('left') ? 'left' : 'right';
+
+    if (side === 'right' && entry.inputHandler.isSocketSet('right')) {
+      minilog.e(TAG.GAME, 'GameSessionRegistry: Game is full');
+      return null;
+    }
+
+    entry.inputHandler.setWebSocket(side, socket);
     this.socketToGameEntry.set(socket, entry);
-    return gameId;
+    return { gameId, side };
   }
 
   getGameEntryBySocket(socket: WebSocket): GameEntry | null {
@@ -78,7 +93,8 @@ export class GameSessionRegistry {
   deleteGameBySocket(socket: WebSocket): boolean {
     const entry = this.socketToGameEntry.get(socket);
     if (!entry) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         'GameSessionRegistry: No game entry found for the given socket',
       );
       return false;
@@ -91,7 +107,8 @@ export class GameSessionRegistry {
   deleteGameByGameId(gameId: number): boolean {
     const entry = this.gameIdToGameEntry.get(gameId);
     if (!entry) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         'GameSessionRegistry: No game entry found for the given game ID',
       );
       return false;
@@ -108,11 +125,13 @@ export class GameSessionRegistry {
   deleteUserFromGame(socket: WebSocket): boolean {
     const entry = this.socketToGameEntry.get(socket);
     if (!entry) {
-      console.error(
+      minilog.e(
+        TAG.GAME,
         'GameSessionRegistry: No game entry found for the given socket',
       );
       return false;
     }
+    entry.inputHandler.removeSocket(socket);
     this.socketToGameEntry.delete(socket);
     return true;
   }

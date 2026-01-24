@@ -1,12 +1,21 @@
 import { Component } from '../../interface/Component';
 import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
+import { GameSocket } from '../../components/game/ws/GameSocket';
+import { getUserById } from '../../services/user/dashboard';
+import { toaster } from '../common/Toaster';
 
 export class UserMenu implements Component {
   private static instance: UserMenu | null = null;
   private el: HTMLElement;
   private currentUserId: string | null = null;
   private currentUsername: string | null = null;
+
+  private handleOutsideClick = (e: MouseEvent) => {
+    if (this.el && !this.el.contains(e.target as Node)) {
+      this.hide();
+    }
+  };
 
   constructor() {
     this.el = document.createElement('div');
@@ -15,11 +24,15 @@ export class UserMenu implements Component {
     document.body.appendChild(this.el);
 
     // Close on click outside
-    document.addEventListener('click', (e: MouseEvent) => {
-      if (!this.el.contains(e.target as Node)) {
-        this.hide();
-      }
-    });
+    document.addEventListener('click', this.handleOutsideClick);
+  }
+
+  public destroy(): void {
+    document.removeEventListener('click', this.handleOutsideClick);
+    this.el.remove();
+    if (UserMenu.instance === this) {
+      UserMenu.instance = null;
+    }
   }
 
   public static getInstance(): UserMenu {
@@ -29,13 +42,24 @@ export class UserMenu implements Component {
     return UserMenu.instance;
   }
 
-  public show(userId: string, username: string, x: number, y: number) {
+  public async show(userId: string, username: string, x: number, y: number) {
     this.currentUserId = userId;
     this.currentUsername = username;
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
     this.render();
     this.el.classList.remove('hidden');
+
+    // 実際のユーザー名を取得して更新
+    try {
+      const user = await getUserById(userId);
+      if (this.currentUserId === userId) {
+        this.currentUsername = user.username;
+        this.render();
+      }
+    } catch (error) {
+      toaster.show('Failed to fetch user info', 'error');
+    }
   }
 
   public hide() {
@@ -54,19 +78,30 @@ export class UserMenu implements Component {
       if (!this.currentUserId) return;
       try {
         const room = await chatService.getOrCreateDMRoom(this.currentUserId);
-        // We might need a way to tell ChatPage to switch, but since they are on the same page,
-        // maybe we can just use a location check or an event.
-        // For now, let's navigate to /chat if not there, otherwise we might need an event system.
+
         if (window.location.pathname !== '/chat') {
           router.navigateTo('/chat');
         }
         // Dispatch custom event for ChatPage to listen
         window.dispatchEvent(new CustomEvent('switch-room', { detail: room }));
       } catch (error) {
-        console.error('Failed to open DM', error);
+        toaster.show('Failed to open DM', 'error');
       }
       this.hide();
     });
+
+    const inviteBtn = this.createOption(
+      '🏓 Invite to Game',
+      async () => {
+        if (!this.currentUserId) return;
+        // Don't invite yourself
+        if (this.currentUserId === (window as any).currentUser?.id) return;
+
+        // Create game and send invite without navigating
+        await this.createGameAndInvite(this.currentUserId);
+        this.hide();
+      }
+    );
 
     const blockBtn = this.createOption(
       '🚫 Block User',
@@ -81,7 +116,7 @@ export class UserMenu implements Component {
               new CustomEvent('user-blocked', { detail: this.currentUserId })
             );
           } catch (error) {
-            console.error('Failed to block user', error);
+            toaster.show('Failed to block user', 'error');
           }
         }
         this.hide();
@@ -89,7 +124,7 @@ export class UserMenu implements Component {
       'text-red-400 hover:bg-red-500/10'
     );
 
-    this.el.append(label, dmBtn, blockBtn);
+    this.el.append(label, dmBtn, inviteBtn, blockBtn);
   }
 
   private createOption(
@@ -109,5 +144,56 @@ export class UserMenu implements Component {
 
   public getElement(): HTMLElement {
     return this.el;
+  }
+
+  private async createGameAndInvite(targetUserId: string) {
+    const socket = new GameSocket();
+
+    const gameCreated = new Promise<number>((resolve, reject) => {
+      // Set timeout to avoid hanging
+      const timeout = setTimeout(() => {
+        socket.disconnect();
+        reject(new Error('Game creation timed out'));
+      }, 5000);
+
+      socket.connect({
+        onRegistered: () => {
+          // Once registered, create the game
+          socket.sendCreateGame();
+        },
+        onGameGenerated: (gameId: number) => {
+          clearTimeout(timeout);
+          resolve(gameId);
+        },
+        onError: (err) => {
+          clearTimeout(timeout);
+          reject(new Error(err));
+        },
+        // We need to implement other required methods of GameSocketCallbacks interface even if empty
+         onPlayerAdded: () => {},
+         onOpponentJoined: () => {},
+         onGameReady: () => {},
+         onGameStart: () => {},
+         onGameState: () => {},
+         onPlayerLeft: () => {},
+         onGameLeft: () => {},
+      });
+    });
+
+    try {
+      const gameId = await gameCreated;
+      
+      // Send invitation
+      const room = await chatService.getOrCreateDMRoom(targetUserId);
+      const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
+      await chatService.sendMessage(room.id, inviteLink, 'invitation');
+      
+
+      socket.disconnect();
+
+    } catch (error) {
+      toaster.show('Failed to create game invitation', 'error');
+      socket.disconnect();
+    }
   }
 }

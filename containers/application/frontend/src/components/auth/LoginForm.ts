@@ -108,30 +108,33 @@ export class LoginForm implements Component {
       return toaster.show('すべての項目を入力してください', 'error');
     }
 
-    this.setLoading(true);
+    try {
+      this.setLoading(true);
 
-    const request = loginRequestForm(email, password);
-    const [response, err] = await to(login(request));
+      const request = loginRequestForm(email, password);
+      const [response, err] = await to(login(request));
 
-    if (err) {
-      this.setLoading(false);
-      if (err instanceof NetworkError) {
+      if (err) {
+        if (err instanceof NetworkError) {
+          return toaster.show(
+            'サーバーに接続できません。ネットワーク接続を確認してください。',
+            'error'
+          );
+        }
         return toaster.show(
-          'サーバーに接続できません。ネットワーク接続を確認してください。',
+          'ログインに失敗しました。メールアドレスかパスワードが違います。',
           'error'
         );
       }
-      return toaster.show(
-        'ログインに失敗しました。メールアドレスかパスワードが違います。',
-        'error'
-      );
-    }
 
-    this.root.dispatchEvent(
-      new CustomEvent('loginSuccess', {
-        detail: { data: response },
-      })
-    );
+      this.root.dispatchEvent(
+        new CustomEvent('loginSuccess', {
+          detail: { data: response },
+        })
+      );
+    } finally {
+      this.setLoading(false);
+    }
   }
 
   private setLoading(isLoading: boolean) {

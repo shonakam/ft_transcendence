@@ -3,6 +3,7 @@ import { ChatMessage } from '../../types/chat';
 import { chatService } from '../../services/chat/ChatService';
 import { api } from '../../lib/httpClient';
 import { UserMenu } from './UserMenu';
+import { toaster } from '../common/Toaster';
 
 interface UserInfo {
   id: string;
@@ -25,7 +26,7 @@ export class MessageBoard implements Component {
     try {
       this.myUserInfo = await api.get<UserInfo>('users/me');
     } catch (error) {
-      console.error('Failed to get user info', error);
+      toaster.show('Failed to get user info', 'error');
     }
   }
 
@@ -36,7 +37,7 @@ export class MessageBoard implements Component {
       this.render();
       this.scrollToBottom();
     } catch (error) {
-      console.error('Failed to load messages', error);
+      toaster.show('Failed to load messages', 'error');
     }
   }
 
@@ -61,6 +62,25 @@ export class MessageBoard implements Component {
         minute: '2-digit',
       });
 
+      let innerContent = '';
+      if (msg.messageType === 'invitation') {
+        innerContent = `
+          <div class="px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'} break-words">
+             <div class="font-bold mb-1">🏓 Game Invitation</div>
+             <div class="mb-2">Let's play Pong!</div>
+             <a href="${msg.content}" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-xs transition-colors">
+               Join Game
+             </a>
+          </div>
+        `;
+      } else {
+        innerContent = `
+          <div class="px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'} break-words">
+            ${msg.content}
+          </div>
+        `;
+      }
+
       const content = `
         ${
           !isMe
@@ -72,9 +92,7 @@ export class MessageBoard implements Component {
             : ''
         }
         <div class="max-w-[70%]">
-          <div class="px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'} break-words">
-            ${msg.content}
-          </div>
+          ${innerContent}
           <div class="text-[10px] text-slate-500 mt-1 ${isMe ? 'text-right' : 'text-left'}">${time}</div>
         </div>
       `;

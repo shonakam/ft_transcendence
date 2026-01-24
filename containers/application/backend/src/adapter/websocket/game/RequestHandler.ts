@@ -85,20 +85,21 @@ export class RequestHandler {
       return;
     }
 
-    const joinedGameId = gameRegistry.addUserToGame(socket, gameId);
-    if (joinedGameId === null) {
+    const result = gameRegistry.addUserToGame(socket, gameId);
+    if (result === null) {
       this.errorLog(socket, 'ゲームへの参加に失敗しました。');
       return;
     }
+    const { gameId: joinedGameId, side } = result;
 
     // 参加者のユーザーID取得
     const joiningUserId = socketRegistry.getUserIdBySocket(socket) || '不明';
 
-    // 参加者に通知（右側プレイヤーとして参加）
-    ResponseHandler.added(socket, joinedGameId, 'right');
+    // 参加者に通知（動的に割り当てられたサイドを使用）
+    ResponseHandler.added(socket, joinedGameId, side as 'left' | 'right');
     minilog.i(
       TAG.GAME,
-      `RequestHandler: User ${joiningUserId} added to game ${joinedGameId} as right player`,
+      `RequestHandler: User ${joiningUserId} added to game ${joinedGameId} as ${side} player`,
     );
 
     // 2人揃ったらゲーム準備完了を通知し、パドル操作を有効化
