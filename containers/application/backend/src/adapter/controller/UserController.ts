@@ -47,13 +47,18 @@ export default async function UserController(
         }
         
         const body = req.body as any;
+        let image: Buffer | null = null;
+        if (body.image && body.image.type === "file") {
+          image = await body.image.toBuffer();
+        }
         const form: UpdateUserForm = {
-          username: body.username?.value || null,
+          username: body.username?.value ?? null,
           email: body.email?.value || null,
           password: body.password?.value || null,
-          image: body.image ? await body.image.toBuffer() : null,
+          image
         };
-
+        
+        console.log("body:", body)
         const user = await updateUser.execute(trustedUserId, form);
         reply.status(200).send(user);
       } catch (err: unknown) {

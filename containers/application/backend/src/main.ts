@@ -54,6 +54,7 @@ process.on('uncaughtException', (err) => {
  *  - cookie
  *  - multipart
  *  - static
+ *  - websocket
  */
 async function server_conf(server: FastifyInstance) {
   await server.register(cors, {
@@ -79,6 +80,8 @@ async function server_conf(server: FastifyInstance) {
     root: path.join(process.cwd(), "uploads"),
     prefix: "/api/uploads/",
   });
+
+  await server.register(ws);
 }
 
 async function main() {
@@ -86,17 +89,6 @@ async function main() {
 
   await server_conf(server);
   await registRouters(server, container);
-  const ioServer = new Server(server.server, {
-    path: '/ws',
-    transports: ['websocket', 'polling'],
-    cors: { origin: 'https://transcendence.42.fr', credentials: true },
-  });
-  await registerGameWebSocket(ioServer);
-  // setup websocket - 一度だけ登録
-  await server.register(ws);
-
-  await registRouters(server, container);
-
   await registerGameWebSocket(server);
   await registerChatWebSocket(server);
 

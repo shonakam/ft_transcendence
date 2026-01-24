@@ -126,9 +126,7 @@ export class UpdateForm implements Component {
     try {
       this.setLoading(true);
       
-      if (this.selectedFile) {
-        this.sessionStorage.delete()
-      }
+      this.sessionStorage.delete()
 
       const requestData = userUpdateRequestForm(
         email,

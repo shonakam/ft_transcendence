@@ -5,6 +5,7 @@ import type { UpdateUserForm } from '../../domain/user/form/request/UserForm.ts'
 import UserId from '../../domain/user/vo/UserId.ts';
 import { LocalFileStorage } from '../../infra/storage/LocalFileStorage.ts';
 import { Readable } from 'stream';
+import minilog, { TAG } from '../../utils/minilog.ts';
 
 export class UpdateUserUseCase {
   constructor(
@@ -19,14 +20,16 @@ export class UpdateUserUseCase {
     }
 
     const fileName = `${user.id}.png`;
-    await this.lfs.delete(fileName)
     let path = null;
     if (form.image) {
+      await this.lfs.delete(fileName)
       path = await this.lfs.save(fileName, form.image);
     }
     const updateUser = UserForm.update(user, form, path);
 
+    console.log("HI", updateUser)
     await this.repo.save(updateUser);
+    minilog.i(TAG.USER, `UpdateUserUseCase: ${updateUser}`)
     return updateUser;
   }
 }

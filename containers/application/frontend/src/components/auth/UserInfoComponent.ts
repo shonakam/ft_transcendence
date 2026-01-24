@@ -19,7 +19,7 @@ export class UserInfoComponent implements Component {
 	
 	const img = document.createElement('img');
 	img.src = (user.imagePath) 
-    ? (user.imagePath! == '/assets/default-profile.png') ? '/assets/default-profile.png' : `/api/${user.imagePath}`
+    ? (user.imagePath! == '/assets/default-profile.png') ? '/assets/default-profile.png' : `/api/${user.imagePath}?t=${Date.now()}`
     : this.DEFAULT_IMAGE;
 
     img.alt = `${user.username} profile`;
