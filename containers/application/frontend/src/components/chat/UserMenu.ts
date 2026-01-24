@@ -2,6 +2,7 @@ import { Component } from '../../interface/Component';
 import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
 import { GameSocket } from '../../components/game/ws/GameSocket';
+import { getUserById } from '../../services/user/dashboard';
 
 export class UserMenu implements Component {
   private static instance: UserMenu | null = null;
@@ -40,13 +41,24 @@ export class UserMenu implements Component {
     return UserMenu.instance;
   }
 
-  public show(userId: string, username: string, x: number, y: number) {
+  public async show(userId: string, username: string, x: number, y: number) {
     this.currentUserId = userId;
-    this.currentUsername = username;
+    this.currentUsername = username; // 初期値（プレースホルダ等）を表示
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
     this.render();
     this.el.classList.remove('hidden');
+
+    // 実際のユーザー名を取得して更新
+    try {
+      const user = await getUserById(userId);
+      if (this.currentUserId === userId) {
+        this.currentUsername = user.username;
+        this.render();
+      }
+    } catch (error) {
+      console.error('Failed to fetch user info in UserMenu', error);
+    }
   }
 
   public hide() {
