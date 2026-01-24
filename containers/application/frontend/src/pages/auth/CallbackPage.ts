@@ -44,6 +44,7 @@ export class CallbackPage implements Component {
       sessionStorage.setItem('pending_auth_data', JSON.stringify(response));
       router.navigateTo('/auth');
     } catch (err) {
+      loading.hide();
       console.error(err);
       toaster.show('Login failed', 'error');
       router.navigateTo('/auth');
