@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open, Database } from 'sqlite';
+import minilog, { TAG } from '../../utils/minilog.ts';
 import { config } from '../../conf.ts';
 import { promises as fs } from 'fs';
 import { AsyncLocalStorage } from 'node:async_hooks';
@@ -24,15 +25,15 @@ export async function initializeDatabase(): Promise<void> {
         a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
       );
 
-    console.log(`Found ${sqlFiles.length} migration files.`);
+    minilog.i(TAG.DB, `Found ${sqlFiles.length} migration files.`);
 
     for (const file of sqlFiles) {
-      console.log(`Applying migration: ${file}`);
+      minilog.i(TAG.DB, `Applying migration: ${file}`);
       const schemaSql = await fs.readFile(`${migrationsDir}/${file}`, 'utf8');
       await db.exec(schemaSql);
     }
   } catch (err) {
-    console.error(`マイグレーションの実行に失敗しました:`, err);
+    minilog.e(TAG.DB, `マイグレーションの実行に失敗しました: ${err}`);
     throw err;
   }
 }

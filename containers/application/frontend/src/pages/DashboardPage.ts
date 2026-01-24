@@ -65,7 +65,7 @@ export class DashboardPage implements Component {
       }
       this.render(user);
     } catch (error) {
-      console.error('ユーザー情報の取得に失敗しました', error);
+      toaster.show('ユーザー情報の取得に失敗しました', 'error');
     }
   }
 

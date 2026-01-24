@@ -4,7 +4,6 @@ import { design } from '../../conf';
 import { Component } from '../../interface/Component';
 import { router } from '../../router/router';
 import { oidc, oidcRequestForm } from '../../services/auth/oidc';
-// import { AuthPage } from "./AuthPage";
 
 export class CallbackPage implements Component {
   private root: HTMLDivElement;
@@ -44,7 +43,7 @@ export class CallbackPage implements Component {
       sessionStorage.setItem('pending_auth_data', JSON.stringify(response));
       router.navigateTo('/auth');
     } catch (err) {
-      console.error(err);
+      loading.hide();
       toaster.show('Login failed', 'error');
       router.navigateTo('/auth');
     }

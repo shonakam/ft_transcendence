@@ -6,6 +6,7 @@ import { MessageBoard } from '../components/chat/MessageBoard';
 import { MessageInput } from '../components/chat/MessageInput';
 import { chatService } from '../services/chat/ChatService';
 import { chatWebsocketService } from '../services/chat/ChatWebsocketService';
+import { toaster } from '../components/common/Toaster';
 
 export class ChatPage implements Component {
   private el: HTMLElement;
@@ -97,7 +98,7 @@ export class ChatPage implements Component {
       await chatService.sendMessage(this.activeRoom.id, content);
       await this.messageBoard.loadMessages(this.activeRoom.id);
     } catch (error) {
-      console.error('Failed to send message', error);
+      toaster.show('Failed to send message', 'error');
     }
   }
 

@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis';
+import minilog, { TAG } from '../../utils/minilog.ts';
 import { config } from '../../conf.ts';
 
 let redis: Redis;
@@ -13,18 +14,18 @@ export async function initializeRedis(): Promise<void> {
   redis = new Redis(redisOptions);
 
   redis.on('connect', () => {
-    console.log('Redis connected successfully.');
+    minilog.i(TAG.REDIS, 'Redis connected successfully.');
   });
 
   redis.on('error', (err) => {
-    console.error('Redis connection error:', err);
+    minilog.e(TAG.REDIS, `Redis connection error: ${err}`);
     process.exit(1);
   });
 
   try {
     await redis.ping();
   } catch (err) {
-    console.error('Failed to ping Redis on startup:', err);
+    minilog.e(TAG.REDIS, `Failed to ping Redis on startup: ${err}`);
     process.exit(1);
   }
 }
@@ -39,6 +40,6 @@ export function getRedis(): Redis {
 export async function closeRedis(): Promise<void> {
   if (redis) {
     await redis.quit();
-    console.log('Redis connection closed.');
+    minilog.i(TAG.REDIS, 'Redis connection closed.');
   }
 }

@@ -136,7 +136,6 @@ async function handleForceLogout() {
   localStorage.clear();
   sessionStorage.clear();
 
-  console.warn('Session expired. Redirecting to login...');
   toaster.show('Session expired. Redirecting to login...', 'error');
   router.navigateTo('/auth?view=login');
 }

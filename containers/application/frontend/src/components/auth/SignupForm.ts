@@ -134,7 +134,6 @@ export class SignupForm implements Component {
         })
       );
     } catch (error: unknown) {
-      console.error('Signup Error:', error);
       if (error instanceof NetworkError) {
         toaster.show(
           'サーバーに接続できません。ネットワーク接続を確認してください。',
