@@ -64,12 +64,8 @@ export class GameSessionRegistry {
       return null;
     }
 
-    // Determine side: prefer left if empty (e.g. if creator left), else right
     const side = !entry.inputHandler.isSocketSet('left') ? 'left' : 'right';
 
-    // If both sides full (though isSocketSet check above handles logic), reject?
-    // But basic logic: if left is taken, try right.
-    // If we want to be strict:
     if (side === 'right' && entry.inputHandler.isSocketSet('right')) {
       minilog.e(TAG.GAME, 'GameSessionRegistry: Game is full');
       return null;
@@ -135,7 +131,6 @@ export class GameSessionRegistry {
       );
       return false;
     }
-    // Make sure we remove the socket from the InputHandler so the slot becomes free
     entry.inputHandler.removeSocket(socket);
     this.socketToGameEntry.delete(socket);
     return true;

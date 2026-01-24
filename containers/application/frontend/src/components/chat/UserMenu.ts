@@ -44,7 +44,7 @@ export class UserMenu implements Component {
 
   public async show(userId: string, username: string, x: number, y: number) {
     this.currentUserId = userId;
-    this.currentUsername = username; // 初期値（プレースホルダ等）を表示
+    this.currentUsername = username;
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
     this.render();
