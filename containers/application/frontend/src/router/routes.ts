@@ -6,6 +6,7 @@ import { DashboardPage } from '../pages/DashboardPage';
 import { ChatPage } from '../pages/ChatPage';
 import { LocalGamePage } from '../pages/game/LocalGamePage';
 import { RemoteGamePage } from '../pages/game/RemoteGamePage';
+import { GameStatsPage } from '../pages/game/GameStatsPage';
 
 import { AuthPage } from '../pages/auth/AuthPage';
 import { CallbackPage } from '../pages/auth/CallbackPage';
@@ -18,6 +19,7 @@ export const routes: Routes = {
   '/dashboard': () => new DashboardPage(),
   '/game/local': () => new LocalGamePage(),
   '/game/remote': () => new RemoteGamePage(),
+  '/game/stats': () => new GameStatsPage(),
   '/chat': () => new ChatPage(),
 
   '/auth': () => new AuthPage(),

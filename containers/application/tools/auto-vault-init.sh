@@ -79,9 +79,12 @@ if echo "$VAULT_STATUS" | grep -q "Initialized.*true"; then
             ensure_kv_and_secrets
             exit 0
         else
-            # No saved key found, but Vault data exists
-            # Cannot unseal without the key - exit silently
-            exit 1
+            # Keys file missing but Vault already initialized
+            # This happens after cleanup - reset Vault by removing volume
+            echo "⚠️  Warning: Vault initialized but keys file missing." >&2
+            echo "    Run 'make fclean-app' then 'make up-app' to fully reset." >&2
+            echo "    Backend will use .env fallback secrets for now." >&2
+            exit 0
         fi
     fi
 fi

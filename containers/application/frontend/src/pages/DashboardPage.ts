@@ -108,6 +108,9 @@ export class DashboardPage implements Component {
     const mfaBtn = this.createMenuButton('🔒 Security Settings', () =>
       this.switchView('mfa')
     );
+    const statsBtn = this.createMenuButton('📊 Game Stats', () =>
+      router.navigateTo('/game/stats')
+    );
     const chatBtn = this.createMenuButton('💬 Chat', () =>
       router.navigateTo('/chat')
     );
@@ -115,12 +118,7 @@ export class DashboardPage implements Component {
       this.switchView('game')
     );
 
-    menu.append(
-      userBtn,
-      mfaBtn,
-      // chatBtn,
-      // gameBtn
-    );
+    menu.append(userBtn, mfaBtn, statsBtn, chatBtn, gameBtn);
     this.container.append(title, userInfo.getElement(), menu);
   }
 
