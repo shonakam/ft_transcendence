@@ -5,7 +5,8 @@
   "main": "main.ts",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "concurrently \"npm:dev:css\" \"npm:dev:html\"",
+    "dev": "npm run dev:css:init && concurrently \"npm:dev:css\" \"npm:dev:html\"",
+    "dev:css:init": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css",
     "dev:css": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch",
     "dev:html": "vite build --watch",
     "build": "npm run build:css && vite build",
