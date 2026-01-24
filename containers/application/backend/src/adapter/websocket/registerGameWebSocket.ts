@@ -1,43 +1,112 @@
-import { GameSessionRegistry } from '../../container/GameSessionRegistry.ts';
-import { Server, Socket } from 'socket.io';
-import { GameRequestHandler } from './game/GameRequestHandler.ts';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { WebSocket } from 'ws';
 
-export function registerGameWebSocket(io: Server): void {
-  io.of('/game/remote').on('connection', (socket: Socket) => {
-    // client → server
-    socket.emit('connected', { message: 'WebSocket connection established' });
+import { RequestHandler } from './game/RequestHandler.ts';
+import { ResponseHandler } from './game/ResponseHandler.ts';
+import type { ClientMessage } from '@shonakam/common';
 
-    // socket.on('register', (payload: { userId: string }) => {
-    //   GameRequestHandler.handleRegister(socket, payload);
-    // });
+import minilog from '../../utils/minilog.ts';
+import { authenticate } from '../auth/authPreHandler.ts';
+import { container } from '../../container/index.ts';
+import UserId from '../../domain/user/vo/UserId.ts';
 
-    // socket.on('createGame', () => {
-    //   GameRequestHandler.handleCreateGame(socket);
-    // });
+export function registerGameWebSocket(fastify: FastifyInstance): void {
+  fastify.register(async function (fastify: FastifyInstance) {
+    fastify.get(
+      '/ws/game/remote',
+      { websocket: true, preHandler: authenticate },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (connection: any, req: FastifyRequest) => {
+        // @fastify/websocket v11+ では connection が SocketStream で .socket が WebSocket
+        // v10以前では connection が直接 WebSocket オブジェクト
+        const socket: WebSocket = connection?.socket || connection;
 
-    // socket.on('join', (payload: { gameId: string, userId: number }) =>
-    //   GameRequestHandler.handleJoin(socket, payload),
-    // );
+        minilog.i(
+          'WebSocket/game',
+          `Connection keys: ${Object.keys(connection || {}).join(', ')}`,
+        );
+        minilog.i(
+          'WebSocket/game',
+          `Socket has close: ${typeof socket?.close}, send: ${typeof socket?.send}`,
+        );
 
-    // socket.on('playerInput', (payload) =>
-    //   GameRequestHandler.handlePlayerInput(socket, payload),
-    // );
+        const userId = req.authUserId?.get();
+        if (!userId) {
+          minilog.w('WebSocket/game', 'Unauthorized connection attempt');
+          if (typeof socket.close === 'function') {
+            socket.close();
+          }
+          return;
+        }
 
-    // socket.on('leave', (payload) =>
-    //   GameRequestHandler.handleLeave(socket, payload, registry),
-    // );
+        // ユーザー名を取得して登録
+        (async () => {
+          const user = await container.userUseCases.getUser.execute(
+            UserId.from(userId),
+          );
+          const displayName = user?.username || userId;
+          minilog.i('WebSocket/game', `User ${displayName} connected to game`);
+          RequestHandler.registerUser(socket, displayName);
 
-    // socket.on('disconnect', () => {
-    //   registry.deleteUserSocketBySocket(socket);
-    // });
+          // 接続確認メッセージ送信
+          ResponseHandler.sendMessage(socket, 'connected', {
+            message: 'WebSocket connection established',
+          });
+        })();
 
-    // socket.on('error', (err) => {
-    //   console.error('WebSocket error:', err);
-    // });
+        // メッセージハンドリング
+        socket.on('message', (data: Buffer | string) => {
+          try {
+            const message: ClientMessage = JSON.parse(data.toString());
+            handleClientMessage(socket, message);
+          } catch (err) {
+            minilog.e('WebSocket/game', `Failed to parse message: ${err}`);
+            ResponseHandler.error(socket, 'Invalid message format');
+          }
+        });
 
-    socket.on('demo', () => {
-      console.log('Received demo request from client');
-      socket.emit('demoResponse', { message: 'Demo response from server' });
-    });
+        socket.on('close', () => {
+          minilog.i('WebSocket/game', `User ${userId} disconnected`);
+          RequestHandler.unRegisterUser(socket);
+        });
+
+        socket.on('error', (err: Error) => {
+          minilog.e('WebSocket/game', `Socket error: ${err.message}`);
+        });
+      },
+    );
+    minilog.i(
+      'WebSocket',
+      'Game WebSocket routes registered at /ws/game/remote',
+    );
   });
+}
+
+function handleClientMessage(socket: WebSocket, message: ClientMessage): void {
+  switch (message.type) {
+    case 'createGame':
+      RequestHandler.createGame(socket);
+      break;
+    case 'join':
+      RequestHandler.joinGame(socket, message.payload.gameId);
+      break;
+    case 'playerInput':
+      RequestHandler.input(socket, message.payload.input);
+      break;
+    case 'leave':
+      RequestHandler.leaveGame(socket);
+      break;
+    case 'demo':
+      minilog.i('WebSocket/game', 'Received demo request');
+      ResponseHandler.sendMessage(socket, 'demoResponse', {
+        message: 'Demo response from server',
+      });
+      break;
+    default:
+      minilog.w(
+        'WebSocket/game',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        `Unknown message type: ${(message as any).type}`,
+      );
+  }
 }

@@ -1,21 +1,24 @@
-import { GameState } from './GameState';
-import { InputHandler } from './interface/Input';
+import { GameState } from './GameState.ts';
+import { InputHandler } from './interface/Input.ts';
 
-import { Ball } from './Ball';
-import { Paddle } from './Paddle';
+import { Ball } from './Ball.ts';
+import { Paddle } from './Paddle.ts';
 
-import { Direction } from './types/direction';
-import { GameSide } from './types/gameSide';
+import { Direction } from './types/direction.ts';
+import { GameSide } from './types/gameSide.ts';
 
 export class PhysicsEngine {
   static update(
     dt: number,
     state: GameState,
-    inputHandler: InputHandler
+    inputHandler: InputHandler,
+    paddleOnly: boolean = false
   ): void {
     this.updatePaddles(dt, state, inputHandler);
-    this.updateBall(dt, state.ball);
-    this.checkCollisions(state);
+    if (!paddleOnly) {
+      this.updateBall(dt, state.ball);
+      this.checkCollisions(state);
+    }
   }
 
   // パドルの位置更新
@@ -28,6 +31,8 @@ export class PhysicsEngine {
     const rightPaddle = state.paddles[1];
     const input = inputHandler.getInput();
     const height = state.config.CANVAS_HEIGHT;
+
+    if (!('left' in input) || !('right' in input)) return;
 
     this.updatePaddle(dt, leftPaddle, height, input.left.direction);
     this.updatePaddle(dt, rightPaddle, height, input.right.direction);

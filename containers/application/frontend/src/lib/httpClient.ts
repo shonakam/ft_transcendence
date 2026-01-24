@@ -3,6 +3,23 @@ import { router } from '../router/router';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/';
 
+// カスタムエラークラス
+export class NetworkError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
+export class HttpError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+  }
+}
+
 let isRefreshing = false;
 let refreshSubscribers: ((fail?: boolean) => void)[] = [];
 
@@ -96,8 +113,16 @@ async function httpClient<T>(
     const errorData = await response.json().catch(() => ({
       message: `HTTP Error ${response.status}: ${response.statusText}`,
     }));
-    return Promise.reject(errorData);
-  } catch (networkError) {
+    const httpError = new HttpError(
+      response.status,
+      errorData.message || response.statusText
+    );
+    return Promise.reject(httpError);
+  } catch (error) {
+    // ネットワークエラー（サーバーに届かない場合）
+    const networkError = new NetworkError(
+      'サーバーに接続できません。ネットワーク接続を確認してください。'
+    );
     return Promise.reject(networkError);
   }
 }

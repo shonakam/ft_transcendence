@@ -15,6 +15,9 @@
       "node"
     ],
     "paths": {
+      "@shonakam/common": [
+        "../common/src/index.ts"
+      ],
       "@shonakam/common/*": [
         "../common/src/*"
       ]

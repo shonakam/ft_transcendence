@@ -1,6 +1,6 @@
-import { Vector2 } from './types/vector2';
+import { Vector2 } from './types/vector2.ts';
 
-import CONFIG from './GameConfig';
+import CONFIG from './GameConfig.ts';
 
 export class Ball {
   position: Vector2;

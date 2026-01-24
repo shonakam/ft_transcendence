@@ -11,12 +11,12 @@ process.on('unhandledRejection', (reason) => {
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
+import ws from '@fastify/websocket';
 
 import { registRouters } from './adapter/router/index.ts';
 
-import { Server } from 'socket.io';
-import { registerChatWebSocket } from './adapter/websocket/registerChatWebSocket.ts';
 import { registerGameWebSocket } from './adapter/websocket/registerGameWebSocket.ts';
+import { registerChatWebSocket } from './adapter/websocket/registerChatWebSocket.ts';
 
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
@@ -63,14 +63,12 @@ async function main() {
     parseOptions: {},
   });
 
+  // setup websocket - 一度だけ登録
+  await server.register(ws);
+
   await registRouters(server, container);
 
-  const ioServer = new Server(server.server, {
-    path: '/ws',
-    transports: ['websocket', 'polling'],
-    cors: { origin: 'https://transcendence.42.fr', credentials: true },
-  });
-  await registerGameWebSocket(ioServer);
+  await registerGameWebSocket(server);
   await registerChatWebSocket(server);
 
   try {

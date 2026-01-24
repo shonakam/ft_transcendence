@@ -1,28 +1,26 @@
 import { PongGame } from '@shonakam/common/index';
 
-import { GameCanvas } from './canvas/GameCanvas';
+import { GameCanvas } from '../game/canvas/GameCanvas';
 import { InputHandler } from '@shonakam/common/index';
 import { GameState } from '@shonakam/common/index';
-import { CanvasRenderer } from '../../components/game/canvas/CanvasRenderer';
-import { GameSocketClient } from './ws/GameSocketClient';
+import { CanvasRenderer } from '../game/canvas/CanvasRenderer';
 
 import { checkGoalCollision, PhysicsEngine } from '@shonakam/common/index';
 
 import type { GameSide } from '@shonakam/common/game/types/gameSide';
 
-export class RemotePongGameClient implements PongGame {
+export class LocalGame implements PongGame {
   canvas: GameCanvas;
   input: InputHandler;
-  state: GameState = new GameState();
+  state: GameState;
   renderer: CanvasRenderer;
   lastFrameTime: number | null = null;
   private readonly loopCallback: (time: number) => void;
 
-  socket: GameSocketClient = new GameSocketClient();
-
   constructor(gameCanvas: GameCanvas, inputHandler: InputHandler) {
     this.canvas = gameCanvas;
     this.input = inputHandler;
+    this.state = new GameState();
     this.renderer = new CanvasRenderer(this.state, this.canvas);
     this.loopCallback = this.loop.bind(this);
   }
@@ -30,10 +28,6 @@ export class RemotePongGameClient implements PongGame {
   initRender(): void {
     this.renderer.renderStaticLayer();
     this.renderer.renderDynamicLayer();
-  }
-
-  connect(): boolean {
-    return true;
   }
 
   start(): void {
@@ -46,34 +40,38 @@ export class RemotePongGameClient implements PongGame {
   stop(): void {
     if (this.state.status !== 'playing') return;
     this.state.setStatus('paused');
+    this.lastFrameTime = null;
     this.renderer.render();
   }
 
   loop(currentTime: number): void {
+    if (this.lastFrameTime === null && this.state.status !== 'playing') return;
     let dt: number;
     if (this.lastFrameTime === null) dt = 0;
     else dt = (currentTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = currentTime;
-    this.socket.sendDemoRequest();
     PhysicsEngine.update(dt, this.state, this.input);
-    const side = checkGoalCollision(
+    const goal = checkGoalCollision(
       this.state.ball,
       this.state.config.CANVAS_WIDTH
     );
-    this.updateScore(side);
+    this.updateScoreStatus(goal);
     this.renderer.render();
-    if (this.state.status === 'playing') {
+    if (this.state.status === 'playing')
       window.requestAnimationFrame(this.loopCallback);
+  }
+
+  updateScoreStatus(goal: GameSide | 'none'): void {
+    if (goal === 'none') return;
+    this.state.setStatus('ready');
+    this.state.ball.reset();
+    if (goal === 'left') this.state.incrementScore('left');
+    else if (goal === 'right') this.state.incrementScore('right');
+    if (
+      this.state.scores[0] >= this.state.config.WINNING_SCORE ||
+      this.state.scores[1] >= this.state.config.WINNING_SCORE
+    ) {
+      this.state.setStatus('finished');
     }
   }
-
-  updateScore(side: GameSide | 'none'): void {
-    if (side === 'none') return;
-    if (side === 'left') this.state.incrementScore('left');
-    else if (side === 'right') this.state.incrementScore('right');
-    this.state.ball.reset();
-    this.state.setStatus('ready');
-  }
-
-  sendInput(): void {}
 }
