@@ -2,6 +2,8 @@ import { NavLink } from './NavLink';
 import { Component } from '../../interface/Component';
 import { router } from '../../router/router';
 import { logout } from '../../services/auth/logout';
+import { to } from '../../lib/to';
+import { toaster } from '../common/Toaster';
 
 export class HeaderNav implements Component {
   private el: HTMLElement;
@@ -23,8 +25,11 @@ export class HeaderNav implements Component {
 
     logoutBtn.addEventListener('click', async () => {
       if (confirm('ログアウトしますか？')) {
-        await logout().catch(() => {});
-        localStorage.clear();
+        const [_, err] = await to(logout());
+        if (err) {
+          toaster.show(err.message, 'error')
+        }
+        window.sessionStorage.clear();
         router.navigateTo('/auth?view=login');
       }
     });

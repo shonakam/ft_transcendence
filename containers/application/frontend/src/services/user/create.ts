@@ -1,18 +1,5 @@
 import { api } from '../../lib/httpClient';
-
-export interface UserCreateRequest {
-  email: string;
-  username: string;
-  password: string;
-  imagePath: string | null;
-  is2faEnabled: boolean;
-}
-
-export interface UserCreateResponse {
-  id: string;
-  email: string;
-  message?: string;
-}
+import { UserCreateRequest, UserCreateResponse } from '../../types/user';
 
 export function userCreateRequestForm(
   email: string,

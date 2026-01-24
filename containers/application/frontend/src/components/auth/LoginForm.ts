@@ -108,12 +108,11 @@ export class LoginForm implements Component {
     }
 
     this.setLoading(true);
-
     const request = loginRequestForm(email, password);
     const [response, err] = await to(login(request));
+    this.setLoading(false);
 
     if (err) {
-      this.setLoading(false);
       return toaster.show(
         'ログインに失敗しました。メールアドレスかパスワードが違います。',
         'error'

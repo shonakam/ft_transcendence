@@ -2,14 +2,14 @@ import { getDb } from '../../db.ts';
 import type { Database } from 'sqlite';
 import type { UserRepository } from '../../../../domain/user/repository/UserRepository.ts';
 import { User } from '../../../../domain/user/entity/User.ts';
-import { userInfo } from 'os';
 
 export class UserRepositorySqlite implements UserRepository {
   private get db(): Database {
     return getDb();
   }
 
-  private scan(row: any): User {
+  private scan(row: any): User | null {
+    if (!row) return null;
     return {
       id: row.id,
       email: row.email,
@@ -89,6 +89,8 @@ export class UserRepositorySqlite implements UserRepository {
       SELECT * FROM users WHERE withdrawn_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [limit, offset],
     );
-    return rows.map((row) => this.scan(row));
+    return rows
+      .map((row) => this.scan(row))
+      .filter((user): user is User => user !== null);
   }
 }

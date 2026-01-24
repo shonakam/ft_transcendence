@@ -1,17 +1,5 @@
 import { api } from '../../lib/httpClient';
-
-//　あとで必要な項目のみにする
-export interface UserResponse {
-  id: string;
-  email: string;
-  username: string;
-  password: string | null;
-  imagePath: string | null;
-  is2faEnabled: number; // 0 or 1
-  createdAt: number;
-  updatedAt: number;
-  withdrawnAt: null | number;
-}
+import { UserResponse } from '../../types/user';
 
 export async function getMe(): Promise<UserResponse> {
   return api.get<UserResponse>('users/me');

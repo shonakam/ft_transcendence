@@ -8,6 +8,7 @@ import type {
 import { UserUseCases } from '../../container/user.container.ts';
 import UserId from '../../domain/user/vo/UserId.ts';
 import { Pagination } from '../../domain/user/vo/Pagination.ts';
+import minilog, { TAG } from '../../utils/minilog.ts';
 
 export default async function UserController(
   server: FastifyInstance,
@@ -19,12 +20,12 @@ export default async function UserController(
   // CREATE
   server.post('/', async (req, reply) => {
     try {
-      console.log('HI: ', req.body);
       const form = req.body as CreateUserForm;
       const user = await createUser.execute(form);
       reply.status(201).send(user);
     } catch (err: unknown) {
       if (err instanceof Error) {
+        minilog.w(TAG.USER, `${err.stack}`)
         reply.status(400).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });
@@ -33,26 +34,38 @@ export default async function UserController(
   });
 
   // UPDATE
-  server.put('/me', { preHandler: authenticate }, async (req, reply) => {
-    try {
-      const trustedUserId = req.authUserId;
-      if (trustedUserId === undefined) {
-        return reply
-          .status(500)
-          .send({ message: 'Authentication data missing.' });
-      }
+  server.put(
+    '/me', 
+    { preHandler: authenticate },
+    async (req, reply) => {
+      try {
+        const trustedUserId = req.authUserId;
+        if (trustedUserId === undefined) {
+          return reply
+            .status(500)
+            .send({ message: 'Authentication data missing.' });
+        }
+        
+        const body = req.body as any;
+        const form: UpdateUserForm = {
+          username: body.username?.value || null,
+          email: body.email?.value || null,
+          password: body.password?.value || null,
+          image: body.image ? await body.image.toBuffer() : null,
+        };
 
-      const form = req.body as UpdateUserForm;
-      const user = await updateUser.execute(trustedUserId, form);
-      reply.status(200).send(user);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        reply.status(400).send({ error: err.message });
-      } else {
-        reply.status(500).send({ message: 'Internal Server Error' });
+        const user = await updateUser.execute(trustedUserId, form);
+        reply.status(200).send(user);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          minilog.w(TAG.USER, `${err.stack}`)
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
       }
     }
-  });
+  );
 
   // GET user detail
   server.get<{ Params: { id: string } }>(
@@ -73,6 +86,7 @@ export default async function UserController(
           : reply.status(404).send({ message: 'User not found' });
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.USER, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -94,6 +108,7 @@ export default async function UserController(
           : reply.status(404).send({ message: 'User not found' });
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.USER, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -116,6 +131,7 @@ export default async function UserController(
         reply.status(200).send(users);
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.USER, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -139,6 +155,7 @@ export default async function UserController(
       reply.status(204);
     } catch (err: unknown) {
       if (err instanceof Error) {
+        minilog.w(TAG.USER, `${err.stack}`)
         reply.status(400).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });

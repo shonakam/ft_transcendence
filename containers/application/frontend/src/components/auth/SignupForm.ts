@@ -10,30 +10,13 @@ export class SignupForm implements Component {
   private emailInput: HTMLInputElement;
   private passwordInput: HTMLInputElement;
   private confirmPasswordInput: HTMLInputElement;
-  private imageInput: HTMLInputElement;
-  private previewImage: HTMLImageElement;
   private submitButton: HTMLButtonElement;
   private switchButton: HTMLButtonElement;
-
-  private selectedFile: File | null = null;
   private readonly DEFAULT_IMAGE = '/assets/default-profile.png';
 
   constructor() {
     this.root = document.createElement('form');
     this.root.className = 'flex flex-col space-y-4 w-full';
-
-    // プレビュー表示エリア
-    this.previewImage = document.createElement('img');
-    this.previewImage.src = this.DEFAULT_IMAGE;
-    this.previewImage.className =
-      'w-24 h-24 rounded-full mx-auto bg-white/10 object-cover border-2 border-white/10 mb-2';
-
-    // 画像選択
-    this.imageInput = document.createElement('input');
-    this.imageInput.type = 'file';
-    this.imageInput.accept = 'image/*';
-    this.imageInput.className =
-      'text-xs text-indigo-300 mx-auto block cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20';
 
     // 各入力フィールドの生成
     this.usernameInput = this.createInput('text', 'ユーザー名');
@@ -59,8 +42,6 @@ export class SignupForm implements Component {
       'text-indigo-400 hover:text-indigo-300 hover:underline text-sm block w-full text-center transition-colors';
 
     this.root.append(
-      this.previewImage,
-      this.imageInput,
       this.usernameInput,
       this.emailInput,
       this.passwordInput,
@@ -86,15 +67,6 @@ export class SignupForm implements Component {
   }
 
   private initEvents() {
-    this.imageInput.addEventListener('change', (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (files && files[0]) {
-        this.selectedFile = files[0];
-        this.previewImage.src = URL.createObjectURL(this.selectedFile);
-        this.previewImage.classList.remove('hidden');
-      }
-    });
-
     this.root.addEventListener('submit', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -132,38 +104,17 @@ export class SignupForm implements Component {
     try {
       this.setLoading(true);
 
-      let imagePath: string | null = null;
-      if (
-        this.selectedFile &&
-        !this.previewImage.src.endsWith(this.DEFAULT_IMAGE)
-      ) {
-        try {
-          const formData = new FormData();
-          formData.append('file', this.selectedFile);
-          const uploadRes = await api.post<{ path: string }>(
-            'upload',
-            formData
-          );
-          imagePath = uploadRes.path;
-        } catch (error: unknown) {
-          toaster.show(
-            (error as Error).message || '画像のアップロードに失敗しました。',
-            'error'
-          );
-          throw new Error('画像のアップロードに失敗しました。');
-        }
-      }
-
       const requestData = userCreateRequestForm(
         email,
         username,
         password,
-        imagePath
+        this.DEFAULT_IMAGE
       );
 
       const [response, err] = await to(createUser(requestData));
       if (err) {
-        return toaster.show('アカウントを作成に失敗しました。', 'error');
+        const message = (err as any).error || (err as any).message || '予期せぬエラーが発生しました';
+        return toaster.show(`${message}`, 'error');
       }
 
       toaster.show(
