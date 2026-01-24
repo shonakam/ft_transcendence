@@ -4,6 +4,12 @@ set -eu
 
 ES=ft-elasticsearch
 
+# 証明書が既に存在する場合は早期終了
+if [ -f config/certs/ft-elasticsearch/ft-elasticsearch.crt ]; then
+  echo "Certificates already exist. Skipping setup."
+  exit 0
+fi
+
 if [ x${ELASTIC_PASSWORD} == x ]; then
   echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
   exit 1;
@@ -40,8 +46,4 @@ echo "Setting file permissions"
 chown -R root:root config/certs;
 find . -type d -exec chmod 750 \{\} \;;
 find . -type f -exec chmod 640 \{\} \;;
-echo "Waiting for Elasticsearch availability";
-until curl -s --cacert config/certs/ca/ca.crt https://${ES}:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
-echo "Setting kibana_system password";
-until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://${ES}:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
-echo "All done!";
+echo "Certificates ready!";
