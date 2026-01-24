@@ -9,8 +9,12 @@ process.on('unhandledRejection', (reason) => {
 });
 
 import fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from "@fastify/static";
+import path from "node:path";
 
 import { registRouters } from './adapter/router/index.ts';
 import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
@@ -37,10 +41,14 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-async function main() {
-  const server = fastify({ logger: true });
-
-  // setup cors
+/*
+ * setup
+ *  - cors
+ *  - cookie
+ *  - multipart
+ *  - static
+ */
+async function server_conf(server: FastifyInstance) {
   await server.register(cors, {
     // origin: 'http://localhost:5173',
     origin: 'https://transcendence.42.fr',
@@ -48,7 +56,6 @@ async function main() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
 
-  // setup cookie
   await server.register(cookie, {
     secret:
       process.env.COOKIE_SECRET ||
@@ -56,8 +63,22 @@ async function main() {
     parseOptions: {},
   });
 
-  await registRouters(server, container);
+  await server.register(fastifyMultipart, {
+    attachFieldsToBody: true,
+    limits: { fileSize: 5 * 1024 * 1024 }, // LIMIT 5MB
+  });
 
+  await server.register(fastifyStatic, {
+    root: path.join(process.cwd(), "uploads"),
+    prefix: "/api/uploads/",
+  });
+}
+
+async function main() {
+  const server = fastify({ logger: true });
+
+  await server_conf(server);
+  await registRouters(server, container);
   await registerWebSocket(server);
 
   try {
