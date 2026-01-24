@@ -89,6 +89,8 @@ services:
     networks:
       - transcendence-network
     restart: unless-stopped
+    depends_on:
+      - redis
     <<: *logging
 
   database:
@@ -117,6 +119,7 @@ services:
     tty: true
     networks:
       - transcendence-network
+
   vault:
     image: hashicorp/vault:1.13.3
     container_name: ft-vault

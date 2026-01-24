@@ -7,12 +7,10 @@ export interface CreateUserForm {
 }
 
 export interface UpdateUserForm {
-  username?: string;
-  email?: string;
-  imagePath?: string | null;
-  currentPassword: string;
-  newPassword?: string;
-  is2faEnabled?: boolean;
+  email: string | null;
+  username: string | null;
+  password: string | null;
+  image: Buffer | null;
 }
 
 export interface ChangePasswordForm {

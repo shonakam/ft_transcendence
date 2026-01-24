@@ -4,8 +4,8 @@ import { UserRepository } from '../../domain/user/repository/UserRepository.ts';
 import { TokenService } from './TokenService.ts';
 import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
-import speakeasy from 'speakeasy';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
+import speakeasy from 'speakeasy';
 
 export class VerifyTOTPUseCase {
   constructor(

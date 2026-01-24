@@ -1,17 +1,23 @@
 import { api } from '../lib/httpClient';
 import { Component } from '../interface/Component';
-import { UserResponse } from '../services/user/dashboard';
-import { design } from '../conf';
+import { UserResponse } from '../types/user';
+import { config, design } from '../conf';
 import { MfaForm } from '../components/auth/MfaForm';
+import { UpdateForm } from '../components/auth/UpdateForm';
+import { UserInfoComponent } from '../components/auth/UserInfoComponent';
 import { router } from '../router/router';
 import { toaster } from '../components/common/Toaster';
+import { SessionStorage } from '../lib/sessionStorage';
 
-export type DashboardView = 'game' | 'chat' | 'mfa';
+export type DashboardView = 
+  'user' | 'game' | 'chat' | 'mfa' | 'default';
 
 export class DashboardPage implements Component {
   private el: HTMLElement;
   private container: HTMLDivElement;
   private mfaForm: MfaForm;
+  private updateForm: UpdateForm;
+  private sessionStorage: SessionStorage<UserResponse>
 
   constructor() {
     this.el = document.createElement('main');
@@ -21,13 +27,29 @@ export class DashboardPage implements Component {
     this.container.className = design.container;
 
     this.mfaForm = new MfaForm();
+    this.updateForm = new UpdateForm();
+    this.sessionStorage = new SessionStorage(config.user.sessionStorageKey)
 
+    this.initEventListener();
+
+    this.el.appendChild(this.container);
+    this.init();
+  }
+
+  private initEventListener(): void {
     this.mfaForm.getElement().addEventListener('cancel', () => {
       this.init();
     });
 
-    this.el.appendChild(this.container);
-    this.init();
+    this.updateForm.getElement().addEventListener('cancel', () => {
+      this.init();
+    });
+
+    this.updateForm.getElement().addEventListener('updateSuccess', () => {
+      this.init();
+      location.reload();
+      this.switchView('default'); 
+    });
   }
 
   public destroy(): void {
@@ -36,7 +58,11 @@ export class DashboardPage implements Component {
 
   private async init() {
     try {
-      const user = await api.get<UserResponse>('users/me');
+      let user = this.sessionStorage.get()
+      if (!user) {
+        user = await api.get<UserResponse>('users/me');
+        this.sessionStorage.save(user)
+      }
       this.render(user);
     } catch (error) {
       toaster.show('ユーザー情報の取得に失敗しました', 'error');
@@ -46,14 +72,17 @@ export class DashboardPage implements Component {
   private async switchView(view: DashboardView) {
     let element: HTMLElement;
     switch (view) {
+      case 'user':
+        element = this.updateForm.getElement()
+        break;
       case 'mfa':
         await this.mfaForm.activate('setup');
         element = this.mfaForm.getElement();
         break;
-      case 'game':
-        break;
-      case 'chat':
-        break;
+      // case 'game':
+      //   break;
+      // case 'chat':
+      //   break;
       default:
         element = this.el;
         break;
@@ -62,24 +91,20 @@ export class DashboardPage implements Component {
   }
 
   private render(user: UserResponse) {
-    this.container.innerHTML = '';
-
+    this.container.replaceChildren();
+    
     const title = document.createElement('h2');
     title.className = 'text-2xl font-bold text-white mb-6 text-center';
     title.textContent = 'Dashboard';
 
-    const info = document.createElement('div');
-    info.className = 'mb-8 text-slate-300 text-sm';
-    info.innerHTML = `
-      <p>User: <span class="text-white font-medium">${user.username}</span></p>
-      <p>MFA Status: <span class="${user.is2faEnabled ? 'text-green-400' : 'text-red-400'} font-bold">
-        ${user.is2faEnabled ? 'Enabled' : 'Disabled'}
-      </span></p>
-    `;
-
+    const userInfo = new UserInfoComponent(user);
+    
     const menu = document.createElement('div');
     menu.className = 'space-y-4';
 
+    const userBtn = this.createMenuButton('👤 User Settings', () =>
+      this.switchView('user')
+    );
     const mfaBtn = this.createMenuButton('🔒 Security Settings', () =>
       this.switchView('mfa')
     );
@@ -90,8 +115,13 @@ export class DashboardPage implements Component {
       this.switchView('game')
     );
 
-    menu.append(mfaBtn, chatBtn, gameBtn);
-    this.container.append(title, info, menu);
+    menu.append(
+      userBtn,
+      mfaBtn,
+      // chatBtn,
+      // gameBtn
+    );
+    this.container.append(title, userInfo.getElement(), menu);
   }
 
   private createMenuButton(

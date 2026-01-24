@@ -39,8 +39,10 @@ async function httpClient<T>(
   const url = `${BASE_URL}${endpoint}`;
   const headers = new Headers(options.headers || {});
 
+  const isFormData = options.body instanceof FormData;
   const hasBody = options.body !== undefined && options.body !== null;
-  if (!headers.has('Content-Type') && hasBody) {
+  
+  if (!headers.has('Content-Type') && hasBody && !isFormData) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -60,7 +62,7 @@ async function httpClient<T>(
     }
 
     // 2. 認証エラー (401) 時の処理
-    if (response.status === 401 || response.status === 400) {
+    if (response.status === 401) {
       // 認証系エンドポイント自体が401を返した場合、または既にリトライ済みの場合はループ防止のため終了
       const isAuthEndpoint = [
         'auth/login',
@@ -140,30 +142,34 @@ async function handleForceLogout() {
 
 // --- 公開API ---
 export const api = {
-  get: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) =>
+  get: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) => 
     httpClient<T>(endpoint, { ...options, method: 'GET' }),
 
   post: <T>(
     endpoint: string,
     body: unknown,
     options?: Omit<CustomOptions, 'method' | 'body'>
-  ) =>
-    httpClient<T>(endpoint, {
+  ) => {
+    const formattedBody = body instanceof FormData ? body : JSON.stringify(body);
+    return httpClient<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
-    }),
+      body: formattedBody,
+    });
+  },
 
   put: <T>(
     endpoint: string,
     body: unknown,
     options?: Omit<CustomOptions, 'method' | 'body'>
-  ) =>
-    httpClient<T>(endpoint, {
+  ) => {
+    const formattedBody = body instanceof FormData ? body : JSON.stringify(body);
+    return httpClient<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(body),
-    }),
+      body: formattedBody,
+    });
+  },
 
   delete: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) =>
     httpClient<T>(endpoint, { ...options, method: 'DELETE' }),

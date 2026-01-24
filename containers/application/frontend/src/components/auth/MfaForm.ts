@@ -5,7 +5,7 @@ import { router } from '../../router/router';
 import { setupMfa } from '../../services/auth/setupMfa';
 import { toaster } from '../common/Toaster';
 
-// import QRCode from 'qrcode'
+import QRCode from 'qrcode'
 
 export type MfaMode = 'setup' | 'verify';
 

@@ -16,6 +16,8 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
+    "@fastify/multipart": "^9.4.0",
+    "@fastify/static": "^9.0.0",
     "@fastify/websocket": "^11.2.0",
     "@shonakam/common": "file:../common",
     "fastify": "^5.6.0",

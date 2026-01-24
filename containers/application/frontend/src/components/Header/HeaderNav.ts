@@ -2,6 +2,8 @@ import { NavLink } from './NavLink';
 import { Component } from '../../interface/Component';
 import { router } from '../../router/router';
 import { logout } from '../../services/auth/logout';
+import { to } from '../../lib/to';
+import { toaster } from '../common/Toaster';
 import { authStore, AuthState } from '../../store/authStore';
 
 export class HeaderNav implements Component {

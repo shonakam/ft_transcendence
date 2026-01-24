@@ -23,16 +23,19 @@ export class UserForm {
     };
   }
 
-  static update(user: User, form: UpdateUserForm): User {
+  static update(user: User, form: UpdateUserForm, path: string | null): User {
     const now = getUnixTimeMs();
 
-    user.username = form.username ?? user.username;
-    user.email = form.email ?? user.email;
-    user.password =
-      (form.newPassword && Password.create(form.newPassword).getHash()) ??
-      user.password;
-    user.imagePath = form.imagePath ?? user.imagePath;
-    user.is2faEnabled = form.is2faEnabled ? 1 : 0;
+    if (form.username !== null && form.username !== undefined)
+      user.username = UserName.create(form.username).get();
+
+    if (form.email !== null && form.email !== undefined)
+      user.email = Email.create(form.email).get();
+
+    if (form.password)
+      user.password = Password.create(form.password).getHash();
+
+    user.imagePath = path ?? user.imagePath;
     user.updatedAt = now;
     return user;
   }
