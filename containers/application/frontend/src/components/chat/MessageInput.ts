@@ -43,6 +43,10 @@ export class MessageInput implements Component {
     };
   }
 
+  public destroy(): void {
+    this.el.remove();
+  }
+
   public getElement(): HTMLElement {
     return this.el;
   }

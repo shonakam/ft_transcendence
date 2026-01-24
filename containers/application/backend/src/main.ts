@@ -17,14 +17,21 @@ import fastifyStatic from "@fastify/static";
 import path from "node:path";
 
 import { registRouters } from './adapter/router/index.ts';
-import { registerWebSocket } from './adapter/websocket/registerWebSocket.ts';
+
+import { Server } from 'socket.io';
+import { registerChatWebSocket } from './adapter/websocket/registerChatWebSocket.ts';
+import { registerGameWebSocket } from './adapter/websocket/registerGameWebSocket.ts';
 
 import { container } from './container/index.js';
 import { initializeDatabase } from './infra/sqlite/db.ts';
 import { initializeRedis } from './infra/redis/db.ts';
+import { VaultService } from './infra/vault/vault.service.ts';
 import minilog, { TAG } from './utils/minilog.ts';
 import { initPrometheus } from './infra/metric/prometheus.ts';
 import { registerMetricHooks } from './infra/metric/hook.ts';
+
+// Global Vault service instance
+export const vaultService = new VaultService();
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -80,8 +87,42 @@ async function main() {
   await server_conf(server);
   await registRouters(server, container);
   await registerWebSocket(server);
+  const ioServer = new Server(server.server, {
+    path: '/ws',
+    transports: ['websocket', 'polling'],
+    cors: { origin: 'https://transcendence.42.fr', credentials: true },
+  });
+  await registerGameWebSocket(ioServer);
+  await registerChatWebSocket(server);
 
   try {
+    // Initialize Vault first (for secrets management)
+    minilog.i(TAG.SYSTEM, 'Initializing Vault...');
+    const vaultConnected = await vaultService.init();
+    const vaultRequired = process.env.VAULT_REQUIRED === 'true';
+
+    if (vaultConnected) {
+      minilog.i(
+        TAG.SYSTEM,
+        '✅ Vault connected successfully - secrets will be loaded from Vault',
+      );
+    } else if (vaultRequired) {
+      minilog.e(
+        TAG.SYSTEM,
+        '❌ VAULT_REQUIRED=true but Vault is not available! Aborting startup.',
+      );
+      process.exit(1);
+    } else {
+      minilog.w(
+        TAG.SYSTEM,
+        '⚠️  Vault not available - falling back to environment variables',
+      );
+      minilog.w(
+        TAG.SYSTEM,
+        '⚠️  Set VAULT_REQUIRED=true in production to enforce Vault usage',
+      );
+    }
+
     minilog.i(TAG.SYSTEM, 'Initializing database...');
     await initializeDatabase();
 

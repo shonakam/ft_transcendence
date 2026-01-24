@@ -1,139 +1,115 @@
 import { GameState } from './GameState';
-import { InputHandler } from './InputHandler';
+import { InputHandler } from './interface/Input';
 
 import { Ball } from './Ball';
 import { Paddle } from './Paddle';
 
+import { Direction } from './types/direction';
+import { GameSide } from './types/gameSide';
+
 export class PhysicsEngine {
-  state: GameState;
-  inputHandler: InputHandler;
-
-  constructor(state: GameState, inputHandler: InputHandler) {
-    this.state = state;
-    this.inputHandler = inputHandler;
+  static update(
+    dt: number,
+    state: GameState,
+    inputHandler: InputHandler
+  ): void {
+    this.updatePaddles(dt, state, inputHandler);
+    this.updateBall(dt, state.ball);
+    this.checkCollisions(state);
   }
 
-  update(dt: number) {
-    this.updatePaddles(dt);
-    this.updateBall(dt);
-    this.checkCollisions();
+  // パドルの位置更新
+  static updatePaddles(
+    dt: number,
+    state: GameState,
+    inputHandler: InputHandler
+  ): void {
+    const leftPaddle = state.paddles[0];
+    const rightPaddle = state.paddles[1];
+    const input = inputHandler.getInput();
+    const height = state.config.CANVAS_HEIGHT;
+
+    this.updatePaddle(dt, leftPaddle, height, input.left.direction);
+    this.updatePaddle(dt, rightPaddle, height, input.right.direction);
   }
 
-  updatePaddles(dt: number) {
-    const keys = this.inputHandler.keys;
-    const leftPaddle = this.state.paddles[0];
-    const rightPaddle = this.state.paddles[1];
-    const canvasHeight = this.state.config.CANVAS_HEIGHT;
-
-    // 左パドル (W/S)
-    if (keys.has('KeyW') && leftPaddle.position.y > 0)
-      leftPaddle.position.y -= leftPaddle.speed * dt;
-    if (
-      keys.has('KeyS') &&
-      leftPaddle.position.y < canvasHeight - leftPaddle.length
+  static updatePaddle(
+    dt: number,
+    paddle: Paddle,
+    canvasHeight: number,
+    direction: Direction
+  ): void {
+    if (direction === 'up' && paddle.position.y > 0)
+      paddle.position.y -= paddle.speed * dt;
+    else if (
+      direction === 'down' &&
+      paddle.position.y < canvasHeight - paddle.length
     )
-      leftPaddle.position.y += leftPaddle.speed * dt;
-
-    // 右パドル (矢印キー)
-    if ((keys.has('ArrowUp') || keys.has('KeyI')) && rightPaddle.position.y > 0)
-      rightPaddle.position.y -= rightPaddle.speed * dt;
-    if (
-      (keys.has('ArrowDown') || keys.has('KeyK')) &&
-      rightPaddle.position.y < canvasHeight - rightPaddle.length
-    )
-      rightPaddle.position.y += rightPaddle.speed * dt;
+      paddle.position.y += paddle.speed * dt;
   }
 
-  updateBall(dt: number) {
-    const { ball } = this.state;
-
+  // ボールの位置更新
+  static updateBall(dt: number, ball: Ball): void {
     ball.position.x += ball.velocity.x * dt;
     ball.position.y += ball.velocity.y * dt;
   }
 
   // 衝突判定ラッパー
-  checkCollisions() {
-    const { ball, paddles } = this.state;
+  static checkCollisions(state: GameState): void {
+    const ball = state.ball;
+    const paddles = state.paddles;
+    const canvasHeight = state.config.CANVAS_HEIGHT;
 
-    this.checkHorizontalWallCollision(ball);
-    this.checkLeftPaddleCollision(ball, paddles[0]);
-    this.checkRightPaddleCollision(ball, paddles[1]);
-    this.checkGoalCollision(ball);
+    this.checkHorizontalWallCollision(ball, canvasHeight);
+    this.checkPaddleCollision(ball, paddles[0], 'left');
+    this.checkPaddleCollision(ball, paddles[1], 'right');
   }
 
   // 上下の壁での反射
-  checkHorizontalWallCollision(ball: Ball) {
-    const { config } = this.state;
+  static checkHorizontalWallCollision(ball: Ball, canvasHeight: number): void {
+    const ballTop = ball.position.y - ball.radius;
+    const ballBottom = ball.position.y + ball.radius;
+    const topWallY = 0;
+    const bottomWallY = canvasHeight;
 
-    if (ball.velocity.y < 0 && ball.position.y - ball.radius < 0) {
-      ball.velocity.y = -ball.velocity.y;
-      ball.position.y = ball.radius - (ball.position.y - ball.radius);
-      return;
-    }
-    if (
-      ball.velocity.y > 0 &&
-      ball.position.y + ball.radius > config.CANVAS_HEIGHT
-    ) {
-      ball.velocity.y = -ball.velocity.y;
-      ball.position.y =
-        config.CANVAS_HEIGHT -
-        ball.radius -
-        (ball.position.y + ball.radius - config.CANVAS_HEIGHT);
-      return;
+    if (ball.velocity.y < 0) {
+      if (ballTop > topWallY) return;
+      ball.velocity.y *= -1;
+    } else {
+      // if (ball.velocity.y > 0)
+      if (ballBottom < bottomWallY) return;
+      ball.velocity.y *= -1;
     }
   }
 
-  // 左パドルの衝突判定
-  checkLeftPaddleCollision(ball: Ball, paddle: Paddle) {
-    const leftPaddle = this.state.paddles[0];
+  // パドルの衝突判定
+  static checkPaddleCollision(
+    ball: Ball,
+    paddle: Paddle,
+    side: GameSide
+  ): void {
+    if (side === 'right' && ball.velocity.x < 0) return;
+    else if (side === 'left' && 0 < ball.velocity.x) return;
 
-    if (0 < ball.velocity.x) return;
+    const ballLeft = ball.position.x - ball.radius;
+    const ballRight = ball.position.x + ball.radius;
+    const paddleLeft = paddle.position.x;
+    const paddleRight = paddle.position.x + paddle.thickness;
 
-    if (
-      ball.position.x - ball.radius <=
-        leftPaddle.position.x + leftPaddle.thickness &&
-      ball.position.x + ball.radius > leftPaddle.position.x &&
-      ball.position.y + ball.radius > leftPaddle.position.y &&
-      ball.position.y - ball.radius < leftPaddle.position.y + leftPaddle.length
-    ) {
-      ball.velocity.x = -ball.velocity.x;
-      ball.position.x =
-        leftPaddle.position.x + leftPaddle.thickness + ball.radius;
-    }
-  }
+    if (ballRight < paddleLeft || paddleRight < ballLeft) return;
 
-  // 右パドルの衝突判定
-  checkRightPaddleCollision(ball: Ball, paddle: Paddle) {
-    const rightPaddle = this.state.paddles[1];
+    const ballTop = ball.position.y - ball.radius;
+    const ballBottom = ball.position.y + ball.radius;
+    const paddleTop = paddle.position.y;
+    const paddleBottom = paddle.position.y + paddle.length;
 
-    if (ball.velocity.x < 0) return;
+    if (ballBottom < paddleTop || paddleBottom < ballTop) return;
 
-    if (
-      ball.position.x + ball.radius >= rightPaddle.position.x &&
-      ball.position.x + ball.radius <
-        rightPaddle.position.x + rightPaddle.thickness &&
-      ball.position.y + ball.radius > rightPaddle.position.y &&
-      ball.position.y - ball.radius <
-        rightPaddle.position.y + rightPaddle.length
-    ) {
-      ball.velocity.x = -ball.velocity.x;
-      ball.position.x = rightPaddle.position.x - ball.radius;
-    }
-  }
-
-  // ゴール判定
-  checkGoalCollision(ball: Ball) {
-    const { config } = this.state;
-
-    if (
-      0 < ball.position.x - ball.radius &&
-      ball.position.x + ball.radius < config.CANVAS_WIDTH
-    )
-      return;
-    if (ball.position.x - ball.radius <= 0) this.state.incrementScore('right');
-    else if (config.CANVAS_WIDTH <= ball.position.x + ball.radius)
-      this.state.incrementScore('left');
-    this.state.status = 'ready';
-    ball.reset();
+    ball.velocity.x *= -1;
+    // if (side === 'left') {
+    //   ball.position.x = paddleRight + ball.radius;
+    // } else if (side === 'right') {
+    //   ball.position.x = paddleLeft - ball.radius;
+    // }
   }
 }

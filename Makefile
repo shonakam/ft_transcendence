@@ -18,7 +18,9 @@ init-app:
 
 up-app: init-app
 	@bash $(APP)/tools/certs.sh
+	@bash $(APP)/tools/gen-vault-cert.sh
 	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml up --build -d --remove-orphans
+	@bash $(APP)/tools/auto-vault-init.sh
 	@bash $(APP)/tools/hosts.sh create
 
 down-app:

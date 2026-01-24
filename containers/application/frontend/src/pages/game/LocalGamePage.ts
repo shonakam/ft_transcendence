@@ -1,3 +1,109 @@
-import { GamePage } from './GamePage';
+// import { GamePage } from './GamePage';
+import { Component } from '../../interface/Component';
 
-export class LocalGamePage extends GamePage {}
+import { GameCanvas } from '../../components/game/canvas/GameCanvas';
+import { LocalInputHandler } from '../../components/game/inputHandler/LocalInputHandler';
+import { LocalPongGame } from '../../components/game/LocalPongGame';
+import gameTemplate from './game.html?raw';
+
+import CONFIG from '@shonakam/common/game/GameConfig';
+import { TournamentRender } from '../../components/game/tournament/TournamentRender';
+
+export class LocalGamePage implements Component {
+  // private rootElement: HTMLElement = document.getElementById(
+  // 'app-root'
+  // ) as HTMLElement;
+  private el: HTMLElement = document.createElement('main');
+  private gameCanvas: GameCanvas;
+  private inputHandler = new LocalInputHandler();
+  private pongGame: LocalPongGame;
+
+  private tournament: TournamentRender = new TournamentRender();
+
+  constructor() {
+    this.el.innerHTML = gameTemplate;
+    this.gameCanvas = new GameCanvas(
+      this.el.querySelector('.canvas-stack') as HTMLElement,
+      CONFIG.CANVAS_WIDTH,
+      CONFIG.CANVAS_HEIGHT
+    );
+    this.pongGame = new LocalPongGame(this.gameCanvas, this.inputHandler);
+    this.pongGame.initRender();
+    this.render();
+    this.pongGame.state.onScoreChange = this.updateScore.bind(this);
+    this.pongGame.state.onStatusChange = this.updateStatus.bind(this);
+    this.pongGame.state.playerSide = 'both';
+  }
+
+  public render(): void {
+    this.el.querySelector('h1')!.textContent = 'Local Pong Game';
+    this.el.querySelector('#game-description')!.textContent =
+      'This is the local multiplayer pong game.';
+    this.updateWinningScore();
+    // FIX: temporary random players for testing
+    for (let i = 0; i < Math.floor(Math.random() * (8 - 2 + 1)) + 2; i++) {
+      this.tournament.logic.addMember(`Player ${i + 1}`);
+    }
+    this.tournament.logic.createInitialState();
+    this.tournament.render();
+    this.el
+      .querySelector('.tournament-section')!
+      .appendChild(this.tournament.getElement());
+  }
+
+  public destroy(): void {
+    this.removeSpaceEventListener();
+    this.el.remove();
+  }
+
+  public getElement(): HTMLElement {
+    this.addSpaceEventListener();
+    return this.el;
+  }
+
+  private keydownHandler = (event: KeyboardEvent) => {
+    if (event.code === 'Space') {
+      if (
+        this.pongGame.state.status === 'ready' ||
+        this.pongGame.state.status === 'paused'
+      ) {
+        this.pongGame.start();
+      } else if (this.pongGame.state.status === 'playing') {
+        this.pongGame.stop();
+      }
+    }
+  };
+
+  private addSpaceEventListener(): void {
+    window.addEventListener('keydown', this.keydownHandler);
+  }
+
+  private removeSpaceEventListener(): void {
+    window.removeEventListener('keydown', this.keydownHandler);
+  }
+
+  private updateWinningScore() {
+    this.el.querySelector('#winning-score')!.textContent =
+      `(First to ${CONFIG.WINNING_SCORE} wins)`;
+  }
+
+  private updateScore(left: number, right: number) {
+    this.el.querySelector('#score-left')!.textContent = left.toString();
+    this.el.querySelector('#score-right')!.textContent = right.toString();
+    if (left < CONFIG.WINNING_SCORE && right < CONFIG.WINNING_SCORE) return;
+    const winner =
+      left >= CONFIG.WINNING_SCORE ? 'Left Player' : 'Right Player';
+    // add winning message
+    this.el.querySelector('.game-canvas')!.innerHTML += `
+      <div class="winning-message absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-75 p-4 rounded shadow-lg">
+        <h2 class="text-5xl font-bold mb-2">${winner} Wins!</h2>
+        <p class="text-xl">Final Score: ${left} : ${right}</p>
+      </div>
+    `;
+  }
+
+  private updateStatus(status: string) {
+    this.el.querySelector('#game-status')!.textContent =
+      `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+  }
+}

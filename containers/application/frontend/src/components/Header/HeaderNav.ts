@@ -17,11 +17,12 @@ export class HeaderNav implements Component {
     this.el.appendChild(new NavLink('LocalGame', '/game/local').getElement());
     this.el.appendChild(new NavLink('RemoteGame', '/game/remote').getElement());
     this.el.appendChild(new NavLink('Dashboard', '/dashboard').getElement());
+    this.el.appendChild(new NavLink('Chat', '/chat').getElement());
     this.el.appendChild(new NavLink('Auth', '/auth').getElement());
 
     const logoutBtn = document.createElement('button');
     logoutBtn.textContent = 'Logout';
-    logoutBtn.className = 'text-gray-300 hover:text-white transition-colors'; // NavLinkのスタイルに合わせる
+    logoutBtn.className = 'text-slate-300 hover:text-white transition-colors font-medium text-sm'; // NavLinkのスタイルに合わせる
 
     logoutBtn.addEventListener('click', async () => {
       if (confirm('ログアウトしますか？')) {

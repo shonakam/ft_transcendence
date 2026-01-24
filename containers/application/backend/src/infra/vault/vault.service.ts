@@ -42,7 +42,9 @@ export class VaultService {
       return true;
     } catch (err) {
       this.isConnected = false;
-      console.error('Vault: Initialization failed. Please ensure the Vault container is running and unsealed.');
+      console.error(
+        'Vault: Initialization failed. Please ensure the Vault container is running and unsealed.',
+      );
       return false;
     }
   }
@@ -60,7 +62,9 @@ export class VaultService {
   async setSecret(path: string, data: Record<string, any>) {
     try {
       // KV v2 uses secret/data/ prefix
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       return await this.vaultClient.write(kvPath, { data });
     } catch (err) {
       throw new Error(`Vault Write Error: Could not save secret to ${path}`);
@@ -72,7 +76,9 @@ export class VaultService {
    */
   async getSecret(path: string): Promise<Record<string, any> | null> {
     try {
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       const response = await this.vaultClient.read(kvPath);
       return response?.data?.data || null;
     } catch (err) {
@@ -85,7 +91,9 @@ export class VaultService {
    */
   async deleteSecret(path: string) {
     try {
-      const kvPath = path.startsWith('secret/data/') ? path : `secret/data/${path}`;
+      const kvPath = path.startsWith('secret/data/')
+        ? path
+        : `secret/data/${path}`;
       await this.vaultClient.delete(kvPath);
     } catch (err) {
       console.error(`Vault Delete Error at ${path}:`, err);
@@ -104,6 +112,7 @@ export class VaultService {
     if (this.isConnected) {
       const secrets = await this.getSecret('backend/jwt');
       if (secrets) {
+        console.log('Vault: ✅ JWT secrets loaded from Vault');
         return {
           access_secret: secrets.access_secret,
           refresh_secret: secrets.refresh_secret,
@@ -112,7 +121,7 @@ export class VaultService {
       }
     }
     // Fallback to environment variables
-    console.warn('Vault: JWT secrets not found in Vault, using environment variables');
+    console.warn('⚠️  Vault: JWT secrets NOT loaded from Vault - using environment variables (INSECURE for production!)');
     return {
       access_secret: process.env.JWT_ACCESS_SECRET || '',
       refresh_secret: process.env.JWT_REFRESH_SECRET || '',
@@ -128,6 +137,7 @@ export class VaultService {
     if (this.isConnected) {
       const secrets = await this.getSecret('backend/oauth');
       if (secrets) {
+        console.log('Vault: ✅ OAuth credentials loaded from Vault');
         return {
           client_id: secrets.client_id,
           client_secret: secrets.client_secret,
@@ -135,7 +145,9 @@ export class VaultService {
       }
     }
     // Fallback to environment variables
-    console.warn('Vault: OAuth credentials not found in Vault, using environment variables');
+    console.warn(
+      'Vault: OAuth credentials not found in Vault, using environment variables',
+    );
     return {
       client_id: process.env.VITE_42_CLIENT_ID || '',
       client_secret: process.env.VITE_42_CLIENT_SECRET || '',
@@ -147,11 +159,13 @@ export class VaultService {
    */
   async getCookieSecret(): Promise<string> {
     if (this.isConnected) {
-      const secrets = await this.getSecret('shared/cookie');
+      const secrets = await this.getSecret('backend/cookie');
       if (secrets?.secret) {
+        console.log('Vault: ✅ Cookie secret loaded from Vault');
         return secrets.secret;
       }
     }
+    console.warn('⚠️  Vault: Cookie secret NOT loaded from Vault - using environment variable');
     return process.env.COOKIE_SECRET || '';
   }
 }

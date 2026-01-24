@@ -40,6 +40,23 @@ export class SendMessageUseCase {
     };
 
     await this.chatMessageRepo.save(message);
+
+    // WebSocket 通知
+    const { chatWebSocketManager } = await import(
+      '../../adapter/websocket/ChatWebSocketManager.ts'
+    );
+    if (room.type === 'global') {
+      chatWebSocketManager.broadcast({ type: 'NEW_MESSAGE', data: message });
+    } else {
+      const memberIds = await this.chatRoomRepo.findMembers(roomId);
+      for (const memberId of memberIds) {
+        chatWebSocketManager.sendToUser(memberId, {
+          type: 'NEW_MESSAGE',
+          data: message,
+        });
+      }
+    }
+
     return message;
   }
 }

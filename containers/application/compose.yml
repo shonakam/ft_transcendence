@@ -1,9 +1,9 @@
 x-logging: &logging
   logging:
-    driver: "json-file"
+    driver: 'json-file'
     options:
-      max-file: "10"
-      max-size: "100m"
+      max-file: '10'
+      max-size: '100m'
 
 networks:
   transcendence-network:
@@ -31,12 +31,15 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    depends_on:
+      frontend:
+        condition: service_healthy
     container_name: ft-nginx
     ports:
-      - "80:8080" # REDIRECT TO HTTPS
-      - "443:8443"
+      - '80:8080' # REDIRECT TO HTTPS
+      - '443:8443'
     volumes:
-      - "./frontend/dist:/usr/share/nginx/html:ro"
+      - './frontend/dist:/usr/share/nginx/html:ro'
     networks:
       - transcendence-network
     secrets:
@@ -54,13 +57,19 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ft-frontend
     ports: # TODO: delete this section.
-      - "${FRONTEND_EXTERNAL_PORT:-5173}:${FRONTEND_INTERNAL_PORT:-5173}"
+      - '${FRONTEND_EXTERNAL_PORT:-5173}:${FRONTEND_INTERNAL_PORT:-5173}'
     volumes:
       - ./frontend:/app
       - ./common:/common
-      - "/app/node_modules"
+      - '/app/node_modules'
     env_file:
       - ./.env.local
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/dist/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
     networks:
       - transcendence-network
     <<: *logging
@@ -72,12 +81,12 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ft-backend
     ports: # TODO: delete this section.
-      - "${BACKEND_EXTERNAL_PORT:-8080}:${BACKEND_INTERNAL_PORT:-8080}"
+      - '${BACKEND_EXTERNAL_PORT:-8080}:${BACKEND_INTERNAL_PORT:-8080}'
     volumes:
       - ./backend:/app
       - ./common:/common
       - storage:/var/lib/sqlite
-      - "/app/node_modules"
+      - '/app/node_modules'
     env_file:
       - ./.env.local # TODO: 環境変数管理ファイルを分離
     networks:
@@ -108,7 +117,7 @@ services:
       dockerfile: Dockerfile
     container_name: ft-redis
     ports:
-      - "${REDIS_HOST_PORT:-6379}:${REDIS_CONTAINER_PORT:-6379}"
+      - '${REDIS_HOST_PORT:-6379}:${REDIS_CONTAINER_PORT:-6379}'
     restart: unless-stopped
     tty: true
     networks:
@@ -116,27 +125,43 @@ services:
 
   vault:
     image: hashicorp/vault:1.13.3
-    container_name: vault
+    container_name: ft-vault
     ports:
-      - "8200:8200"
+      - '8200:8200'
     environment:
-      VAULT_ADDR: "https://127.0.0.1:8200"
-      VAULT_SKIP_VERIFY: "true"
-      SKIP_SETCAP: "true"
+      VAULT_ADDR: 'https://127.0.0.1:8200'
+      VAULT_SKIP_VERIFY: 'true'
+      SKIP_SETCAP: 'true'
     cap_add:
       - IPC_LOCK
     volumes:
       - ./.secrets/certs/vault:/vault/certs:ro
-      - ./.secrets/vault-config.hcl:/vault/config/vault.hcl:ro
+      - ./tools/vault-config-init.sh:/vault/vault-config-init.sh
       - vault-data:/vault/data
-    entrypoint: vault
-    command: ["server", "-config=/vault/config/vault.hcl"]
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        mkdir -p /vault/config
+        cat > /vault/config/vault.hcl << 'VAULTEOF'
+        ui = true
+        listener "tcp" {
+          address     = "0.0.0.0:8200"
+          tls_cert_file = "/vault/certs/vault.crt"
+          tls_key_file  = "/vault/certs/vault.key"
+        }
+        storage "file" {
+          path = "/vault/data"
+        }
+        api_addr = "https://127.0.0.1:8200"
+        VAULTEOF
+        exec vault server -config=/vault/config/vault.hcl
     networks:
       - transcendence-network
 
-# ====================
-# EXPORTER CONTAINERS
-# ====================
+  # ====================
+  # EXPORTER CONTAINERS
+  # ====================
   nginx_exporter:
     init: true
     container_name: ft-nginx-exporter
@@ -151,6 +176,6 @@ services:
     container_name: ft-redis-exporter
     image: oliver006/redis_exporter:v1.80.0-alpine
     command:
-      - "--redis.addr=redis://redis:6379"
+      - '--redis.addr=redis://redis:6379'
     networks:
       - transcendence-network
