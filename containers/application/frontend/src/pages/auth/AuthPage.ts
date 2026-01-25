@@ -85,6 +85,11 @@ export class AuthPage implements Component {
     this.signupForm.getElement().addEventListener('switchView', handleSwitch);
     this.loginForm.getElement().addEventListener('switchView', handleSwitch);
     this.mfaForm.getElement().addEventListener('switchView', handleSwitch);
+
+    this.mfaForm.getElement().addEventListener('success', async () => {
+      await authStore.checkAuthStatus();
+      router.navigateTo('/dashboard');
+    });
   }
 
   private updateUrl(view: AuthView) {

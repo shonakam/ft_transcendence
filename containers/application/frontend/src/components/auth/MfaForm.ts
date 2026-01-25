@@ -12,6 +12,7 @@ export type MfaMode = 'setup' | 'verify';
 export class MfaForm implements Component {
   private root: HTMLFormElement;
   private qrSection: HTMLDivElement;
+  private enabledSection: HTMLDivElement;
   private qrImage: HTMLImageElement;
   private codeInput: HTMLInputElement;
   private submitButton: HTMLButtonElement;
@@ -71,8 +72,17 @@ export class MfaForm implements Component {
 
     buttonGroup.append(this.submitButton, this.cancelButton);
 
+    this.enabledSection = document.createElement('div');
+    this.enabledSection.className =
+      'hidden flex flex-col items-center space-y-4 p-8 bg-white/5 rounded-lg border border-white/10 text-center';
+    this.enabledSection.innerHTML = `
+      <div class="text-4xl mb-2">✅</div>
+      <h3 class="text-xl font-bold text-white">2FAは設定済みです</h3>
+      <p class="text-sm text-slate-400">現在、あなたのアカウントは2要素認証で保護されています。</p>
+    `;
+
     this.root.innerHTML = '';
-    this.root.append(this.qrSection, this.codeInput, buttonGroup);
+    this.root.append(this.enabledSection, this.qrSection, this.codeInput, buttonGroup);
     this.initEvents();
   }
 
@@ -102,9 +112,21 @@ export class MfaForm implements Component {
     }
   }
 
-  async activate(mode: MfaMode) {
+  async activate(mode: MfaMode, isEnabled: boolean = false) {
     this.mode = mode;
     this.codeInput.value = '';
+
+    if (isEnabled && mode === 'setup') {
+      this.enabledSection.classList.remove('hidden');
+      this.qrSection.classList.add('hidden');
+      this.codeInput.classList.add('hidden');
+      this.submitButton.classList.add('hidden');
+      return;
+    }
+
+    this.enabledSection.classList.add('hidden');
+    this.codeInput.classList.remove('hidden');
+    this.submitButton.classList.remove('hidden');
 
     if (mode === 'setup') {
       this.qrSection.classList.remove('hidden');
@@ -128,7 +150,8 @@ export class MfaForm implements Component {
       if (err) return toaster.show('認証コードが正しくありません', 'error');
 
       toaster.show('認証に成功しました', 'success');
-      router.navigateTo('/dashboard');
+      
+      this.root.dispatchEvent(new CustomEvent('success'));
     });
 
     this.cancelButton.addEventListener('click', () => {

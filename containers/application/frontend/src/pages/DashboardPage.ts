@@ -40,6 +40,12 @@ export class DashboardPage implements Component {
       this.init();
     });
 
+    this.mfaForm.getElement().addEventListener('success', async () => {
+      this.sessionStorage.delete();
+      await this.init();
+      this.switchView('default');
+    });
+
     this.updateForm.getElement().addEventListener('cancel', () => {
       this.init();
     });
@@ -75,7 +81,8 @@ export class DashboardPage implements Component {
         element = this.updateForm.getElement();
         break;
       case 'mfa':
-        await this.mfaForm.activate('setup');
+        const user = this.sessionStorage.get();
+        await this.mfaForm.activate('setup', user?.is2faEnabled === 1);
         element = this.mfaForm.getElement();
         break;
       // case 'game':
