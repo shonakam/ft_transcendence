@@ -11,11 +11,13 @@ networks:
 
 volumes:
   storage:
+    name: ft-storage
     driver_opts:
       type: none
       o: bind
       device: ${DATA_DIR}
   vault-data:
+    name: ft-vault-data
 
 secrets:
   nginx_certificate:
@@ -62,7 +64,7 @@ services:
     env_file:
       - ./.env.local
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/dist/index.html"]
+      test: ['CMD', 'test', '-f', '/app/dist/index.html']
       interval: 10s
       timeout: 5s
       retries: 10

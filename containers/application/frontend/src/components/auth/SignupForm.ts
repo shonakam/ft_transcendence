@@ -1,8 +1,11 @@
 import { Component } from '../../interface/Component';
 import { createUser, userCreateRequestForm } from '../../services/user/create';
+import { login, loginRequestForm } from '../../services/auth/login';
 import { api, NetworkError } from '../../lib/httpClient';
 import { toaster } from '../common/Toaster';
 import { to } from '../../lib/to';
+import { router } from '../../router/router';
+import { authStore } from '../../store/authStore';
 
 export class SignupForm implements Component {
   private root: HTMLFormElement;
@@ -12,6 +15,7 @@ export class SignupForm implements Component {
   private confirmPasswordInput: HTMLInputElement;
   private submitButton: HTMLButtonElement;
   private switchButton: HTMLButtonElement;
+  private validationHint: HTMLDivElement;
   private readonly DEFAULT_IMAGE = '/assets/default-profile.png';
 
   constructor() {
@@ -26,6 +30,17 @@ export class SignupForm implements Component {
       'password',
       'パスワード（確認）'
     );
+
+    // バリデーション条件表示
+    this.validationHint = document.createElement('div');
+    this.validationHint.className = 'text-xs text-slate-400 space-y-1';
+    this.validationHint.innerHTML = `
+      <p class="font-semibold text-slate-300">入力条件:</p>
+      <ul class="list-disc list-inside space-y-0.5">
+        <li>ユーザー名: 1〜20文字の英数字のみ</li>
+        <li>パスワード: 12文字以上、英字・数字・記号を含む</li>
+      </ul>
+    `;
 
     // 登録ボタン
     this.submitButton = document.createElement('button');
@@ -46,6 +61,7 @@ export class SignupForm implements Component {
       this.emailInput,
       this.passwordInput,
       this.confirmPasswordInput,
+      this.validationHint,
       this.submitButton,
       this.switchButton
     );
@@ -85,7 +101,7 @@ export class SignupForm implements Component {
      - フォームバリデーション
      - 画像が選択された場合アップロード（パスを取得）
      - ユーザー作成APIリクエスト
-     - 成功後にログインビューへ遷移
+     - 成功後に自動ログインしてHomeに遷移
    */
   private async handleSubmit() {
     const username = this.usernameInput.value;
@@ -111,6 +127,7 @@ export class SignupForm implements Component {
         this.DEFAULT_IMAGE
       );
 
+      // ユーザー作成
       const [response, err] = await to(createUser(requestData));
       if (err) {
         if (err instanceof NetworkError) {
@@ -119,20 +136,46 @@ export class SignupForm implements Component {
             'error'
           );
         }
-        const message = (err as any).error || (err as any).message || '予期せぬエラーが発生しました';
+        const message =
+          (err as any).error ||
+          (err as any).message ||
+          '予期せぬエラーが発生しました';
         return toaster.show(`${message}`, 'error');
       }
 
-      toaster.show(
-        'アカウントを作成しました！ログインしてください。',
-        'success'
-      );
+      // 登録成功後、自動ログイン
+      const loginData = loginRequestForm(email, password);
+      const [loginResponse, loginErr] = await to(login(loginData));
+      if (loginErr) {
+        // ログイン失敗時はログイン画面へ遷移
+        toaster.show(
+          'アカウントを作成しました。ログインしてください。',
+          'success'
+        );
+        this.root.dispatchEvent(
+          new CustomEvent('signupSuccess', { detail: { data: response } })
+        );
+        return;
+      }
 
-      this.root.dispatchEvent(
-        new CustomEvent('signupSuccess', {
-          detail: { data: response },
-        })
-      );
+      // MFAが必要な場合
+      if (loginResponse.tmpAuthToken) {
+        toaster.show(
+          'アカウントを作成しました。MFA認証を完了してください。',
+          'success'
+        );
+        this.root.dispatchEvent(
+          new CustomEvent('signupSuccess', {
+            detail: { data: loginResponse, needMfa: true },
+          })
+        );
+        return;
+      }
+
+      // ログイン成功、Homeへ遷移
+      await authStore.checkAuthStatus();
+      toaster.show('アカウントを作成しました！', 'success');
+      router.navigateTo('/home');
     } catch (error: unknown) {
       if (error instanceof NetworkError) {
         toaster.show(

@@ -21,7 +21,7 @@ export class HeaderNav implements Component {
 
     // 公開リンク
     this.el.appendChild(new NavLink('Home', '/home').getElement());
-    this.el.appendChild(new NavLink('About', '/about').getElement());
+    // this.el.appendChild(new NavLink('About', '/about').getElement());
     this.el.appendChild(new NavLink('LocalGame', '/game/local').getElement());
 
     // 認証必須リンク（グレーアウト対象）
@@ -33,7 +33,7 @@ export class HeaderNav implements Component {
     this.el.appendChild(dashboardLink);
 
     // Login リンク（未ログイン時のみ表示）
-    this.loginLink = new NavLink('Login', '/auth').getElement();
+    this.loginLink = new NavLink('Signup / Login', '/auth').getElement();
     this.el.appendChild(this.loginLink);
 
     // ユーザーメニュー（ログイン時のみ表示）
@@ -66,7 +66,7 @@ export class HeaderNav implements Component {
       if (confirm('ログアウトしますか？')) {
         await logout().catch(() => {});
         authStore.setLoggedOut();
-        window.sessionStorage.clear()
+        window.sessionStorage.clear();
         router.navigateTo('/auth?view=login');
       }
     });

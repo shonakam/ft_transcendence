@@ -12,6 +12,17 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(form: CreateUserForm): Promise<User> {
+    // 重複チェック
+    const existingEmail = await this.repo.findByEmail(form.email);
+    if (existingEmail) {
+      throw new Error('このメールアドレスは既に登録されています');
+    }
+
+    const existingUsername = await this.repo.findByUsername(form.username);
+    if (existingUsername) {
+      throw new Error('このユーザー名は既に使用されています');
+    }
+
     const user = UserForm.create(form);
 
     await transaction(async (db) => {

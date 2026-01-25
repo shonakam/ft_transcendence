@@ -107,7 +107,7 @@ export class GameSocket {
       case 'disconnected':
         break;
       case 'registered':
-        toaster.show(`ユーザー登録完了: ${message.payload.userId}`, 'success');
+        // WebSocket接続完了（トーストは不要、UIで状態を示す）
         this.callbacks?.onRegistered?.(message.payload.userId);
         break;
       case 'unregistered':

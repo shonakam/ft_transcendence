@@ -2,6 +2,7 @@ import { Component } from '../../interface/Component';
 import { ChatRoom } from '../../types/chat';
 import { chatService } from '../../services/chat/ChatService';
 import { toaster } from '../common/Toaster';
+import { authStore } from '../../store/authStore';
 
 export class RoomList implements Component {
   private el: HTMLElement;
@@ -30,6 +31,23 @@ export class RoomList implements Component {
     this.render();
   }
 
+  // DMルーム名から自分の名前を除いて相手の名前だけを表示
+  private getDisplayName(room: ChatRoom): string {
+    if (!room.name) return 'Unknown Room';
+
+    // DMルームの場合、"user1 / user2" 形式なので自分を除く
+    if (room.type === 'dm' && room.name.includes(' / ')) {
+      const myUsername = authStore.getUsername();
+      if (myUsername) {
+        const names = room.name.split(' / ');
+        const otherName = names.find((name) => name !== myUsername);
+        if (otherName) return otherName;
+      }
+    }
+
+    return room.name;
+  }
+
   private render() {
     this.el.innerHTML = `
       <div class="p-4 border-b border-white/10 font-bold text-lg">Chat Rooms</div>
@@ -51,9 +69,10 @@ export class RoomList implements Component {
       item.className = `w-full text-left p-4 hover:bg-white/5 transition-colors border-b border-white/5 flex items-center space-x-3 ${isActive ? 'bg-indigo-600/20 border-r-2 border-r-indigo-500' : ''}`;
 
       const icon = room.type === 'global' ? '🌐' : '👤';
+      const displayName = this.getDisplayName(room);
       item.innerHTML = `
         <span class="text-xl">${icon}</span>
-        <span class="truncate pr-2">${room.name || 'Unknown Room'}</span>
+        <span class="truncate pr-2">${displayName}</span>
       `;
 
       item.onclick = () => this.onRoomSelect(room);

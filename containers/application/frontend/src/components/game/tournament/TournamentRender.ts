@@ -34,6 +34,7 @@ export class TournamentRender implements Component {
   }
 
   private updateCheckboxVisibility(isLoggedIn: boolean): void {
+    // 各プレイヤーの「This is me」ラベル
     this.el.querySelectorAll('.is-me-label').forEach((label) => {
       if (isLoggedIn) {
         label.classList.remove('hidden');
@@ -43,6 +44,16 @@ export class TournamentRender implements Component {
         label.classList.remove('flex');
       }
     });
+
+    // 「ログインユーザーとしてプレイしない」オプション
+    const notPlayingOption = this.el.querySelector('#not-playing-option');
+    if (notPlayingOption) {
+      if (isLoggedIn) {
+        notPlayingOption.classList.remove('hidden');
+      } else {
+        notPlayingOption.classList.add('hidden');
+      }
+    }
   }
 
   private initForm(): void {
@@ -100,13 +111,19 @@ export class TournamentRender implements Component {
   private handleFormSubmit(form: HTMLFormElement): void {
     const formData = new FormData(form);
 
+    // ラジオボタンで選択された「This is me」のプレイヤー番号を取得
+    const selectedMeValue = formData.get('isMe') as string | null;
+    const selectedMeIndex = selectedMeValue
+      ? parseInt(selectedMeValue, 10)
+      : null;
+
     // プレイヤーをクリアして再登録
     this.logic.clearMembers();
 
     for (let i = 1; i <= 8; i++) {
       const alias = formData.get(`player${i}`) as string;
       if (alias && alias.trim()) {
-        const isMe = formData.get(`isMe${i}`) === 'on';
+        const isMe = selectedMeIndex === i;
         const userId = isMe ? this.loggedInUserId : null;
         this.logic.addMember(alias.trim(), userId);
       }

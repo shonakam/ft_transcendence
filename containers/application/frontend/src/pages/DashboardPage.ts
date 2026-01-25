@@ -9,15 +9,14 @@ import { router } from '../router/router';
 import { toaster } from '../components/common/Toaster';
 import { SessionStorage } from '../lib/sessionStorage';
 
-export type DashboardView = 
-  'user' | 'game' | 'chat' | 'mfa' | 'default';
+export type DashboardView = 'user' | 'game' | 'chat' | 'mfa' | 'default';
 
 export class DashboardPage implements Component {
   private el: HTMLElement;
   private container: HTMLDivElement;
   private mfaForm: MfaForm;
   private updateForm: UpdateForm;
-  private sessionStorage: SessionStorage<UserResponse>
+  private sessionStorage: SessionStorage<UserResponse>;
 
   constructor() {
     this.el = document.createElement('main');
@@ -28,7 +27,7 @@ export class DashboardPage implements Component {
 
     this.mfaForm = new MfaForm();
     this.updateForm = new UpdateForm();
-    this.sessionStorage = new SessionStorage(config.user.sessionStorageKey)
+    this.sessionStorage = new SessionStorage(config.user.sessionStorageKey);
 
     this.initEventListener();
 
@@ -48,7 +47,7 @@ export class DashboardPage implements Component {
     this.updateForm.getElement().addEventListener('updateSuccess', () => {
       this.init();
       location.reload();
-      this.switchView('default'); 
+      this.switchView('default');
     });
   }
 
@@ -58,10 +57,10 @@ export class DashboardPage implements Component {
 
   private async init() {
     try {
-      let user = this.sessionStorage.get()
+      let user = this.sessionStorage.get();
       if (!user) {
         user = await api.get<UserResponse>('users/me');
-        this.sessionStorage.save(user)
+        this.sessionStorage.save(user);
       }
       this.render(user);
     } catch (error) {
@@ -73,7 +72,7 @@ export class DashboardPage implements Component {
     let element: HTMLElement;
     switch (view) {
       case 'user':
-        element = this.updateForm.getElement()
+        element = this.updateForm.getElement();
         break;
       case 'mfa':
         await this.mfaForm.activate('setup');
@@ -92,13 +91,13 @@ export class DashboardPage implements Component {
 
   private render(user: UserResponse) {
     this.container.replaceChildren();
-    
+
     const title = document.createElement('h2');
     title.className = 'text-2xl font-bold text-white mb-6 text-center';
     title.textContent = 'Dashboard';
 
     const userInfo = new UserInfoComponent(user);
-    
+
     const menu = document.createElement('div');
     menu.className = 'space-y-4';
 
@@ -111,14 +110,8 @@ export class DashboardPage implements Component {
     const statsBtn = this.createMenuButton('📊 Game Stats', () =>
       router.navigateTo('/game/stats')
     );
-    const chatBtn = this.createMenuButton('💬 Chat', () =>
-      router.navigateTo('/chat')
-    );
-    const gameBtn = this.createMenuButton('🎮 Game Start', () =>
-      this.switchView('game')
-    );
 
-    menu.append(userBtn, mfaBtn, statsBtn, chatBtn, gameBtn);
+    menu.append(userBtn, mfaBtn, statsBtn);
     this.container.append(title, userInfo.getElement(), menu);
   }
 

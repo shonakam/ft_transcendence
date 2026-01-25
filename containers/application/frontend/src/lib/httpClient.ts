@@ -41,7 +41,7 @@ async function httpClient<T>(
 
   const isFormData = options.body instanceof FormData;
   const hasBody = options.body !== undefined && options.body !== null;
-  
+
   if (!headers.has('Content-Type') && hasBody && !isFormData) {
     headers.set('Content-Type', 'application/json');
   }
@@ -132,17 +132,23 @@ async function httpClient<T>(
 async function handleForceLogout() {
   if (window.location.pathname.startsWith('/auth')) return;
 
+  // 以前ログインしていた形跡があるかチェック（セッション切れかどうか判定）
+  const wasLoggedIn = localStorage.getItem('username') !== null;
+
   await api.delete('auth/logout').catch(() => {});
   localStorage.clear();
   sessionStorage.clear();
 
-  toaster.show('Session expired. Redirecting to login...', 'error');
-  router.navigateTo('/auth?view=login');
+  // セッションが切れた場合のみリダイレクト（初回訪問時は現在のページに留まる）
+  if (wasLoggedIn) {
+    toaster.show('Session expired. Redirecting to login...', 'error');
+    router.navigateTo('/auth?view=login');
+  }
 }
 
 // --- 公開API ---
 export const api = {
-  get: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) => 
+  get: <T>(endpoint: string, options?: Omit<CustomOptions, 'method'>) =>
     httpClient<T>(endpoint, { ...options, method: 'GET' }),
 
   post: <T>(
@@ -150,7 +156,8 @@ export const api = {
     body: unknown,
     options?: Omit<CustomOptions, 'method' | 'body'>
   ) => {
-    const formattedBody = body instanceof FormData ? body : JSON.stringify(body);
+    const formattedBody =
+      body instanceof FormData ? body : JSON.stringify(body);
     return httpClient<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -163,7 +170,8 @@ export const api = {
     body: unknown,
     options?: Omit<CustomOptions, 'method' | 'body'>
   ) => {
-    const formattedBody = body instanceof FormData ? body : JSON.stringify(body);
+    const formattedBody =
+      body instanceof FormData ? body : JSON.stringify(body);
     return httpClient<T>(endpoint, {
       ...options,
       method: 'PUT',
