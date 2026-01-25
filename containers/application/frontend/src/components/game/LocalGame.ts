@@ -45,7 +45,11 @@ export class LocalGame implements PongGame {
   }
 
   loop(currentTime: number): void {
-    if (this.lastFrameTime === null && this.state.status !== 'playing') return;
+    // playing状態でなければループを終了
+    if (this.state.status !== 'playing') {
+      this.lastFrameTime = null;
+      return;
+    }
     let dt: number;
     if (this.lastFrameTime === null) dt = 0;
     else dt = (currentTime - this.lastFrameTime) / 1000;

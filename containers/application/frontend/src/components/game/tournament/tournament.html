@@ -1,120 +1,168 @@
-<h2 class="text-2xl font-bold mb-4 text-center">Tournament</h2>
+<h2 class="text-2xl font-bold mb-4 text-center text-white">Tournament</h2>
 <form id="tournament-form" class="text-center mt-8">
   <div class="space-y-6 max-w-xl mx-auto">
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 gap-1 gap-x-10 text-sm text-gray-700"
-    >
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player1"
-      >
-        <span>Player 1</span>
-        <input
-          id="player1"
-          name="player1"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player2"
-      >
-        <span>Player 2</span>
-        <input
-          id="player2"
-          name="player2"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player3"
-      >
-        <span>Player 3</span>
-        <input
-          id="player3"
-          name="player3"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player4"
-      >
-        <span>Player 4</span>
-        <input
-          id="player4"
-          name="player4"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player5"
-      >
-        <span>Player 5</span>
-        <input
-          id="player5"
-          name="player5"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player6"
-      >
-        <span>Player 6</span>
-        <input
-          id="player6"
-          name="player6"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player7"
-      >
-        <span>Player 7</span>
-        <input
-          id="player7"
-          name="player7"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
-      <label
-        class="flex flex-col sm:flex-row sm:items-center gap-1"
-        for="player8"
-      >
-        <span>Player 8</span>
-        <input
-          id="player8"
-          name="player8"
-          type="text"
-          placeholder="name"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </label>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 gap-x-10 text-sm">
+      <!-- Player 1 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 1</span>
+          <input
+            id="player1"
+            name="player1"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe1" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 2 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 2</span>
+          <input
+            id="player2"
+            name="player2"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe2" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 3 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 3</span>
+          <input
+            id="player3"
+            name="player3"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe3" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 4 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 4</span>
+          <input
+            id="player4"
+            name="player4"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe4" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 5 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 5</span>
+          <input
+            id="player5"
+            name="player5"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe5" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 6 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 6</span>
+          <input
+            id="player6"
+            name="player6"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe6" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 7 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 7</span>
+          <input
+            id="player7"
+            name="player7"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe7" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
+      <!-- Player 8 -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+          <span class="w-16 text-white">Player 8</span>
+          <input
+            id="player8"
+            name="player8"
+            type="text"
+            placeholder="name"
+            class="flex-1 rounded border border-white/30 bg-white/10 text-white placeholder-gray-400 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <label
+          class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
+        >
+          <input type="checkbox" name="isMe8" class="is-me-checkbox" />
+          <span>This is me</span>
+        </label>
+      </div>
     </div>
     <button
       type="submit"
-      class="inline-flex items-center justify-center rounded bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      disabled
+      class="inline-flex items-center justify-center rounded bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 opacity-50 cursor-not-allowed"
     >
-      Submit
+      Start Tournament
     </button>
-    <div id="tournament" class="flex gap-12 justify-center"></div>
   </div>
 </form>
+<!-- トーナメント表（フォームとは別に表示） -->
+<div id="tournament" class="hidden flex gap-12 justify-center mt-8"></div>

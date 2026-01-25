@@ -4,7 +4,7 @@ import { Component } from '../../interface/Component';
 import { GameCanvas } from '../../components/game/canvas/GameCanvas';
 import { RemoteInputHandler } from '../../components/game/inputHandler/RemoteInputHandler';
 import { RemoteGame } from '../../components/game/RemoteGame';
-import gameTemplate from './game.html?raw';
+import remoteGameTemplate from './remote-game.html?raw';
 
 import CONFIG from '@shonakam/common/game/GameConfig';
 import { GameSocket } from '../../components/game/ws/GameSocket';
@@ -26,7 +26,7 @@ export class RemoteGamePage implements Component {
   private pendingJoinGameId: number | null = null; // URLパラメータからの自動参加用
 
   constructor() {
-    this.el.innerHTML = gameTemplate;
+    this.el.innerHTML = remoteGameTemplate;
     this.gameCanvas = new GameCanvas(
       this.el.querySelector('.canvas-stack') as HTMLElement,
       CONFIG.CANVAS_WIDTH,

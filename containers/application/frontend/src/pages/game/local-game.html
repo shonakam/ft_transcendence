@@ -1,0 +1,56 @@
+<div
+  class="fixed inset-0 flex flex-col items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto"
+>
+  <!-- subtle noise -->
+  <div class="absolute inset-0 opacity-20 bg-[url('/noise.png')]"></div>
+
+  <!-- content wrapper -->
+  <div class="relative z-10 w-full max-w-4xl px-6 pt-24 pb-16">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">
+        Local Pong Game
+      </h1>
+      <p id="game-description" class="text-lg text-gray-400">
+        Play against a friend on the same device
+      </p>
+    </div>
+
+    <!-- スコアボード -->
+    <div
+      class="scoreboard bg-white/10 backdrop-blur rounded-xl p-4 mb-6 text-center"
+    >
+      <!-- マッチ情報 -->
+      <div id="match-info" class="mb-3">
+        <span id="match-display" class="text-lg font-bold text-white">-</span>
+      </div>
+      <!-- スコア -->
+      <div class="text-4xl font-bold text-white mb-2">
+        <span id="score-left">0</span>
+        <span class="text-gray-500 mx-4">:</span>
+        <span id="score-right">0</span>
+      </div>
+      <p id="winning-score" class="text-gray-400 text-sm">(First to 5 wins)</p>
+      <p id="game-status" class="text-gray-400 text-sm mt-1">Status: Ready</p>
+    </div>
+
+    <!-- ゲームキャンバス -->
+    <div class="game-canvas flex justify-center mb-8">
+      <div
+        class="canvas-stack rounded-xl overflow-hidden shadow-2xl"
+        style="position: relative; width: 800px; height: 400px"
+      ></div>
+    </div>
+
+    <!-- 操作説明 -->
+    <p class="text-center text-gray-400">
+      Left: <span class="text-white font-medium">W/S</span> | Right:
+      <span class="text-white font-medium">↑/↓</span> or
+      <span class="text-white font-medium">I/K</span> |
+      <span class="text-white font-medium">Space</span> to start
+    </p>
+
+    <!-- トーナメントセクション -->
+    <div class="tournament-section mt-12"></div>
+  </div>
+</div>
