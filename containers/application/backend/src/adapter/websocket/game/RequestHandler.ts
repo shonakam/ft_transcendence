@@ -9,6 +9,9 @@ import { RemoteInputHandler } from '../../../domain/game/entity/RemoteInputHandl
 import { GameSide, PlayerInput } from '@shonakam/common/index.ts';
 
 import minilog, { TAG } from '../../../utils/minilog.ts';
+import { UserRepositorySqlite } from '../../../infra/sqlite/repository/user/UserRepositorySqlite.ts';
+
+const userRepository = new UserRepositorySqlite();
 
 export class RequestHandler {
   // User registration
@@ -73,7 +76,7 @@ export class RequestHandler {
   }
 
   // Invite player to game
-  static joinGame(socket: WebSocket, gameId: number): void {
+  static async joinGame(socket: WebSocket, gameId: number): Promise<void> {
     if (this.checkRegistration(socket) === false) return;
     const gameRegistry = container.gameSessionRegistry;
     const socketRegistry = container.gameSocketRegistry;
@@ -118,15 +121,37 @@ export class RequestHandler {
         ? socketRegistry.getUserIdBySocket(rightSocket) || '不明'
         : '不明';
 
+      // ユーザー名（エイリアス）を取得
+      let leftAlias = leftUserId;
+      let rightAlias = rightUserId;
+      try {
+        const leftUser = await userRepository.findById(leftUserId);
+        const rightUser = await userRepository.findById(rightUserId);
+        if (leftUser?.username) leftAlias = leftUser.username;
+        if (rightUser?.username) rightAlias = rightUser.username;
+      } catch (err) {
+        minilog.e(
+          TAG.GAME,
+          `RequestHandler: Failed to fetch user aliases: ${err}`,
+        );
+      }
+
       // 左プレイヤーに相手参加通知
       if (leftSocket) {
-        ResponseHandler.opponentJoined(leftSocket, joinedGameId, rightUserId);
+        ResponseHandler.opponentJoined(
+          leftSocket,
+          joinedGameId,
+          rightUserId,
+          rightAlias,
+        );
         ResponseHandler.ready(
           leftSocket,
           joinedGameId,
           leftUserId,
           rightUserId,
           'left',
+          leftAlias,
+          rightAlias,
         );
       }
       // 右プレイヤーに gameReady 通知
@@ -137,11 +162,13 @@ export class RequestHandler {
           leftUserId,
           rightUserId,
           'right',
+          leftAlias,
+          rightAlias,
         );
       }
 
-      gameEntry.inputHandler.setUserInfo('left', leftUserId);
-      gameEntry.inputHandler.setUserInfo('right', rightUserId);
+      gameEntry.inputHandler.setUserInfo('left', leftUserId, leftAlias);
+      gameEntry.inputHandler.setUserInfo('right', rightUserId, rightAlias);
 
       gameEntry.gameServer.startReadyLoop();
       minilog.i(TAG.GAME, `RequestHandler: Game ${joinedGameId} is ready`);

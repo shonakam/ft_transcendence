@@ -34,8 +34,13 @@ export class ResponseHandler {
     socket: WebSocket,
     gameId: number,
     opponentId: string,
+    opponentAlias?: string,
   ): void {
-    this.sendMessage(socket, 'opponentJoined', { gameId, opponentId });
+    this.sendMessage(socket, 'opponentJoined', {
+      gameId,
+      opponentId,
+      opponentAlias: opponentAlias || opponentId,
+    });
   }
 
   static ready(
@@ -44,12 +49,16 @@ export class ResponseHandler {
     leftPlayer: string,
     rightPlayer: string,
     yourSide: 'left' | 'right',
+    leftAlias?: string,
+    rightAlias?: string,
   ): void {
     this.sendMessage(socket, 'gameReady', {
       gameId,
       leftPlayer,
       rightPlayer,
       yourSide,
+      leftAlias: leftAlias || leftPlayer,
+      rightAlias: rightAlias || rightPlayer,
     });
   }
 

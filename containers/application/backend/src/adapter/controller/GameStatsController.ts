@@ -101,7 +101,7 @@ export default async function GameStatsController(
         const offset = query.offset ? parseInt(query.offset, 10) : undefined;
 
         console.log(
-          `[GameStatsController] Fetching stats for user: ${requesterId}, limit: ${limit}, offset: ${offset}`,
+          `[GameStatsController] Fetching stats for user: ${requesterId}`,
         );
 
         const records = await listGameRecords.execute(requesterId, {
@@ -109,7 +109,9 @@ export default async function GameStatsController(
           offset,
         });
 
-        console.log(`[GameStatsController] Found ${records.length} records`);
+        console.log(
+          `[GameStatsController] Found ${records.length} records for ${requesterId}`,
+        );
 
         reply.status(200).send(records);
       } catch (err: any) {

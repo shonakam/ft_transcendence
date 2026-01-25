@@ -65,21 +65,21 @@ class AuthStore {
 
   // サーバーから認証状態を確認
   async checkAuthStatus(): Promise<boolean> {
-    // まずlocalStorageをチェック
-    const cachedUsername = localStorage.getItem('username');
-    const cachedUserId = localStorage.getItem('userId');
-    if (cachedUsername) {
-      this.state = {
-        isLoggedIn: true,
-        username: cachedUsername,
-        id: cachedUserId,
-      };
-      this.notify();
-    }
-
-    // サーバーで確認
+    // サーバーで最新情報を取得
     const [user, err] = await to(getMe());
     if (err || !user) {
+      // サーバーで失敗した場合、localStorageから復元を試みる（オフライン対応など）
+      const cachedUsername = localStorage.getItem('username');
+      const cachedUserId = localStorage.getItem('userId');
+      if (cachedUsername && cachedUserId) {
+        this.state = {
+          isLoggedIn: true,
+          username: cachedUsername,
+          id: cachedUserId,
+        };
+        this.notify();
+        return true;
+      }
       this.setLoggedOut();
       return false;
     }

@@ -9,6 +9,7 @@ import remoteGameTemplate from './remote-game.html?raw';
 import CONFIG from '@shonakam/common/game/GameConfig';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import type { GameState } from '@shonakam/common';
+import { authStore } from '../../store/authStore';
 
 export class RemoteGamePage implements Component {
   el: HTMLElement = document.createElement('main');
@@ -23,6 +24,8 @@ export class RemoteGamePage implements Component {
   private mySide: 'left' | 'right' | null = null;
   private leftPlayer: string | null = null;
   private rightPlayer: string | null = null;
+  private leftPlayerAlias: string | null = null;
+  private rightPlayerAlias: string | null = null;
   private pendingJoinGameId: number | null = null; // URLパラメータからの自動参加用
 
   constructor() {
@@ -48,10 +51,24 @@ export class RemoteGamePage implements Component {
       onGameGenerated: (gameId, state) =>
         this.handleGameGenerated(gameId, state),
       onPlayerAdded: (gameId, side) => this.handlePlayerAdded(gameId, side),
-      onOpponentJoined: (gameId, opponentId) =>
-        this.handleOpponentJoined(gameId, opponentId),
-      onGameReady: (gameId, leftPlayer, rightPlayer, yourSide) =>
-        this.handleGameReady(gameId, leftPlayer, rightPlayer, yourSide),
+      onOpponentJoined: (gameId, opponentId, opponentAlias) =>
+        this.handleOpponentJoined(gameId, opponentId, opponentAlias),
+      onGameReady: (
+        gameId,
+        leftPlayer,
+        rightPlayer,
+        yourSide,
+        leftAlias,
+        rightAlias
+      ) =>
+        this.handleGameReady(
+          gameId,
+          leftPlayer,
+          rightPlayer,
+          yourSide,
+          leftAlias,
+          rightAlias
+        ),
       onGameStart: (gameId) => this.handleGameStart(gameId),
       onGameState: (state) => this.pongGame.updateState(state),
       onPlayerLeft: (gameId, playerId) =>
@@ -101,6 +118,7 @@ export class RemoteGamePage implements Component {
     this.currentGameId = gameId;
     this.mySide = 'left'; // ゲーム作成者は左
     this.leftPlayer = this.userId;
+    this.leftPlayerAlias = authStore.getUsername() || this.userId;
     this.updateGameIdInput();
     this.updateMatchDisplay();
     this.pongGame.updateState(state);
@@ -118,8 +136,13 @@ export class RemoteGamePage implements Component {
     this.pongGame.start();
   }
 
-  private handleOpponentJoined(_gameId: number, opponentId: string): void {
+  private handleOpponentJoined(
+    _gameId: number,
+    opponentId: string,
+    opponentAlias: string
+  ): void {
     this.rightPlayer = opponentId;
+    this.rightPlayerAlias = opponentAlias;
     this.updateMatchDisplay();
   }
 
@@ -127,12 +150,16 @@ export class RemoteGamePage implements Component {
     gameId: number,
     leftPlayer: string,
     rightPlayer: string,
-    yourSide: 'left' | 'right'
+    yourSide: 'left' | 'right',
+    leftAlias: string,
+    rightAlias: string
   ): void {
     this.currentGameId = gameId;
     this.mySide = yourSide;
     this.leftPlayer = leftPlayer;
     this.rightPlayer = rightPlayer;
+    this.leftPlayerAlias = leftAlias;
+    this.rightPlayerAlias = rightAlias;
     this.updateGameIdInput();
     this.updateMatchDisplay();
   }
@@ -149,8 +176,10 @@ export class RemoteGamePage implements Component {
     // 相手が退出した場合、待機状態に戻す
     if (this.mySide === 'left') {
       this.rightPlayer = null;
+      this.rightPlayerAlias = null;
     } else {
       this.leftPlayer = null;
+      this.leftPlayerAlias = null;
     }
     this.updateMatchDisplay();
   }
@@ -173,6 +202,8 @@ export class RemoteGamePage implements Component {
     this.mySide = null;
     this.leftPlayer = null;
     this.rightPlayer = null;
+    this.leftPlayerAlias = null;
+    this.rightPlayerAlias = null;
     this.clearGameIdInput();
     this.updateMatchDisplay();
     this.enableGameControls();
@@ -287,11 +318,11 @@ export class RemoteGamePage implements Component {
         leftLabel = 'left - challenger';
         rightLabel = 'right - you';
       }
-      const leftName = this.leftPlayer
-        ? `${this.leftPlayer} (${leftLabel})`
+      const leftName = this.leftPlayerAlias
+        ? `${this.leftPlayerAlias} (${leftLabel})`
         : '待機中...';
-      const rightName = this.rightPlayer
-        ? `${this.rightPlayer} (${rightLabel})`
+      const rightName = this.rightPlayerAlias
+        ? `${this.rightPlayerAlias} (${rightLabel})`
         : '待機中...';
       matchEl.textContent = `${leftName} vs ${rightName}`;
     }
@@ -323,15 +354,28 @@ export class RemoteGamePage implements Component {
     this.el.querySelector('#score-left')!.textContent = left.toString();
     this.el.querySelector('#score-right')!.textContent = right.toString();
     if (left < CONFIG.WINNING_SCORE && right < CONFIG.WINNING_SCORE) return;
-    const winner =
-      left >= CONFIG.WINNING_SCORE ? 'Left Player' : 'Right Player';
-    // add winning message
-    this.el.querySelector('.game-canvas')!.innerHTML += `
-      <div class="winning-message absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-75 p-4 rounded shadow-lg">
-        <h2 class="text-5xl font-bold mb-2">${winner} Wins!</h2>
-        <p class="text-xl">Final Score: ${left} : ${right}</p>
-      </div>
-    `;
+
+    // 勝利メッセージを表示（Local形式に合わせる）
+    const canvasStack = this.el.querySelector('.canvas-stack');
+    if (canvasStack) {
+      const winnerName =
+        left >= CONFIG.WINNING_SCORE
+          ? this.leftPlayerAlias || 'Left Player'
+          : this.rightPlayerAlias || 'Right Player';
+      canvasStack.innerHTML += `
+        <div class="winning-message absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+          <div class="text-center">
+            <p class="text-2xl text-gray-300 mb-2">🏆 Winner 🏆</p>
+            <h2 class="text-6xl font-extrabold text-white mb-4 drop-shadow-lg">${winnerName}</h2>
+            <p class="text-3xl font-bold text-gray-200">${left} : ${right}</p>
+            <p class="text-lg text-gray-400 mt-6">Game Over</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // リモートゲームの結果はサーバー側（GameServer.ts）で保存されるため、
+    // クライアント側からの保存は不要
   }
 
   private updateStatus(status: string) {

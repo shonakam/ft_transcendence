@@ -39,14 +39,19 @@ export function registerGameWebSocket(fastify: FastifyInstance): void {
           return;
         }
 
-        // ユーザー名を取得して登録
+        // ユーザーを登録（userIdで登録）
+        RequestHandler.registerUser(socket, userId);
+
+        // ユーザー名を取得してログに表示
         (async () => {
           const user = await container.userUseCases.getUser.execute(
             UserId.from(userId),
           );
           const displayName = user?.username || userId;
-          minilog.i('WebSocket/game', `User ${displayName} connected to game`);
-          RequestHandler.registerUser(socket, displayName);
+          minilog.i(
+            'WebSocket/game',
+            `User ${displayName} (${userId}) connected to game`,
+          );
 
           // 接続確認メッセージ送信
           ResponseHandler.sendMessage(socket, 'connected', {
@@ -88,7 +93,10 @@ function handleClientMessage(socket: WebSocket, message: ClientMessage): void {
       RequestHandler.createGame(socket);
       break;
     case 'join':
-      RequestHandler.joinGame(socket, message.payload.gameId);
+      RequestHandler.joinGame(socket, message.payload.gameId).catch((err) => {
+        minilog.e('WebSocket/game', `Failed to join game: ${err}`);
+        ResponseHandler.error(socket, 'Failed to join game');
+      });
       break;
     case 'playerInput':
       RequestHandler.input(socket, message.payload.input);

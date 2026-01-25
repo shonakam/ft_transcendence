@@ -28,6 +28,8 @@ export class SaveGameResultUseCase {
       gameId,
       leftUserId: input.leftUserId,
       rightUserId: input.rightUserId,
+      leftAlias: input.leftAlias ?? null,
+      rightAlias: input.rightAlias ?? null,
       leftPoint: input.leftScore,
       rightPoint: input.rightScore,
       winnerId: input.winner === 'left' ? input.leftUserId : input.rightUserId,
