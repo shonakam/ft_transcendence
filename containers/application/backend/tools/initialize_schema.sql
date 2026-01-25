@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
-    username TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
     password TEXT,
     image_path TEXT,
     is_2fa_enabled INTEGER NOT NULL DEFAULT 0,

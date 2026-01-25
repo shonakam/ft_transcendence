@@ -66,6 +66,14 @@ export class UserRepositorySqlite implements UserRepository {
     return this.scan(row) ?? null;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    const row = await this.db.get(
+      `SELECT * FROM users WHERE username = ? AND withdrawn_at IS NULL`,
+      [username],
+    );
+    return this.scan(row) ?? null;
+  }
+
   /* physical delete */
   // async delete(id: string): Promise<void> {
   //   await this.db.run(`DELETE FROM users WHERE id = ?`, [id]);

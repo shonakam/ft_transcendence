@@ -11,11 +11,13 @@ networks:
 
 volumes:
   storage:
+    name: ft-storage
     driver_opts:
       type: none
       o: bind
       device: ${DATA_DIR}
   vault-data:
+    name: ft-vault-data
 
 secrets:
   nginx_certificate:

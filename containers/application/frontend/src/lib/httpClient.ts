@@ -132,11 +132,17 @@ async function httpClient<T>(
 async function handleForceLogout() {
   if (window.location.pathname.startsWith('/auth')) return;
 
+  // 以前ログインしていた形跡があるかチェック（セッション切れかどうか判定）
+  const wasLoggedIn = localStorage.getItem('username') !== null;
+
   await api.delete('auth/logout').catch(() => {});
   localStorage.clear();
   sessionStorage.clear();
 
-  toaster.show('Session expired. Redirecting to login...', 'error');
+  // セッションが切れた場合のみメッセージを表示（初回訪問時は表示しない）
+  if (wasLoggedIn) {
+    toaster.show('Session expired. Redirecting to login...', 'error');
+  }
   router.navigateTo('/auth?view=login');
 }
 
