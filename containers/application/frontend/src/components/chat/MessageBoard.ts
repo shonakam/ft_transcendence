@@ -94,7 +94,7 @@ export class MessageBoard implements Component {
       const username = sender?.username || `User-${msg.senderId.slice(0, 4)}`;
       const imagePath = sender?.imagePath;
       const avatarSrc = imagePath
-        ? `/api/uploads/${imagePath}`
+        ?  ((imagePath.startsWith('http')) ? imagePath : `/api/uploads/${imagePath}`)
         : '/assets/default-profile.png';
       const avatarContent = `<img src="${avatarSrc}" class="w-full h-full rounded-full object-cover" alt="${username}">`;
 
