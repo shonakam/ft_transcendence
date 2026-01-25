@@ -1,6 +1,7 @@
 import { config } from '../../conf.ts';
 import { HttpClient, FetchError } from '../http/client.ts';
 import { AuthCode } from '../../domain/auth/vo/AuthCode.ts';
+import { vaultService } from '../../main.ts';
 
 type IdP42Response = {
   access_token: string;
@@ -11,11 +12,16 @@ type IdP42Response = {
 };
 
 export class IdP42Service {
-  constructor(
-    private readonly httpClient: HttpClient,
-    private readonly clientId = config.auth.idp.providers.ft.clientId,
-    private readonly clientSecret = config.auth.idp.providers.ft.clientSecret,
-  ) {}
+  private clientId!: string;
+  private clientSecret!: string;
+
+  constructor(private readonly httpClient: HttpClient) {}
+
+  public async init() {
+    const c = await vaultService.getOAuthCredentials();
+    this.clientId = c?.client_id || config.auth.idp.providers.ft.clientId;
+    this.clientSecret = c?.client_secret || config.auth.idp.providers.ft.clientSecret;
+  }
 
   // https://api.intra.42.fr/apidoc/2.0/cursus_users/index.html
   public async trade(code: AuthCode): Promise<IdP42Response> {

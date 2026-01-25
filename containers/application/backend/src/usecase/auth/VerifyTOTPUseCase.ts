@@ -6,6 +6,8 @@ import { User2faRepository } from '../../domain/user/repository/User2faRepositor
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import speakeasy from 'speakeasy';
+import { JwtSecrets } from '../../infra/vault/vault.service.ts';
+import { vaultService } from '../../main.ts';
 
 export class VerifyTOTPUseCase {
   constructor(
@@ -58,8 +60,9 @@ export class VerifyTOTPUseCase {
     }
 
     const loginPayload = { id: payload.sub };
-    const access = this.tokenService.generateAccessToken(loginPayload);
-    const refresh = this.tokenService.generateRefreshToken(loginPayload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const access = this.tokenService.generateAccessToken(loginPayload, jwts.access_secret);
+    const refresh = this.tokenService.generateRefreshToken(loginPayload, jwts.refresh_secret);
 
     const key = `session:refresh:${payload.sub}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();

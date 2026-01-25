@@ -5,6 +5,8 @@ import Password from '../../domain/user/vo/Password.ts';
 import { VolatileDataRepositoryRedis } from '../../infra/redis/repository/VolatileDataRepositoryRedis.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
+import { JwtSecrets } from '../../infra/vault/vault.service.ts';
+import { vaultService } from '../../main.ts';
 
 export interface LoginResponse {
   accessToken: string | null;
@@ -22,7 +24,8 @@ export class LoginUseCase {
 
   private async generateTmpToken(id: string): Promise<LoginResponse> {
     const payload = { id: id };
-    const tmpAuth = this.tokenService.generateTmpAuthToken(payload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const tmpAuth = this.tokenService.generateTmpAuthToken(payload, jwts.tmp_auth_secret);
     return {
       accessToken: null,
       refreshToken: null,
@@ -32,8 +35,9 @@ export class LoginUseCase {
 
   private async issueTokenAndSotoreToken(id: string): Promise<LoginResponse> {
     const payload = { id: id }; // TODO: Define VO
-    const access = this.tokenService.generateAccessToken(payload);
-    const refresh = this.tokenService.generateRefreshToken(payload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const access = this.tokenService.generateAccessToken(payload, jwts.access_secret);
+    const refresh = this.tokenService.generateRefreshToken(payload, jwts.refresh_secret);
 
     const key = `session:refresh:${id}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();

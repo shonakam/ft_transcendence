@@ -12,6 +12,8 @@ import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import UserIdpId from '../../domain/user/vo/UserIdpId.ts';
 import { IdP } from '../../infra/idp/IdP.ts';
 import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
+import { vaultService } from '../../main.ts';
+import { JwtSecrets } from '../../infra/vault/vault.service.ts';
 
 interface IdpConfig {
   redirect_uri: string;
@@ -66,7 +68,8 @@ export class LoginWithOIDCUseCase {
 
   private async generateTmpToken(id: string): Promise<LoginWithOIDCResponse> {
     const payload = { id: id };
-    const tmpAuth = this.tokenService.generateTmpAuthToken(payload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const tmpAuth = this.tokenService.generateTmpAuthToken(payload, jwts.tmp_auth_secret);
     return {
       accessToken: null,
       refreshToken: null,
@@ -79,8 +82,9 @@ export class LoginWithOIDCUseCase {
     provider: string,
   ): Promise<LoginWithOIDCResponse> {
     const payload = { id: userId, idp: provider };
-    const access = this.tokenService.generateAccessToken(payload);
-    const refresh = this.tokenService.generateRefreshToken(payload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const access = this.tokenService.generateAccessToken(payload, jwts.access_secret);
+    const refresh = this.tokenService.generateRefreshToken(payload, jwts.refresh_secret);
     const key = `session:refresh:${userId}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();
     await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);

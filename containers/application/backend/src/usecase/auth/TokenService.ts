@@ -19,28 +19,24 @@ export class TokenService {
     });
   }
 
-  public generateAccessToken(payload: jwt.JwtPayload): AccessToken {
+  public generateAccessToken(payload: jwt.JwtPayload, secret: string): AccessToken {
     const ttlMs = config.auth.accessTokenTtlMs;
-    const secret = config.auth.jwtAccessSecret;
 
     payload = this.payloadConfigure(payload);
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
-
     return AccessToken.create(tokenString, getUnixTimeMs() + ttlMs);
   }
 
-  public generateRefreshToken(payload: jwt.JwtPayload): RefreshToken {
+  public generateRefreshToken(payload: jwt.JwtPayload, secret: string): RefreshToken {
     const ttlMs = config.auth.refreshTokenTtlMs;
-    const secret = config.auth.jwtRefreshSecret;
 
     payload = this.payloadConfigure(payload);
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });
     return RefreshToken.create(tokenString, getUnixTimeMs() + ttlMs);
   }
 
-  public generateTmpAuthToken(payload: jwt.JwtPayload): TmpAuthToken {
+  public generateTmpAuthToken(payload: jwt.JwtPayload, secret: string): TmpAuthToken {
     const ttlMs = config.auth.accessTokenTtlMs; // 期限はアクセストークンと同じ値を使用
-    const secret = config.auth.jwtTmpAuthSecret;
 
     payload = this.payloadConfigure(payload);
     const tokenString = jwt.sign(payload, secret, { expiresIn: ttlMs / 1000 });

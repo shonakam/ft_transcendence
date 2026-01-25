@@ -2,6 +2,8 @@ import { config } from '../../conf.ts';
 import { TokenService } from './TokenService.ts';
 import { UserRepository } from '../../domain/user/repository/UserRepository.ts';
 import { VolatileDataRepositoryRedis } from '../../infra/redis/repository/VolatileDataRepositoryRedis.ts';
+import { JwtSecrets } from '../../infra/vault/vault.service.ts';
+import { vaultService } from '../../main.ts';
 
 export class RefreshUseCase {
   constructor(
@@ -36,7 +38,8 @@ export class RefreshUseCase {
     }
 
     const rePayload = { id: user.id };
-    const access = this.tokenService.generateAccessToken(rePayload);
+    const jwts: JwtSecrets = await vaultService.getJwtSecrets();
+    const access = this.tokenService.generateAccessToken(rePayload, jwts.access_secret);
 
     return {
       accessToken: access.token,
