@@ -1,5 +1,5 @@
 
-CREATE TABLE game_records (
+CREATE TABLE IF NOT EXISTS game_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   game_id TEXT NOT NULL UNIQUE,
   left_user_id TEXT NOT NULL,
