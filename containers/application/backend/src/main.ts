@@ -56,7 +56,7 @@ process.on('uncaughtException', (err) => {
  *  - static
  *  - websocket
  */
-async function server_conf(server: FastifyInstance) {
+async function server_conf(server: FastifyInstance, cookieSecret: string) {
   await server.register(cors, {
     // origin: 'http://localhost:5173',
     origin: 'https://transcendence.42.fr',
@@ -65,9 +65,7 @@ async function server_conf(server: FastifyInstance) {
   });
 
   await server.register(cookie, {
-    secret:
-      process.env.COOKIE_SECRET ||
-      'FQJH1Fh/yGZuqYyRkTK4pemzZF1pEX0hjbAnWcvxOLA=',
+    secret: cookieSecret,
     parseOptions: {},
   });
 
@@ -86,11 +84,6 @@ async function server_conf(server: FastifyInstance) {
 
 async function main() {
   const server = fastify({ logger: true });
-
-  await server_conf(server);
-  await registRouters(server, container);
-  await registerGameWebSocket(server);
-  await registerChatWebSocket(server);
 
   try {
     // Initialize Vault first (for secrets management)
@@ -119,6 +112,20 @@ async function main() {
         '⚠️  Set VAULT_REQUIRED=true in production to enforce Vault usage',
       );
     }
+
+    // Get cookie secret from Vault (with fallback to env)
+    const cookieSecret =
+      (await vaultService.getCookieSecret()) ||
+      process.env.COOKIE_SECRET ||
+      (() => {
+        minilog.w(TAG.SYSTEM, '⚠️  Using fallback cookie secret - NOT SECURE FOR PRODUCTION');
+        return 'dev-fallback-cookie-secret-change-me';
+      })();
+
+    await server_conf(server, cookieSecret);
+    await registRouters(server, container);
+    await registerGameWebSocket(server);
+    await registerChatWebSocket(server);
 
     minilog.i(TAG.SYSTEM, 'Initializing database...');
     await initializeDatabase();
