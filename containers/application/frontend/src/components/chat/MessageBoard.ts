@@ -5,14 +5,13 @@ import { api } from '../../lib/httpClient';
 import { UserMenu } from './UserMenu';
 import { toaster } from '../common/Toaster';
 
-interface UserInfo {
-  id: string;
-  username: string;
-}
+import { UserResponse } from '../../types/user';
+
+import { userProfileService } from '../../services/user/UserProfileService';
 
 export class MessageBoard implements Component {
   private el: HTMLElement;
-  private myUserInfo: UserInfo | null = null;
+  private myUserInfo: UserResponse | null = null;
   private messages: ChatMessage[] = [];
   private currentRoomId: string | null = null;
 
@@ -24,7 +23,7 @@ export class MessageBoard implements Component {
 
   public async init() {
     try {
-      this.myUserInfo = await api.get<UserInfo>('users/me');
+      this.myUserInfo = await api.get<UserResponse>('users/me');
     } catch (error) {
       toaster.show('Failed to get user info', 'error');
     }
@@ -34,11 +33,19 @@ export class MessageBoard implements Component {
     this.currentRoomId = roomId;
     try {
       this.messages = await chatService.getMessages(roomId);
+      await this.fetchRequiredProfiles();
       this.render();
       this.scrollToBottom();
     } catch (error) {
       toaster.show('Failed to load messages', 'error');
     }
+  }
+
+  private async fetchRequiredProfiles() {
+    const senderIds = [...new Set(this.messages.map((m) => m.senderId))];
+    await Promise.all(
+      senderIds.map((id) => userProfileService.getProfile(id).catch(() => null))
+    );
   }
 
   private render() {
@@ -81,12 +88,22 @@ export class MessageBoard implements Component {
         `;
       }
 
+      // Use userProfileService to potentially get from cache synchronously
+      // (since we fetched them in fetchRequiredProfiles)
+      const sender = userProfileService.getCachedProfile(msg.senderId);
+      const username = sender?.username || `User-${msg.senderId.slice(0, 4)}`;
+      const imagePath = sender?.imagePath;
+      const avatarSrc = imagePath
+        ? `/api/uploads/${imagePath}`
+        : '/assets/default-profile.png';
+      const avatarContent = `<img src="${avatarSrc}" class="w-full h-full rounded-full object-cover" alt="${username}">`;
+
       const content = `
         ${
           !isMe
             ? `
-          <button class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold border border-white/10 hover:bg-indigo-500/30 transition-colors avatar-btn" data-user-id="${msg.senderId}" data-username="User-${msg.senderId.slice(0, 4)}">
-            ${msg.senderId.slice(0, 2).toUpperCase()}
+          <button class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold border border-white/10 hover:bg-indigo-500/30 transition-colors avatar-btn overflow-hidden" data-user-id="${msg.senderId}" data-username="${username}">
+            ${avatarContent}
           </button>
         `
             : ''
