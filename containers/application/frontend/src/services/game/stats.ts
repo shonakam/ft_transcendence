@@ -3,11 +3,13 @@ import { api } from '../../lib/httpClient';
 export interface GameRecord {
   id?: number;
   gameId: string;
-  userId: string;
-  alias: string | null;
-  score: number;
-  isWinner: boolean;
-  side: 'left' | 'right';
+  leftUserId: string;
+  rightUserId: string;
+  leftAlias?: string | null;
+  rightAlias?: string | null;
+  leftPoint: number;
+  rightPoint: number;
+  winnerId?: string | null;
   endedAt: number;
   createdAt: number;
 }

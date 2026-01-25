@@ -52,14 +52,18 @@ export default async function GameStatsController(
         } = req.body;
 
         if (winner !== 'left' && winner !== 'right') {
-          return reply.status(400).send({ error: 'winner must be left or right' });
+          return reply
+            .status(400)
+            .send({ error: 'winner must be left or right' });
         }
 
         if (requesterId !== leftUserId && requesterId !== rightUserId) {
-          return reply.status(403).send({ error: 'Not allowed to submit stats for others' });
+          return reply
+            .status(403)
+            .send({ error: 'Not allowed to submit stats for others' });
         }
 
-        const records = await saveGameResult.execute({
+        const record = await saveGameResult.execute({
           gameId,
           leftUserId,
           rightUserId,
@@ -71,7 +75,7 @@ export default async function GameStatsController(
           endedAt,
         });
 
-        reply.status(201).send(records);
+        reply.status(201).send(record);
       } catch (err: any) {
         reply.status(500).send({ error: err.message });
       }
@@ -92,13 +96,20 @@ export default async function GameStatsController(
           return reply.status(401).send({ error: 'Unauthorized' });
         }
 
-        const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
-        const offset = req.query.offset ? parseInt(req.query.offset, 10) : undefined;
+        const query = req.query as ListQuery;
+        const limit = query.limit ? parseInt(query.limit, 10) : undefined;
+        const offset = query.offset ? parseInt(query.offset, 10) : undefined;
+
+        console.log(
+          `[GameStatsController] Fetching stats for user: ${requesterId}, limit: ${limit}, offset: ${offset}`,
+        );
 
         const records = await listGameRecords.execute(requesterId, {
           limit,
           offset,
         });
+
+        console.log(`[GameStatsController] Found ${records.length} records`);
 
         reply.status(200).send(records);
       } catch (err: any) {

@@ -140,7 +140,9 @@ export class RequestHandler {
         );
       }
 
-      // パドル操作用の ready ループを開始
+      gameEntry.inputHandler.setUserInfo('left', leftUserId);
+      gameEntry.inputHandler.setUserInfo('right', rightUserId);
+
       gameEntry.gameServer.startReadyLoop();
       minilog.i(TAG.GAME, `RequestHandler: Game ${joinedGameId} is ready`);
     }

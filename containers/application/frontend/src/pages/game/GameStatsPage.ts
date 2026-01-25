@@ -1,6 +1,7 @@
 import { Component } from '../../interface/Component';
 import { GameRecord, getGameStats } from '../../services/game/stats';
 import { design } from '../../conf';
+import { authStore } from '../../store/authStore';
 
 export class GameStatsPage implements Component {
   private el: HTMLElement;
@@ -89,9 +90,9 @@ export class GameStatsPage implements Component {
     thead.innerHTML = `
       <tr>
         <th class="px-6 py-3">Date</th>
-        <th class="px-6 py-3">Alias</th>
+        <th class="px-6 py-3">Opponent</th>
         <th class="px-6 py-3">Side</th>
-        <th class="px-6 py-3">Score</th>
+        <th class="px-6 py-3">Score (Me - Op)</th>
         <th class="px-6 py-3">Result</th>
       </tr>
     `;
@@ -106,16 +107,25 @@ export class GameStatsPage implements Component {
       row.className = 'hover:bg-white/5 transition-colors';
 
       const date = new Date(record.endedAt).toLocaleString();
-      const resultText = record.isWinner ? 'Win' : 'Loss';
-      const resultClass = record.isWinner
+
+      const loggedInUserId = authStore.getUserId();
+      const isLeft = record.leftUserId === loggedInUserId;
+      const myScore = isLeft ? record.leftPoint : record.rightPoint;
+      const opponentScore = isLeft ? record.rightPoint : record.leftPoint;
+      const opponentAlias = isLeft ? record.rightAlias : record.leftAlias;
+      const isWinner = record.winnerId === loggedInUserId;
+      const side = isLeft ? 'Left' : 'Right';
+
+      const resultText = isWinner ? 'Win' : 'Loss';
+      const resultClass = isWinner
         ? 'text-green-400 font-bold'
         : 'text-red-400';
 
       row.innerHTML = `
         <td class="px-6 py-4 text-slate-300">${date}</td>
-        <td class="px-6 py-4 text-white">${record.alias || 'Anonymous'}</td>
-        <td class="px-6 py-4 text-slate-300 uppercase">${record.side}</td>
-        <td class="px-6 py-4 text-white font-mono">${record.score}</td>
+        <td class="px-6 py-4 text-white">${opponentAlias || 'Anonymous'}</td>
+        <td class="px-6 py-4 text-slate-300 uppercase">${side}</td>
+        <td class="px-6 py-4 text-white font-mono">${myScore} - ${opponentScore}</td>
         <td class="px-6 py-4 ${resultClass}">${resultText}</td>
       `;
 

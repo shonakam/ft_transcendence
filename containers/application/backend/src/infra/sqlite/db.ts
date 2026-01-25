@@ -30,7 +30,15 @@ export async function initializeDatabase(): Promise<void> {
     for (const file of sqlFiles) {
       minilog.i(TAG.DB, `Applying migration: ${file}`);
       const schemaSql = await fs.readFile(`${migrationsDir}/${file}`, 'utf8');
-      await db.exec(schemaSql);
+      try {
+        await db.exec(schemaSql);
+      } catch (err: any) {
+        if (err.message && err.message.includes('already exists')) {
+          minilog.w(TAG.DB, `Migration ${file} skipped: Table already exists.`);
+        } else {
+          throw err;
+        }
+      }
     }
   } catch (err) {
     minilog.e(TAG.DB, `マイグレーションの実行に失敗しました: ${err}`);

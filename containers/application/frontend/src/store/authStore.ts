@@ -6,12 +6,14 @@ type AuthListener = (state: AuthState) => void;
 export interface AuthState {
   isLoggedIn: boolean;
   username: string | null;
+  id: string | null;
 }
 
 class AuthStore {
   private state: AuthState = {
     isLoggedIn: false,
     username: null,
+    id: null,
   };
   private listeners: AuthListener[] = [];
 
@@ -27,15 +29,25 @@ class AuthStore {
     return this.state.username;
   }
 
-  setLoggedIn(username: string): void {
-    this.state = { isLoggedIn: true, username };
+  getUserId(): string | null {
+    return this.state.id;
+  }
+
+  setLoggedIn(username: string, id?: string): void {
+    this.state = {
+      isLoggedIn: true,
+      username,
+      id: id || this.state.id,
+    };
     localStorage.setItem('username', username);
+    if (id) localStorage.setItem('userId', id);
     this.notify();
   }
 
   setLoggedOut(): void {
-    this.state = { isLoggedIn: false, username: null };
+    this.state = { isLoggedIn: false, username: null, id: null };
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
     this.notify();
   }
 
@@ -55,8 +67,13 @@ class AuthStore {
   async checkAuthStatus(): Promise<boolean> {
     // まずlocalStorageをチェック
     const cachedUsername = localStorage.getItem('username');
+    const cachedUserId = localStorage.getItem('userId');
     if (cachedUsername) {
-      this.state = { isLoggedIn: true, username: cachedUsername };
+      this.state = {
+        isLoggedIn: true,
+        username: cachedUsername,
+        id: cachedUserId,
+      };
       this.notify();
     }
 
@@ -67,8 +84,14 @@ class AuthStore {
       return false;
     }
 
-    this.setLoggedIn(user.username);
+    this.setLoggedIn(user.username, user.id);
     return true;
+  }
+
+  async getMe() {
+    const [user, err] = await to(getMe());
+    if (err || !user) return null;
+    return user;
   }
 }
 

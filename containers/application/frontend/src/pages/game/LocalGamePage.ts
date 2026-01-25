@@ -238,21 +238,33 @@ export class LocalGamePage implements Component {
 
     // ログインユーザーが参加している試合のみバックエンドに保存
     if (authStore.isLoggedIn()) {
-      const loggedInUserId = authStore.getUsername();
+      const loggedInUser = await authStore.getMe();
+      const loggedInUserId = loggedInUser?.id;
+
       if (loggedInUserId) {
         // ログインユーザーが参加した試合を抽出
         const userMatches = results.filter(
           (match) =>
             match.p1.userId === loggedInUserId ||
-            match.p2.userId === loggedInUserId
+            match.p2.userId === loggedInUserId ||
+            match.p1.alias === authStore.getUsername() ||
+            match.p2.alias === authStore.getUsername()
         );
 
         // 各試合を保存
         for (const match of userMatches) {
           try {
             await saveGameResult({
-              leftUserId: match.p1.userId || `anon:${match.p1.alias}`,
-              rightUserId: match.p2.userId || `anon:${match.p2.alias}`,
+              leftUserId:
+                match.p1.userId ||
+                (match.p1.alias === authStore.getUsername()
+                  ? loggedInUserId
+                  : `anon:${match.p1.alias}`),
+              rightUserId:
+                match.p2.userId ||
+                (match.p2.alias === authStore.getUsername()
+                  ? loggedInUserId
+                  : `anon:${match.p2.alias}`),
               leftAlias: match.p1.alias,
               rightAlias: match.p2.alias,
               leftScore: match.p1.score ?? 0,
