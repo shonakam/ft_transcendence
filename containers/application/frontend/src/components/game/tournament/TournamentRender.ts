@@ -73,7 +73,9 @@ export class TournamentRender implements Component {
       const playerCount = this.countFilledPlayers(form);
       const duplicates = this.findDuplicateAliases(form);
       const hasDuplicates = duplicates.length > 0;
-      const errorEl = this.el.querySelector('#alias-error') as HTMLParagraphElement;
+      const errorEl = this.el.querySelector(
+        '#alias-error'
+      ) as HTMLParagraphElement;
 
       if (submitBtn) {
         const isValid = playerCount >= 2 && !hasDuplicates;
@@ -104,7 +106,9 @@ export class TournamentRender implements Component {
     }
 
     // 「This is me」ラジオボタンにイベントリスナーを追加
-    const isMeRadios = form?.querySelectorAll('.is-me-radio') as NodeListOf<HTMLInputElement>;
+    const isMeRadios = form?.querySelectorAll(
+      '.is-me-radio'
+    ) as NodeListOf<HTMLInputElement>;
     isMeRadios?.forEach((radio) => {
       radio.addEventListener('change', () => {
         this.handleIsMeChange(form, radio.value, updateSubmitButton);
@@ -137,8 +141,9 @@ export class TournamentRender implements Component {
     const duplicates: string[] = [];
 
     for (let i = 1; i <= 8; i++) {
-      const alias = (form.querySelector(`#player${i}`) as HTMLInputElement)
-        ?.value?.trim();
+      const alias = (
+        form.querySelector(`#player${i}`) as HTMLInputElement
+      )?.value?.trim();
       if (alias) {
         if (aliases.includes(alias)) {
           if (!duplicates.includes(alias)) {
@@ -178,7 +183,9 @@ export class TournamentRender implements Component {
     if (isNaN(playerIndex)) return;
 
     // 対象のinputフィールドにユーザー名を設定
-    const input = form.querySelector(`#player${playerIndex}`) as HTMLInputElement;
+    const input = form.querySelector(
+      `#player${playerIndex}`
+    ) as HTMLInputElement;
     if (input) {
       input.value = this.loggedInUserId;
       input.readOnly = true;
@@ -188,7 +195,9 @@ export class TournamentRender implements Component {
     // 他のフィールドのreadOnlyを解除し、自動入力されていた値をクリア
     for (let i = 1; i <= 8; i++) {
       if (i !== playerIndex) {
-        const otherInput = form.querySelector(`#player${i}`) as HTMLInputElement;
+        const otherInput = form.querySelector(
+          `#player${i}`
+        ) as HTMLInputElement;
         if (otherInput && otherInput.readOnly) {
           otherInput.readOnly = false;
           otherInput.value = ''; // 以前の自動入力をクリア

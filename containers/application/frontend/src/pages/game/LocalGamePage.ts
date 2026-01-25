@@ -63,6 +63,8 @@ export class LocalGamePage implements Component {
 
   private onTournamentStart(): void {
     this.isTournamentMode = true;
+    // ゲームを初期状態にリセット
+    this.resetGameForNewMatch();
   }
 
   private onMatchReady(match: {
@@ -109,6 +111,18 @@ export class LocalGamePage implements Component {
     this.pongGame.state.scores = [0, 0];
     this.updateScore(0, 0);
     this.pongGame.state.status = 'ready';
+
+    // ボールを中央にリセット
+    this.pongGame.state.ball.reset();
+
+    // パドルを初期位置にリセット
+    const centerY = (CONFIG.CANVAS_HEIGHT - CONFIG.PADDLE_LENGTH) / 2;
+    this.pongGame.state.paddles[0].position.y = centerY;
+    this.pongGame.state.paddles[1].position.y = centerY;
+
+    // 描画を更新
+    this.pongGame.renderer.render();
+
     // 勝利メッセージを削除
     const winningMessage = this.el.querySelector('.winning-message');
     if (winningMessage) winningMessage.remove();
