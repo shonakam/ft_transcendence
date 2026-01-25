@@ -71,12 +71,28 @@ export class TournamentRender implements Component {
     // 入力監視でボタンの有効/無効を切り替え
     const updateSubmitButton = () => {
       const playerCount = this.countFilledPlayers(form);
+      const duplicates = this.findDuplicateAliases(form);
+      const hasDuplicates = duplicates.length > 0;
+      const errorEl = this.el.querySelector('#alias-error') as HTMLParagraphElement;
+
       if (submitBtn) {
-        submitBtn.disabled = playerCount < 2;
-        if (playerCount < 2) {
+        const isValid = playerCount >= 2 && !hasDuplicates;
+        submitBtn.disabled = !isValid;
+        if (!isValid) {
           submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
+
+      // エラーメッセージの表示/非表示
+      if (errorEl) {
+        if (hasDuplicates) {
+          errorEl.textContent = `エイリアスが重複しています: ${duplicates.join(', ')}`;
+          errorEl.classList.remove('hidden');
+        } else {
+          errorEl.textContent = '';
+          errorEl.classList.add('hidden');
         }
       }
     };
@@ -86,6 +102,14 @@ export class TournamentRender implements Component {
       const input = form?.querySelector(`#player${i}`) as HTMLInputElement;
       input?.addEventListener('input', updateSubmitButton);
     }
+
+    // 「This is me」ラジオボタンにイベントリスナーを追加
+    const isMeRadios = form?.querySelectorAll('.is-me-radio') as NodeListOf<HTMLInputElement>;
+    isMeRadios?.forEach((radio) => {
+      radio.addEventListener('change', () => {
+        this.handleIsMeChange(form, radio.value, updateSubmitButton);
+      });
+    });
 
     // 初期状態を設定
     updateSubmitButton();
@@ -106,6 +130,74 @@ export class TournamentRender implements Component {
       }
     }
     return count;
+  }
+
+  private findDuplicateAliases(form: HTMLFormElement): string[] {
+    const aliases: string[] = [];
+    const duplicates: string[] = [];
+
+    for (let i = 1; i <= 8; i++) {
+      const alias = (form.querySelector(`#player${i}`) as HTMLInputElement)
+        ?.value?.trim();
+      if (alias) {
+        if (aliases.includes(alias)) {
+          if (!duplicates.includes(alias)) {
+            duplicates.push(alias);
+          }
+        } else {
+          aliases.push(alias);
+        }
+      }
+    }
+    return duplicates;
+  }
+
+  private handleIsMeChange(
+    form: HTMLFormElement,
+    value: string,
+    updateCallback: () => void
+  ): void {
+    // ログイン済みでない場合は何もしない
+    if (!this.loggedInUserId) return;
+
+    // "ログインユーザーとしてプレイしない"を選択した場合 (value === "")
+    if (!value) {
+      // 全フィールドのreadOnlyを解除
+      for (let i = 1; i <= 8; i++) {
+        const input = form.querySelector(`#player${i}`) as HTMLInputElement;
+        if (input && input.readOnly) {
+          input.readOnly = false;
+          input.classList.remove('bg-blue-900/30', 'border-blue-500');
+        }
+      }
+      updateCallback();
+      return;
+    }
+
+    const playerIndex = parseInt(value, 10);
+    if (isNaN(playerIndex)) return;
+
+    // 対象のinputフィールドにユーザー名を設定
+    const input = form.querySelector(`#player${playerIndex}`) as HTMLInputElement;
+    if (input) {
+      input.value = this.loggedInUserId;
+      input.readOnly = true;
+      input.classList.add('bg-blue-900/30', 'border-blue-500');
+    }
+
+    // 他のフィールドのreadOnlyを解除し、自動入力されていた値をクリア
+    for (let i = 1; i <= 8; i++) {
+      if (i !== playerIndex) {
+        const otherInput = form.querySelector(`#player${i}`) as HTMLInputElement;
+        if (otherInput && otherInput.readOnly) {
+          otherInput.readOnly = false;
+          otherInput.value = ''; // 以前の自動入力をクリア
+          otherInput.classList.remove('bg-blue-900/30', 'border-blue-500');
+        }
+      }
+    }
+
+    updateCallback();
   }
 
   private handleFormSubmit(form: HTMLFormElement): void {

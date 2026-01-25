@@ -33,6 +33,7 @@ export class LocalGame implements PongGame {
   start(): void {
     if (this.state.status === 'ready' || this.state.status === 'paused')
       this.state.setStatus('playing');
+    this.lastFrameTime = null; // dtをリセットして巨大な移動を防ぐ
     const now = performance.now();
     this.loop(now);
   }
@@ -67,15 +68,17 @@ export class LocalGame implements PongGame {
 
   updateScoreStatus(goal: GameSide | 'none'): void {
     if (goal === 'none') return;
-    this.state.setStatus('ready');
-    this.state.ball.reset();
+
+    // スコア更新（incrementScoreは勝利時に自動でfinishedにする）
     if (goal === 'left') this.state.incrementScore('left');
     else if (goal === 'right') this.state.incrementScore('right');
-    if (
-      this.state.scores[0] >= this.state.config.WINNING_SCORE ||
-      this.state.scores[1] >= this.state.config.WINNING_SCORE
-    ) {
-      this.state.setStatus('finished');
+
+    // ボールをリセット
+    this.state.ball.reset();
+
+    // まだ試合が続く場合のみreadyに戻す
+    if (this.state.status !== 'finished') {
+      this.state.setStatus('ready');
     }
   }
 }
