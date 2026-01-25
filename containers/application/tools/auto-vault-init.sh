@@ -39,7 +39,11 @@ ensure_kv_and_secrets() {
     # Sync .env.local with ROOT_TOKEN
     if [ -n "$ROOT_TOKEN" ] && [ -f "$ENV_FILE" ]; then
         if grep -q "^VAULT_TOKEN=" "$ENV_FILE"; then
-            sed -i "s|^VAULT_TOKEN=.*|VAULT_TOKEN=$ROOT_TOKEN|" "$ENV_FILE"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "s|^VAULT_TOKEN=.*|VAULT_TOKEN=$ROOT_TOKEN|" "$ENV_FILE"
+            else
+                sed -i "s|^VAULT_TOKEN=.*|VAULT_TOKEN=$ROOT_TOKEN|" "$ENV_FILE"
+            fi
         else
             echo "VAULT_TOKEN=$ROOT_TOKEN" >> "$ENV_FILE"
         fi

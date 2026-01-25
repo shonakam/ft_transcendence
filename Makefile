@@ -30,7 +30,7 @@ down-app:
 clean-app: # TODO: Implementation pending
 
 fclean-app:
-	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.yml down --rmi local -v --remove-orphans
 	@rm -rf $(APP)/*/node_modules
 	@bash $(APP)/tools/hosts.sh delete
 
@@ -41,9 +41,10 @@ init-ops:
 
 up-ops: init-ops
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml up --build -d --remove-orphans
-	@curl -u "elastic:changeme" \
-		-X POST "http://localhost:5601/api/saved_objects/_import" \
-		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson
+	@curl -sf -o /dev/null -u "elastic:changeme" \
+		-X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson \
+		|| echo "Warning: Kibana import failed"
 
 down-ops:
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down
@@ -51,9 +52,16 @@ down-ops:
 clean-ops: # TODO: Implementation pending
 
 fclean-ops:
-	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down --rmi local -v
+	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml down --rmi local -v --remove-orphans
 
 re-ops: fclean-ops up-ops
+
+# 完全クリーンアップ（未使用のDocker リソースも削除）
+prune:
+	@echo "Pruning unused Docker resources..."
+	@docker image prune -f
+	@docker volume prune -f
+	@docker network prune -f
 
 .PHONEY:
 
