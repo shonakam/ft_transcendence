@@ -1,6 +1,15 @@
 <h2 class="text-2xl font-bold mb-4 text-center text-white">Tournament</h2>
 <form id="tournament-form" class="text-center mt-8">
   <div class="space-y-6 max-w-xl mx-auto">
+    <!-- ログインユーザーとしてプレイしない選択肢 -->
+    <div id="not-playing-option" class="hidden">
+      <label
+        class="inline-flex items-center gap-2 text-sm text-gray-300 cursor-pointer hover:text-white transition-colors"
+      >
+        <input type="radio" name="isMe" value="" class="is-me-radio" checked />
+        <span>ログインユーザーとしてプレイしない</span>
+      </label>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 gap-x-10 text-sm">
       <!-- Player 1 -->
       <div class="flex flex-col gap-1">
@@ -17,7 +26,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe1" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="1" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -36,7 +45,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe2" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="2" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -55,7 +64,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe3" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="3" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -74,7 +83,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe4" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="4" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -93,7 +102,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe5" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="5" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -112,7 +121,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe6" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="6" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -131,7 +140,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe7" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="7" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>
@@ -150,7 +159,7 @@
         <label
           class="is-me-label hidden items-center gap-1 text-xs text-blue-400 ml-16"
         >
-          <input type="checkbox" name="isMe8" class="is-me-checkbox" />
+          <input type="radio" name="isMe" value="8" class="is-me-radio" />
           <span>This is me</span>
         </label>
       </div>

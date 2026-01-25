@@ -136,7 +136,10 @@ export class SignupForm implements Component {
             'error'
           );
         }
-        const message = (err as any).error || (err as any).message || '予期せぬエラーが発生しました';
+        const message =
+          (err as any).error ||
+          (err as any).message ||
+          '予期せぬエラーが発生しました';
         return toaster.show(`${message}`, 'error');
       }
 
@@ -145,7 +148,10 @@ export class SignupForm implements Component {
       const [loginResponse, loginErr] = await to(login(loginData));
       if (loginErr) {
         // ログイン失敗時はログイン画面へ遷移
-        toaster.show('アカウントを作成しました。ログインしてください。', 'success');
+        toaster.show(
+          'アカウントを作成しました。ログインしてください。',
+          'success'
+        );
         this.root.dispatchEvent(
           new CustomEvent('signupSuccess', { detail: { data: response } })
         );
@@ -154,9 +160,14 @@ export class SignupForm implements Component {
 
       // MFAが必要な場合
       if (loginResponse.tmpAuthToken) {
-        toaster.show('アカウントを作成しました。MFA認証を完了してください。', 'success');
+        toaster.show(
+          'アカウントを作成しました。MFA認証を完了してください。',
+          'success'
+        );
         this.root.dispatchEvent(
-          new CustomEvent('signupSuccess', { detail: { data: loginResponse, needMfa: true } })
+          new CustomEvent('signupSuccess', {
+            detail: { data: loginResponse, needMfa: true },
+          })
         );
         return;
       }

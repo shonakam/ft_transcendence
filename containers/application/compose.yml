@@ -64,7 +64,7 @@ services:
     env_file:
       - ./.env.local
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/dist/index.html"]
+      test: ['CMD', 'test', '-f', '/app/dist/index.html']
       interval: 10s
       timeout: 5s
       retries: 10
