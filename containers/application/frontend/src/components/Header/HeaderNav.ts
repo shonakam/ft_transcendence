@@ -21,7 +21,7 @@ export class HeaderNav implements Component {
 
     // 公開リンク
     this.el.appendChild(new NavLink('Home', '/home').getElement());
-    this.el.appendChild(new NavLink('About', '/about').getElement());
+    // this.el.appendChild(new NavLink('About', '/about').getElement());
     this.el.appendChild(new NavLink('LocalGame', '/game/local').getElement());
 
     // 認証必須リンク（グレーアウト対象）

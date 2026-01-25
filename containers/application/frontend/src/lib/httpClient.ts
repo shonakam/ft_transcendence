@@ -139,11 +139,11 @@ async function handleForceLogout() {
   localStorage.clear();
   sessionStorage.clear();
 
-  // セッションが切れた場合のみメッセージを表示（初回訪問時は表示しない）
+  // セッションが切れた場合のみリダイレクト（初回訪問時は現在のページに留まる）
   if (wasLoggedIn) {
     toaster.show('Session expired. Redirecting to login...', 'error');
+    router.navigateTo('/auth?view=login');
   }
-  router.navigateTo('/auth?view=login');
 }
 
 // --- 公開API ---

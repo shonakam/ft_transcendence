@@ -85,14 +85,14 @@ export class UserProfilePage implements Component {
   private render() {
     if (!this.user) return;
 
-    const imageSrc = this.user.imagePath 
-      ? `/api/${this.user.imagePath}` 
+    const imageSrc = this.user.imagePath
+      ? `/api/${this.user.imagePath}`
       : this.DEFAULT_IMAGE;
 
     const joinDate = new Date(this.user.createdAt).toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
 
     this.container.innerHTML = `
@@ -119,11 +119,15 @@ export class UserProfilePage implements Component {
                   📅 Joined: ${joinDate}
                 </span>
               </p>
-              ${this.user.is2faEnabled ? `
+              ${
+                this.user.is2faEnabled
+                  ? `
                 <span class="inline-flex items-center gap-1 mt-2 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">
                   🔒 2FA Enabled
                 </span>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
         </div>
