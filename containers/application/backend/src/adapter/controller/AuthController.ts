@@ -5,6 +5,7 @@ import { LoginForm } from '../../domain/auth/form/LoginForm.ts';
 import { OIDCForm } from '../../domain/auth/form/OIDCForm.ts';
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import { cookieConfig } from '../../conf.ts';
+import minilog, { TAG } from '../../utils/minilog.ts';
 
 export default async function AuthController(
   server: FastifyInstance,
@@ -39,6 +40,7 @@ export default async function AuthController(
     } catch (err: unknown) {
       console.warn(err);
       if (err instanceof Error) {
+        minilog.w(TAG.AUTH, `${err.stack}`)
         reply.status(400).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });
@@ -61,6 +63,7 @@ export default async function AuthController(
         .clearCookie('refreshToken', clearOptions)
         .clearCookie('tmpAuthToken', clearOptions);
       if (err instanceof Error) {
+        minilog.w(TAG.AUTH, `${err.stack}`)
         reply.status(401).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });
@@ -74,7 +77,6 @@ export default async function AuthController(
       try {
         const form = req.body as OIDCForm;
         const response = await loginWithOIDC.execute(form, req.params.provider);
-
         let code = 0;
         if (!response.tmpAuthToken) {
           code = 200;
@@ -96,6 +98,7 @@ export default async function AuthController(
           .clearCookie('refreshToken', clearOptions)
           .clearCookie('tmpAuthToken', clearOptions);
         if (err instanceof Error) {
+          minilog.w(TAG.AUTH, `${err.stack}`)
           reply.status(401).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -114,6 +117,7 @@ export default async function AuthController(
         reply.status(200).send(response);
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.AUTH, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -150,6 +154,7 @@ export default async function AuthController(
         reply.status(200).send(response);
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.AUTH, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -175,6 +180,7 @@ export default async function AuthController(
         reply.status(200);
       } catch (err: unknown) {
         if (err instanceof Error) {
+          minilog.w(TAG.AUTH, `${err.stack}`)
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
