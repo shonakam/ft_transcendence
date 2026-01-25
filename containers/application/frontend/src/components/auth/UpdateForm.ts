@@ -31,12 +31,7 @@ export class UpdateForm implements Component {
     this.previewImage = document.createElement('img');
     this.previewImage.className =
       'w-24 h-24 rounded-full mx-auto bg-white/10 object-cover border-2 border-white/10 mb-2';
-
-    if (user) {
-      this.previewImage.src = user.imagePath ? `/api/${user.imagePath}` : this.DEFAULT_IMAGE;
-    } else {
-      this.previewImage.src = this.DEFAULT_IMAGE;
-    }
+    this.previewImage.src = this.DEFAULT_IMAGE;
 
     this.imageInput = document.createElement('input');
     this.imageInput.type = 'file';
