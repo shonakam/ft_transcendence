@@ -63,6 +63,8 @@ export class LocalGamePage implements Component {
 
   private onTournamentStart(): void {
     this.isTournamentMode = true;
+    // ゲームを初期状態にリセット
+    this.resetGameForNewMatch();
   }
 
   private onMatchReady(match: {
@@ -109,6 +111,18 @@ export class LocalGamePage implements Component {
     this.pongGame.state.scores = [0, 0];
     this.updateScore(0, 0);
     this.pongGame.state.status = 'ready';
+
+    // ボールを中央にリセット
+    this.pongGame.state.ball.reset();
+
+    // パドルを初期位置にリセット
+    const centerY = (CONFIG.CANVAS_HEIGHT - CONFIG.PADDLE_LENGTH) / 2;
+    this.pongGame.state.paddles[0].position.y = centerY;
+    this.pongGame.state.paddles[1].position.y = centerY;
+
+    // 描画を更新
+    this.pongGame.renderer.render();
+
     // 勝利メッセージを削除
     const winningMessage = this.el.querySelector('.winning-message');
     if (winningMessage) winningMessage.remove();
@@ -168,12 +182,15 @@ export class LocalGamePage implements Component {
         ? 'Left Player'
         : 'Right Player';
 
-    // 勝利メッセージを表示
-    this.el.querySelector('.game-canvas')!.innerHTML += `
-      <div class="winning-message absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-75 p-4 rounded shadow-lg">
-        <h2 class="text-5xl font-bold mb-2">${winnerName} Wins!</h2>
-        <p class="text-xl">Final Score: ${left} : ${right}</p>
-        ${this.isTournamentMode ? '<p class="text-sm text-gray-600 mt-2">Next match starting soon...</p>' : ''}
+    // 勝利メッセージを表示（glassmorphismスタイル）
+    this.el.querySelector('.canvas-stack')!.innerHTML += `
+      <div class="winning-message absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+        <div class="text-center">
+          <p class="text-2xl text-gray-300 mb-2">🏆 Winner 🏆</p>
+          <h2 class="text-6xl font-extrabold text-white mb-4 drop-shadow-lg">${winnerName}</h2>
+          <p class="text-3xl font-bold text-gray-200">${left} : ${right}</p>
+          ${this.isTournamentMode ? '<p class="text-lg text-gray-400 mt-6">Next match starting soon...</p>' : '<p class="text-lg text-gray-400 mt-6">Press Space to play again</p>'}
+        </div>
       </div>
     `;
 
@@ -195,13 +212,15 @@ export class LocalGamePage implements Component {
     const winner = this.tournament.getWinner();
     const results = this.tournament.getCompletedResults();
 
-    // 勝利メッセージを更新
+    // 勝利メッセージを更新（トーナメント優勝者）
     const winningMessage = this.el.querySelector('.winning-message');
     if (winningMessage) {
       winningMessage.innerHTML = `
-        <h2 class="text-5xl font-bold mb-4">🏆 Tournament Champion 🏆</h2>
-        <p class="text-3xl font-bold text-blue-600">${winner?.alias ?? 'Unknown'}</p>
-        <p class="text-sm text-gray-600 mt-4">Total matches played: ${results.length}</p>
+        <div class="text-center">
+          <p class="text-3xl text-yellow-400 mb-4">🏆 Tournament Champion 🏆</p>
+          <h2 class="text-6xl font-extrabold text-white mb-4 drop-shadow-lg">${winner?.alias ?? 'Unknown'}</h2>
+          <p class="text-lg text-gray-400">Total matches played: ${results.length}</p>
+        </div>
       `;
     }
 
