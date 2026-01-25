@@ -33,9 +33,12 @@ export class HomePage implements Component {
   }
 
   private updateAuthButtons(isLoggedIn: boolean): void {
-    const loginButton = this.el.querySelector<HTMLButtonElement>('#login-button');
-    const signupButton = this.el.querySelector<HTMLButtonElement>('#signup-button');
-    const loggedInMessage = this.el.querySelector<HTMLParagraphElement>('#logged-in-message');
+    const loginButton =
+      this.el.querySelector<HTMLButtonElement>('#login-button');
+    const signupButton =
+      this.el.querySelector<HTMLButtonElement>('#signup-button');
+    const loggedInMessage =
+      this.el.querySelector<HTMLParagraphElement>('#logged-in-message');
 
     if (loginButton) {
       loginButton.disabled = isLoggedIn;
