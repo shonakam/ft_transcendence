@@ -122,6 +122,16 @@ async function main() {
         return 'dev-fallback-cookie-secret-change-me';
       })();
 
+    // Get JWT secrets from Vault and inject into process.env
+    // This allows conf.ts to read them synchronously
+    const jwtSecrets = await vaultService.getJwtSecrets();
+    if (jwtSecrets.access_secret) {
+      process.env.JWT_ACCESS_SECRET = jwtSecrets.access_secret;
+      process.env.JWT_REFRESH_SECRET = jwtSecrets.refresh_secret;
+      process.env.JWT_TMP_AUTH_SECRET = jwtSecrets.tmp_auth_secret;
+      minilog.i(TAG.SYSTEM, '✅ JWT secrets loaded from Vault into environment');
+    }
+
     await server_conf(server, cookieSecret);
     await registRouters(server, container);
     await registerGameWebSocket(server);
