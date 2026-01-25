@@ -30,3 +30,8 @@ export interface UserUpdateRequest {
   password: string | null;
   image: File | null;
 }
+export interface PublicProfile {
+  id: string;
+  username: string;
+  imagePath: string | null;
+}

@@ -10,6 +10,7 @@ import CONFIG from '@shonakam/common/game/GameConfig';
 import { TournamentRender } from '../../components/game/tournament/TournamentRender';
 import { authStore } from '../../store/authStore';
 import { saveGameResult } from '../../services/game/stats';
+import { chatService } from '../../services/chat/ChatService';
 
 export class LocalGamePage implements Component {
   private el: HTMLElement = document.createElement('main');
@@ -74,6 +75,19 @@ export class LocalGamePage implements Component {
     // 試合開始を通知
     this.tournament.startCurrentMatch();
     this.showMatchInfo(match.p1Alias, match.p2Alias);
+
+    // Generalチャネルに通知を送る
+    if (authStore.isLoggedIn()) {
+      chatService
+        .sendMessage(
+          'global-room-id-001',
+          `Tournament Match Started: ${match.p1Alias} vs ${match.p2Alias} 🏓`
+        )
+        .catch((err) =>
+          console.error('Failed to send tournament start message:', err)
+        );
+    }
+
     // ゲームをリセット
     this.resetGameForNewMatch();
   }
@@ -189,6 +203,18 @@ export class LocalGamePage implements Component {
         <p class="text-3xl font-bold text-blue-600">${winner?.alias ?? 'Unknown'}</p>
         <p class="text-sm text-gray-600 mt-4">Total matches played: ${results.length}</p>
       `;
+    }
+
+    // Generalチャネルに優勝通知を送る
+    if (authStore.isLoggedIn()) {
+      chatService
+        .sendMessage(
+          'global-room-id-001',
+          `🏆 Tournament Ended! Champion: ${winner?.alias ?? 'Unknown'}! 🏆`
+        )
+        .catch((err) =>
+          console.error('Failed to send tournament end message:', err)
+        );
     }
 
     // ログインユーザーが参加している試合のみバックエンドに保存

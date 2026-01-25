@@ -100,6 +100,35 @@ export default async function UserController(
     },
   );
 
+  // GET public user profile
+  server.get<{ Params: { id: string } }>(
+    '/:id/profile',
+    { preHandler: authenticate },
+    async (req, reply) => {
+      try {
+        const target = UserId.from(req.params.id);
+        const user = await getUser.execute(target);
+        if (!user) {
+          return reply.status(404).send({ message: 'User not found' });
+        }
+
+        // Return only public fields
+        reply.send({
+          id: user.id,
+          username: user.username,
+          imagePath: user.imagePath,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          minilog.w(TAG.USER, `${err.stack}`)
+          reply.status(400).send({ error: err.message });
+        } else {
+          reply.status(500).send({ message: 'Internal Server Error' });
+        }
+      }
+    },
+  );
+
   // GET user detail
   server.get<{ Params: { id: string } }>(
     '/:id',
