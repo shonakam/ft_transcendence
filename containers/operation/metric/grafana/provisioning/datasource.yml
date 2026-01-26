@@ -7,7 +7,9 @@ datasources:
     type: prometheus
     access: proxy
     uid: prometheus
-    url: http://ft-prometheus:9090
+    url: https://ft-prometheus:9090
     isDefault: true
     version: 1
     editable: true
+    jsonData:
+      tlsSkipVerify: true
