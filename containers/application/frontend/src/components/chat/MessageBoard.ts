@@ -44,7 +44,12 @@ export class MessageBoard implements Component {
   private async fetchRequiredProfiles() {
     const senderIds = [...new Set(this.messages.map((m) => m.senderId))];
     await Promise.all(
-      senderIds.map((id) => userProfileService.getProfile(id).catch(() => null))
+      senderIds.map((id) =>
+        userProfileService.getProfile(id).catch((err) => {
+          console.error('Failed to fetch profile', id, err);
+          return null;
+        })
+      )
     );
   }
 
@@ -93,9 +98,18 @@ export class MessageBoard implements Component {
       const sender = userProfileService.getCachedProfile(msg.senderId);
       const username = sender?.username || `User-${msg.senderId.slice(0, 4)}`;
       const imagePath = sender?.imagePath;
-      const avatarSrc = imagePath
-        ?  ((imagePath.startsWith('http')) ? imagePath : `/api/uploads/${imagePath}`)
-        : '/assets/default-profile.png';
+      let avatarSrc = '/assets/default-profile.png';
+      if (imagePath) {
+        if (imagePath.startsWith('http')) {
+          avatarSrc = imagePath;
+        } else if (imagePath.startsWith('/assets/')) {
+          avatarSrc = imagePath;
+        } else if (imagePath.startsWith('/uploads/')) {
+          avatarSrc = `/api${imagePath}`;
+        } else {
+          avatarSrc = `/api/uploads/${imagePath}`;
+        }
+      }
       const avatarContent = `<img src="${avatarSrc}" class="w-full h-full rounded-full object-cover" alt="${username}">`;
 
       const content = `

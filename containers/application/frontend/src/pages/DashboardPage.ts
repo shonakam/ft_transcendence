@@ -5,17 +5,25 @@ import { config, design } from '../conf';
 import { MfaForm } from '../components/auth/MfaForm';
 import { UpdateForm } from '../components/auth/UpdateForm';
 import { UserInfoComponent } from '../components/auth/UserInfoComponent';
+import { FriendList } from '../components/user/FriendList';
 import { router } from '../router/router';
 import { toaster } from '../components/common/Toaster';
 import { SessionStorage } from '../lib/sessionStorage';
 
-export type DashboardView = 'user' | 'game' | 'chat' | 'mfa' | 'default';
+export type DashboardView =
+  | 'user'
+  | 'game'
+  | 'chat'
+  | 'mfa'
+  | 'friends'
+  | 'default';
 
 export class DashboardPage implements Component {
   private el: HTMLElement;
   private container: HTMLDivElement;
   private mfaForm: MfaForm;
   private updateForm: UpdateForm;
+  private friendList: FriendList;
   private sessionStorage: SessionStorage<UserResponse>;
 
   constructor() {
@@ -27,6 +35,7 @@ export class DashboardPage implements Component {
 
     this.mfaForm = new MfaForm();
     this.updateForm = new UpdateForm();
+    this.friendList = new FriendList();
     this.sessionStorage = new SessionStorage(config.user.sessionStorageKey);
 
     this.initEventListener();
@@ -54,6 +63,10 @@ export class DashboardPage implements Component {
       this.init();
       location.reload();
       this.switchView('default');
+    });
+
+    this.friendList.getElement().addEventListener('back', () => {
+      this.init();
     });
   }
 
@@ -85,6 +98,9 @@ export class DashboardPage implements Component {
         await this.mfaForm.activate('setup', user?.is2faEnabled === 1);
         element = this.mfaForm.getElement();
         break;
+      case 'friends':
+        element = this.friendList.getElement();
+        break;
       // case 'game':
       //   break;
       // case 'chat':
@@ -114,11 +130,14 @@ export class DashboardPage implements Component {
     const mfaBtn = this.createMenuButton('🔒 Security Settings', () =>
       this.switchView('mfa')
     );
+    const friendsBtn = this.createMenuButton('👥 Friends & Blocked', () =>
+      this.switchView('friends')
+    );
     const statsBtn = this.createMenuButton('📊 Game Stats', () =>
       router.navigateTo('/game/stats')
     );
 
-    menu.append(userBtn, mfaBtn, statsBtn);
+    menu.append(userBtn, mfaBtn, friendsBtn, statsBtn);
     this.container.append(title, userInfo.getElement(), menu);
   }
 

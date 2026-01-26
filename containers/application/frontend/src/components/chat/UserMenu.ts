@@ -3,6 +3,7 @@ import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import { getUserById } from '../../services/user/dashboard';
+import { userRelationshipService } from '../../services/user/UserRelationshipService';
 import { toaster } from '../common/Toaster';
 
 export class UserMenu implements Component {
@@ -90,18 +91,26 @@ export class UserMenu implements Component {
       this.hide();
     });
 
-    const inviteBtn = this.createOption(
-      '🏓 Invite to Game',
-      async () => {
-        if (!this.currentUserId) return;
-        // Don't invite yourself
-        if (this.currentUserId === (window as any).currentUser?.id) return;
+    const inviteBtn = this.createOption('🏓 Invite to Game', async () => {
+      if (!this.currentUserId) return;
+      // Don't invite yourself
+      if (this.currentUserId === (window as any).currentUser?.id) return;
 
-        // Create game and send invite without navigating
-        await this.createGameAndInvite(this.currentUserId);
-        this.hide();
+      // Create game and send invite without navigating
+      await this.createGameAndInvite(this.currentUserId);
+      this.hide();
+    });
+
+    const friendBtn = this.createOption('➕ Add Friend', async () => {
+      if (!this.currentUserId) return;
+      try {
+        await userRelationshipService.requestFriend(this.currentUserId);
+        toaster.show('Friend request sent', 'success');
+      } catch (error) {
+        toaster.show('Failed to send friend request', 'error');
       }
-    );
+      this.hide();
+    });
 
     const blockBtn = this.createOption(
       '🚫 Block User',
@@ -124,7 +133,7 @@ export class UserMenu implements Component {
       'text-red-400 hover:bg-red-500/10'
     );
 
-    this.el.append(label, dmBtn, inviteBtn, blockBtn);
+    this.el.append(label, dmBtn, inviteBtn, friendBtn, blockBtn);
   }
 
   private createOption(
@@ -170,27 +179,25 @@ export class UserMenu implements Component {
           reject(new Error(err));
         },
         // We need to implement other required methods of GameSocketCallbacks interface even if empty
-         onPlayerAdded: () => {},
-         onOpponentJoined: () => {},
-         onGameReady: () => {},
-         onGameStart: () => {},
-         onGameState: () => {},
-         onPlayerLeft: () => {},
-         onGameLeft: () => {},
+        onPlayerAdded: () => {},
+        onOpponentJoined: () => {},
+        onGameReady: () => {},
+        onGameStart: () => {},
+        onGameState: () => {},
+        onPlayerLeft: () => {},
+        onGameLeft: () => {},
       });
     });
 
     try {
       const gameId = await gameCreated;
-      
+
       // Send invitation
       const room = await chatService.getOrCreateDMRoom(targetUserId);
       const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
       await chatService.sendMessage(room.id, inviteLink, 'invitation');
-      
 
       socket.disconnect();
-
     } catch (error) {
       toaster.show('Failed to create game invitation', 'error');
       socket.disconnect();

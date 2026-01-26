@@ -9,6 +9,10 @@ import { UserUseCases } from '../../container/user.container.ts';
 import UserId from '../../domain/user/vo/UserId.ts';
 import { Pagination } from '../../domain/user/vo/Pagination.ts';
 import minilog, { TAG } from '../../utils/minilog.ts';
+import {
+  UserRelationshipController,
+  userRelationshipRoutes,
+} from './UserRelationshipController.ts';
 
 export default async function UserController(
   server: FastifyInstance,
@@ -25,7 +29,7 @@ export default async function UserController(
       reply.status(201).send(user);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        minilog.w(TAG.USER, `${err.stack}`)
+        minilog.w(TAG.USER, `${err.stack}`);
         reply.status(400).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });
@@ -34,43 +38,39 @@ export default async function UserController(
   });
 
   // UPDATE
-  server.put(
-    '/me', 
-    { preHandler: authenticate },
-    async (req, reply) => {
-      try {
-        const trustedUserId = req.authUserId;
-        if (trustedUserId === undefined) {
-          return reply
-            .status(500)
-            .send({ message: 'Authentication data missing.' });
-        }
-        
-        const body = req.body as any;
-        let image: Buffer | null = null;
-        if (body.image && body.image.type === "file") {
-          image = await body.image.toBuffer();
-        }
-        const form: UpdateUserForm = {
-          username: body.username?.value ?? null,
-          email: body.email?.value || null,
-          password: body.password?.value || null,
-          image
-        };
-        
-        console.log("body:", body)
-        const user = await updateUser.execute(trustedUserId, form);
-        reply.status(200).send(user);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          minilog.w(TAG.USER, `${err.stack}`)
-          reply.status(400).send({ error: err.message });
-        } else {
-          reply.status(500).send({ message: 'Internal Server Error' });
-        }
+  server.put('/me', { preHandler: authenticate }, async (req, reply) => {
+    try {
+      const trustedUserId = req.authUserId;
+      if (trustedUserId === undefined) {
+        return reply
+          .status(500)
+          .send({ message: 'Authentication data missing.' });
+      }
+
+      const body = req.body as any;
+      let image: Buffer | null = null;
+      if (body.image && body.image.type === 'file') {
+        image = await body.image.toBuffer();
+      }
+      const form: UpdateUserForm = {
+        username: body.username?.value ?? null,
+        email: body.email?.value || null,
+        password: body.password?.value || null,
+        image,
+      };
+
+      console.log('body:', body);
+      const user = await updateUser.execute(trustedUserId, form);
+      reply.status(200).send(user);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        minilog.w(TAG.USER, `${err.stack}`);
+        reply.status(400).send({ error: err.message });
+      } else {
+        reply.status(500).send({ message: 'Internal Server Error' });
       }
     }
-  );
+  });
 
   // GET user detail
   server.get<{ Params: { id: string } }>(
@@ -91,7 +91,7 @@ export default async function UserController(
           : reply.status(404).send({ message: 'User not found' });
       } catch (err: unknown) {
         if (err instanceof Error) {
-          minilog.w(TAG.USER, `${err.stack}`)
+          minilog.w(TAG.USER, `${err.stack}`);
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -120,7 +120,7 @@ export default async function UserController(
         });
       } catch (err: unknown) {
         if (err instanceof Error) {
-          minilog.w(TAG.USER, `${err.stack}`)
+          minilog.w(TAG.USER, `${err.stack}`);
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -142,7 +142,7 @@ export default async function UserController(
           : reply.status(404).send({ message: 'User not found' });
       } catch (err: unknown) {
         if (err instanceof Error) {
-          minilog.w(TAG.USER, `${err.stack}`)
+          minilog.w(TAG.USER, `${err.stack}`);
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -165,7 +165,7 @@ export default async function UserController(
         reply.status(200).send(users);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          minilog.w(TAG.USER, `${err.stack}`)
+          minilog.w(TAG.USER, `${err.stack}`);
           reply.status(400).send({ error: err.message });
         } else {
           reply.status(500).send({ message: 'Internal Server Error' });
@@ -189,11 +189,19 @@ export default async function UserController(
       reply.status(204);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        minilog.w(TAG.USER, `${err.stack}`)
+        minilog.w(TAG.USER, `${err.stack}`);
         reply.status(400).send({ error: err.message });
       } else {
         reply.status(500).send({ message: 'Internal Server Error' });
       }
     }
+  });
+
+  // Friend management
+  const relationshipController = new UserRelationshipController(
+    opts.useCases.userRelationship,
+  );
+  server.register(userRelationshipRoutes(relationshipController), {
+    prefix: '/friends',
   });
 }
