@@ -10,18 +10,27 @@ rule_files:
 
 scrape_configs:
   - job_name: "prometheus"
+    scheme: https
     static_configs:
       - targets: ["ft-prometheus:9090"]
+    tls_config:
+      insecure_skip_verify: true
   
   - job_name: "nginx"
     static_configs:
       - targets: ["ft-nginx-exporter:9113"]
+    tls_config:
+      insecure_skip_verify: true
 
   - job_name: "redis"
     static_configs:
       - targets: ["ft-redis-exporter:9121"]
+    tls_config:
+      insecure_skip_verify: true
 
   - job_name: "backend"
     metrics_path: /api/metrics
     static_configs:
       - targets: ["ft-backend:8080"]
+    tls_config:
+      insecure_skip_verify: true
