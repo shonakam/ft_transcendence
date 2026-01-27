@@ -1,0 +1,28 @@
+instances:
+  - name: ft-elasticsearch
+    dns:
+      - ft-elasticsearch
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: ft-kibana
+    dns:
+      - ft-kibana
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: ft-logstash
+    dns:
+      - ft-logstash
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: ft-filebeat
+    dns:
+      - ft-filebeat
+      - localhost
+    ip:
+      - 127.0.0.1

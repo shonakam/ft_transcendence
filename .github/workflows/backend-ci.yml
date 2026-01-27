@@ -15,6 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create Docker network
+        run: |
+          docker network inspect transcendence-network >/dev/null 2>&1 || \
+          docker network create transcendence-network
+
       - name: Build and Start Backend Container
         run: |
           mkdir -p containers/application/sqlite/data

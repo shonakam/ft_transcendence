@@ -21,14 +21,27 @@ processors:
 
 
 setup.kibana:
-  host: ${KIBANA_HOSTS}
-  username: ${ELASTIC_USER}
-  password: ${ELASTIC_PASSWORD}
+  host: https://ft-kibana:5601
+  username: "elastic"
+  password: "${ELASTIC_PASSWORD}"
+  ssl:
+    enabled: true
+    certificate_authorities:
+      - /usr/share/filebeat/certs/ca/ca.crt
 
+# output.elasticsearch:
+#   hosts: ${ELASTIC_HOSTS}
+#   username: ${ELASTIC_USER}
+#   password: ${ELASTIC_PASSWORD}
+#   ssl.enabled: true
+#   ssl.certificate_authorities: "certs/ca/ca.crt"
 
 output.elasticsearch:
-  hosts: ${ELASTIC_HOSTS}
-  username: ${ELASTIC_USER}
+  hosts: ["https://ft-elasticsearch:9200"]
+  username: elastic
   password: ${ELASTIC_PASSWORD}
-  ssl.enabled: true
-  ssl.certificate_authorities: "certs/ca/ca.crt"
+  ssl:
+    certificate_authorities: ["/usr/share/filebeat/certs/ca/ca.crt"]
+    certificate: "/usr/share/filebeat/certs/ft-filebeat/ft-filebeat.crt"
+    key: "/usr/share/filebeat/certs/ft-filebeat/ft-filebeat.key"
+
