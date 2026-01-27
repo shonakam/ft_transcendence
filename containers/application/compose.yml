@@ -8,6 +8,7 @@ x-logging: &logging
 networks:
   transcendence-network:
     name: transcendence-network
+    external: true
 
 volumes:
   storage:
