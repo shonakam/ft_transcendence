@@ -17,8 +17,6 @@ volumes:
     driver: local
   ft_kibanadata:
     driver: local
-  ft_metricbeatdata:
-    driver: local
   ft_filebeatdata:
     driver: local
   ft_logstashdata:
@@ -36,6 +34,7 @@ services:
     volumes:
       - ft_certs:/usr/share/elasticsearch/config/certs
       - ./elk/setup.sh:/usr/share/elasticsearch/setup.sh
+      - ./elk/instances.yml:/usr/share/elasticsearch/instances.yml:ro
     user: '0'
     command: bash /usr/share/elasticsearch/setup.sh
     environment:
@@ -53,29 +52,6 @@ services:
     networks:
       - transcendence-network
 
-  # Elasticsearch起動後にkibana_systemパスワードを設定
-  setup-passwords:
-    container_name: ft-setup-passwords
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.8
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    volumes:
-      - ft_certs:/usr/share/elasticsearch/config/certs:ro
-    environment:
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-    command: >
-      bash -c '
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:$${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://ft-elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"$${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do
-          echo "Waiting to set kibana_system password..."
-          sleep 5
-        done
-        echo "kibana_system password set!"
-      '
-    networks:
-      - transcendence-network
-
   elasticsearch:
     init: true
     container_name: ft-elasticsearch
@@ -84,9 +60,9 @@ services:
       dockerfile: Dockerfile
     depends_on:
       setup:
-        condition: service_completed_successfully
+        condition: service_healthy
     volumes:
-      - ft_certs:/usr/share/elasticsearch/config/certs
+      - ft_certs:/usr/share/elasticsearch/config/certs:ro
       - ft_esdata:/usr/share/elasticsearch/data
     environment:
       - node.name=ft-elasticsearch
@@ -134,6 +110,8 @@ services:
         condition: service_healthy
       kibana:
         condition: service_healthy
+    volumes:
+      - ft_certs:/usr/share/logstash/config/certs:ro
     labels:
       co.elastic.logs/module: logstash
     networks:
@@ -150,12 +128,10 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      setup-passwords:
-        condition: service_completed_successfully
     labels:
       co.elastic.logs/module: kibana
     volumes:
-      - ft_certs:/usr/share/kibana/config/certs
+      - ft_certs:/usr/share/kibana/config/certs:ro
       - ft_kibanadata:/usr/share/kibana/data
     ports:
       - ${KIBANA_PORT:-5601}:5601
@@ -168,43 +144,19 @@ services:
       - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - SERVER_SSL_ENABLED=true
+      - SERVER_SSL_CERTIFICATE=config/certs/ft-kibana/ft-kibana.crt
+      - SERVER_SSL_KEY=config/certs/ft-kibana/ft-kibana.key
     mem_limit: ${KB_MEM_LIMIT}
     healthcheck:
       test:
         [
           'CMD-SHELL',
-          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+          "curl -k -s -I https://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
         ]
       interval: 10s
       timeout: 10s
       retries: 120
-
-  metricbeat:
-    init: true
-    container_name: ft-metricbeat
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    image: docker.elastic.co/beats/metricbeat:8.18.8
-    user: root
-    volumes:
-      - ft_certs:/usr/share/metricbeat/certs
-      - ft_metricbeatdata:/usr/share/metricbeat/data
-      - './elk/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro'
-      - '/var/run/docker.sock:/var/run/docker.sock:ro'
-      - '/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro'
-      - '/proc:/hostfs/proc:ro'
-      - '/:/hostfs:ro'
-    environment:
-      - ELASTIC_USER=elastic
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ELASTIC_HOSTS=https://ft-elasticsearch:9200
-      - KIBANA_HOSTS=http://ft-kibana:5601
-      - LOGSTASH_HOSTS=http://ft-logstash:9600
-    networks:
-      - transcendence-network
 
   filebeat:
     depends_on:
@@ -214,9 +166,8 @@ services:
     container_name: ft-filebeat
     user: root
     volumes:
-      - ft_certs:/usr/share/filebeat/certs
+      - ft_certs:/usr/share/filebeat/certs:ro
       - ft_filebeatdata:/usr/share/filebeat/data
-      # - "./elk/filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
       - '../application/backend/logs:/usr/share/filebeat/ingest_data:ro'
       - './elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
       - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
@@ -225,8 +176,9 @@ services:
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ELASTIC_HOSTS=https://ft-elasticsearch:9200
-      - KIBANA_HOSTS=http://ft-kibana:5601
-      - LOGSTASH_HOSTS=http://ft-logstash01:9600
+      - KIBANA_HOSTS=https://ft-kibana:5601
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+      - LOGSTASH_HOSTS=http://ft-logstash:9600
     networks:
       - transcendence-network
 

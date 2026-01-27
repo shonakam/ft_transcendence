@@ -1,0 +1,4 @@
+xpack.monitoring.elasticsearch.hosts: ["https://ft-elasticsearch:9200"]
+xpack.monitoring.elasticsearch.ssl.certificate_authority: /usr/share/logstash/config/certs/ca/ca.crt
+xpack.monitoring.elasticsearch.ssl.certificate: /usr/share/logstash/config/certs/ft-logstash/ft-logstash.crt
+xpack.monitoring.elasticsearch.ssl.key: /usr/share/logstash/config/certs/ft-logstash/ft-logstash.key

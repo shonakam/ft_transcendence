@@ -41,8 +41,8 @@ init-ops:
 
 up-ops: init-ops
 	@docker compose --env-file $(DOCKER_OPS_ENV) -f $(OPS)/compose.yml up --build -d --remove-orphans
-	@curl -sf -o /dev/null -u "elastic:changeme" \
-		-X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+	@curl -k -sf -o /dev/null -u "elastic:changeme" \
+		-X POST "https://localhost:5601/api/saved_objects/_import?overwrite=true" \
 		-H "kbn-xsrf: true" --form file=@containers/operation/elk/kibana/kibana_setup.ndjson \
 		|| echo "Warning: Kibana import failed"
 
