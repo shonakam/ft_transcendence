@@ -20,6 +20,13 @@ export class UserRelationshipService {
   async getPendingRequests(): Promise<string[]> {
     return api.get<string[]>('users/friends/pending');
   }
+
+  async getOnlineStatuses(userIds: string[]): Promise<Record<string, boolean>> {
+    if (userIds.length === 0) return {};
+    return api.post<Record<string, boolean>>('users/friends/online-status', {
+      userIds,
+    });
+  }
 }
 
 export const userRelationshipService = new UserRelationshipService();

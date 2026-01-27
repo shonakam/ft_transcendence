@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { UserRelationshipUseCase } from '../../usecase/user/UserRelationshipUseCase.ts';
 import { authenticate } from '../auth/authPreHandler.ts';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 
 export class UserRelationshipController {
   constructor(private useCase: UserRelationshipUseCase) {}
@@ -85,6 +86,26 @@ export class UserRelationshipController {
       reply.status(500).send({ error: err.message });
     }
   }
+
+  async getOnlineStatuses(
+    req: FastifyRequest<{ Body: { userIds: string[] } }>,
+    reply: FastifyReply,
+  ) {
+    try {
+      const userId = req.authUserId;
+      if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+      const { userIds } = req.body;
+      if (!userIds || !Array.isArray(userIds)) {
+        return reply.status(400).send({ error: 'userIds array is required' });
+      }
+
+      const statuses = await onlineStatusService.getOnlineStatuses(userIds);
+      reply.status(200).send(statuses);
+    } catch (err: any) {
+      reply.status(500).send({ error: err.message });
+    }
+  }
 }
 
 export const userRelationshipRoutes = (
@@ -111,6 +132,11 @@ export const userRelationshipRoutes = (
     );
     server.get('/pending', { preHandler: authenticate }, (req, reply) =>
       controller.getPendingRequests(req, reply),
+    );
+    server.post<{ Body: { userIds: string[] } }>(
+      '/online-status',
+      { preHandler: authenticate },
+      (req, reply) => controller.getOnlineStatuses(req, reply),
     );
   };
 };

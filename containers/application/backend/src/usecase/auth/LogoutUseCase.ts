@@ -2,6 +2,7 @@ import { config } from '../../conf.ts';
 import { TokenService } from './TokenService.ts';
 import { UserRepository } from '../../domain/user/repository/UserRepository.ts';
 import { VolatileDataRepositoryRedis } from '../../infra/redis/repository/VolatileDataRepositoryRedis.ts';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 
 export class LogoutUseCase {
   constructor(
@@ -27,5 +28,8 @@ export class LogoutUseCase {
     }
     const key = `session:refresh:${user.id}`;
     await this.volatileDataRepositoryRedis.delete(key);
+
+    // Mark user as offline
+    await onlineStatusService.setOffline(user.id);
   }
 }

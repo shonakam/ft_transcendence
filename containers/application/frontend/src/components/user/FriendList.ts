@@ -7,6 +7,7 @@ import { toaster } from '../common/Toaster';
 export class FriendList implements Component {
   private el: HTMLElement;
   private container: HTMLDivElement;
+  private onlineStatuses: Record<string, boolean> = {};
 
   constructor() {
     this.el = document.createElement('div');
@@ -28,6 +29,13 @@ export class FriendList implements Component {
         userRelationshipService.getPendingRequests(),
         chatService.getBlockedUsers(),
       ]);
+
+      // Fetch online statuses for friends
+      if (friends.length > 0) {
+        this.onlineStatuses =
+          await userRelationshipService.getOnlineStatuses(friends);
+      }
+
       this.render(friends, pendingRequests, blockedUsers);
     } catch (error) {
       toaster.show('Failed to load friend list', 'error');
@@ -162,10 +170,24 @@ export class FriendList implements Component {
       }
     }
 
+    const isOnline = this.onlineStatuses[userId] ?? false;
+    const statusIndicator = isOnline
+      ? '<span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>'
+      : '<span class="w-2.5 h-2.5 bg-slate-500 rounded-full"></span>';
+    const statusText = isOnline
+      ? '<span class="text-xs text-green-400">Online</span>'
+      : '<span class="text-xs text-slate-500">Offline</span>';
+
     el.innerHTML = `
         <div class="flex items-center gap-2">
-          <img src="${imagePath}" class="w-8 h-8 rounded-full object-cover" />
-          <div class="font-medium text-white text-sm">${username}</div>
+          <div class="relative">
+            <img src="${imagePath}" class="w-8 h-8 rounded-full object-cover" />
+            <div class="absolute -bottom-0.5 -right-0.5 ${isOnline ? 'bg-green-500' : 'bg-slate-500'} w-3 h-3 rounded-full border-2 border-slate-800"></div>
+          </div>
+          <div>
+            <div class="font-medium text-white text-sm">${username}</div>
+            ${statusText}
+          </div>
         </div>
       `;
 
