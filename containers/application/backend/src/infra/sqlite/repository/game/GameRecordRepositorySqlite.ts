@@ -1,6 +1,9 @@
 import type { Database } from 'sqlite';
 import { getDb, transaction } from '../../../sqlite/db.ts';
-import type { GameRecordRepository } from '../../../../domain/game/repository/GameRecordRepository.ts';
+import type {
+  GameRecordRepository,
+  UserWinRate,
+} from '../../../../domain/game/repository/GameRecordRepository.ts';
 import type { GameRecord } from '../../../../domain/game/entity/GameRecord.ts';
 
 export class GameRecordRepositorySqlite implements GameRecordRepository {
@@ -59,5 +62,29 @@ export class GameRecordRepositorySqlite implements GameRecordRepository {
       [userId, userId, limit, offset],
     );
     return rows.map((row: any) => this.scan(row));
+  }
+
+  async getWinRateByUserId(userId: string): Promise<UserWinRate> {
+    const row = await this.db.get(
+      `SELECT
+        COUNT(*) as total_games,
+        SUM(CASE WHEN winner_id = ? THEN 1 ELSE 0 END) as wins
+       FROM game_records
+       WHERE left_user_id = ? OR right_user_id = ?`,
+      [userId, userId, userId],
+    );
+
+    const totalGames = row?.total_games ?? 0;
+    const wins = row?.wins ?? 0;
+    const losses = totalGames - wins;
+    const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+
+    return {
+      userId,
+      totalGames,
+      wins,
+      losses,
+      winRate,
+    };
   }
 }

@@ -3,6 +3,7 @@ import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import { getUserById } from '../../services/user/dashboard';
+import { getUserWinRate, UserWinRate } from '../../services/game/stats';
 import { userRelationshipService } from '../../services/user/UserRelationshipService';
 import { toaster } from '../common/Toaster';
 
@@ -11,6 +12,7 @@ export class UserMenu implements Component {
   private el: HTMLElement;
   private currentUserId: string | null = null;
   private currentUsername: string | null = null;
+  private currentWinRate: UserWinRate | null = null;
 
   private handleOutsideClick = (e: MouseEvent) => {
     if (this.el && !this.el.contains(e.target as Node)) {
@@ -46,20 +48,25 @@ export class UserMenu implements Component {
   public async show(userId: string, username: string, x: number, y: number) {
     this.currentUserId = userId;
     this.currentUsername = username;
+    this.currentWinRate = null;
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
     this.render();
     this.el.classList.remove('hidden');
 
-    // 実際のユーザー名を取得して更新
+    // Fetch user info and win rate in parallel
     try {
-      const user = await getUserById(userId);
+      const [user, winRate] = await Promise.all([
+        getUserById(userId),
+        getUserWinRate(userId),
+      ]);
       if (this.currentUserId === userId) {
         this.currentUsername = user.username;
+        this.currentWinRate = winRate;
         this.render();
       }
     } catch (error) {
-      toaster.show('Failed to fetch user info', 'error');
+      // Silently fail - username label already shown
     }
   }
 
@@ -75,7 +82,27 @@ export class UserMenu implements Component {
       'px-4 py-2 text-xs text-slate-400 border-b border-white/5 mb-1';
     label.textContent = `@${this.currentUsername}`;
 
-    const dmBtn = this.createOption('💬 Go to DM', async () => {
+    // Win rate display
+    const statsDiv = document.createElement('div');
+    statsDiv.className = 'px-4 py-2 border-b border-white/5 mb-1';
+
+    if (this.currentWinRate) {
+      const { totalGames, wins, losses, winRate } = this.currentWinRate;
+      statsDiv.innerHTML = `
+        <div class="text-xs text-slate-400 mb-1">Game Stats</div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}">${winRate}%</span>
+          <span class="text-xs text-slate-500">${wins}W - ${losses}L (${totalGames} games)</span>
+        </div>
+      `;
+    } else {
+      statsDiv.innerHTML = `
+        <div class="text-xs text-slate-400 mb-1">Game Stats</div>
+        <div class="text-xs text-slate-500">Loading...</div>
+      `;
+    }
+
+    const dmBtn = this.createOption('Go to DM', async () => {
       if (!this.currentUserId) return;
       try {
         const room = await chatService.getOrCreateDMRoom(this.currentUserId);
@@ -91,7 +118,7 @@ export class UserMenu implements Component {
       this.hide();
     });
 
-    const inviteBtn = this.createOption('🏓 Invite to Game', async () => {
+    const inviteBtn = this.createOption('Invite to Game', async () => {
       if (!this.currentUserId) return;
       // Don't invite yourself
       if (this.currentUserId === (window as any).currentUser?.id) return;
@@ -101,7 +128,7 @@ export class UserMenu implements Component {
       this.hide();
     });
 
-    const friendBtn = this.createOption('➕ Add Friend', async () => {
+    const friendBtn = this.createOption('Add Friend', async () => {
       if (!this.currentUserId) return;
       try {
         await userRelationshipService.requestFriend(this.currentUserId);
@@ -113,7 +140,7 @@ export class UserMenu implements Component {
     });
 
     const blockBtn = this.createOption(
-      '🚫 Block User',
+      'Block User',
       async () => {
         if (!this.currentUserId) return;
         if (
@@ -133,7 +160,7 @@ export class UserMenu implements Component {
       'text-red-400 hover:bg-red-500/10'
     );
 
-    this.el.append(label, dmBtn, inviteBtn, friendBtn, blockBtn);
+    this.el.append(label, statsDiv, dmBtn, inviteBtn, friendBtn, blockBtn);
   }
 
   private createOption(

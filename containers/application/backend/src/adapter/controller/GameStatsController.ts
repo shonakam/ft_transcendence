@@ -19,11 +19,16 @@ interface ListQuery {
   offset?: string;
 }
 
+interface UserIdParams {
+  userId: string;
+}
+
 export default async function GameStatsController(
   server: FastifyInstance,
   opts: { useCases: GameUseCases },
 ) {
-  const { saveGameResult, listGameRecords } = opts.useCases;
+  const { saveGameResult, listGameRecords, gameRecordRepository } =
+    opts.useCases;
 
   server.post<{ Body: SaveStatsBody }>(
     '/stats',
@@ -114,6 +119,29 @@ export default async function GameStatsController(
         );
 
         reply.status(200).send(records);
+      } catch (err: any) {
+        reply.status(500).send({ error: err.message });
+      }
+    },
+  );
+
+  // Get win rate for a specific user
+  server.get<{ Params: UserIdParams }>(
+    '/stats/:userId/winrate',
+    { preHandler: authenticate },
+    async (
+      req: FastifyRequest<{ Params: UserIdParams }>,
+      reply: FastifyReply,
+    ) => {
+      try {
+        const { userId } = req.params;
+
+        if (!userId) {
+          return reply.status(400).send({ error: 'userId is required' });
+        }
+
+        const winRate = await gameRecordRepository.getWinRateByUserId(userId);
+        reply.status(200).send(winRate);
       } catch (err: any) {
         reply.status(500).send({ error: err.message });
       }
