@@ -70,7 +70,8 @@ export class GameRecordRepositorySqlite implements GameRecordRepository {
         COUNT(*) as total_games,
         SUM(CASE WHEN winner_id = ? THEN 1 ELSE 0 END) as wins
        FROM game_records
-       WHERE left_user_id = ? OR right_user_id = ?`,
+       WHERE (left_user_id = ? OR right_user_id = ?)
+         AND NOT (left_user_id LIKE 'anon:%' AND right_user_id LIKE 'anon:%')`,
       [userId, userId, userId],
     );
 
