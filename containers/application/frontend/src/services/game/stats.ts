@@ -3,11 +3,13 @@ import { api } from '../../lib/httpClient';
 export interface GameRecord {
   id?: number;
   gameId: string;
-  userId: string;
-  alias: string | null;
-  score: number;
-  isWinner: boolean;
-  side: 'left' | 'right';
+  leftUserId: string;
+  rightUserId: string;
+  leftAlias?: string | null;
+  rightAlias?: string | null;
+  leftPoint: number;
+  rightPoint: number;
+  winnerId?: string | null;
   endedAt: number;
   createdAt: number;
 }
@@ -29,6 +31,14 @@ export interface SaveGameResultParams {
   endedAt?: number;
 }
 
+export interface UserWinRate {
+  userId: string;
+  totalGames: number;
+  wins: number;
+  losses: number;
+  winRate: number; // 0-100 percentage
+}
+
 export async function getGameStats(
   params?: GetStatsParams
 ): Promise<GameRecord[]> {
@@ -46,4 +56,8 @@ export async function saveGameResult(
   params: SaveGameResultParams
 ): Promise<GameRecord[]> {
   return api.post<GameRecord[]>('game/stats', params);
+}
+
+export async function getUserWinRate(userId: string): Promise<UserWinRate> {
+  return api.get<UserWinRate>(`game/stats/${userId}/winrate`);
 }

@@ -22,8 +22,8 @@ export class UpdateForm implements Component {
   private readonly DEFAULT_IMAGE = '/assets/default-profile.png';
 
   constructor() {
-    this.sessionStorage = new SessionStorage(config.user.sessionStorageKey)
-    const user = this.sessionStorage.get()
+    this.sessionStorage = new SessionStorage(config.user.sessionStorageKey);
+    const user = this.sessionStorage.get();
 
     this.root = document.createElement('form');
     this.root.className = 'flex flex-col space-y-4 w-full';
@@ -31,7 +31,21 @@ export class UpdateForm implements Component {
     this.previewImage = document.createElement('img');
     this.previewImage.className =
       'w-24 h-24 rounded-full mx-auto bg-white/10 object-cover border-2 border-white/10 mb-2';
-    this.previewImage.src = this.DEFAULT_IMAGE;
+
+    // Set initial image from user data
+    let imgSrc = this.DEFAULT_IMAGE;
+    if (user?.imagePath) {
+      if (user.imagePath.startsWith('/assets/')) {
+        imgSrc = user.imagePath;
+      } else if (user.imagePath.startsWith('http')) {
+        imgSrc = user.imagePath;
+      } else if (user.imagePath.startsWith('/uploads/')) {
+        imgSrc = `/api${user.imagePath}?t=${Date.now()}`;
+      } else {
+        imgSrc = `/api/uploads/${user.imagePath}?t=${Date.now()}`;
+      }
+    }
+    this.previewImage.src = imgSrc;
 
     this.imageInput = document.createElement('input');
     this.imageInput.type = 'file';
@@ -107,7 +121,7 @@ export class UpdateForm implements Component {
 
     this.cancelButton.addEventListener('click', () => {
       this.root.dispatchEvent(new CustomEvent('cancel'));
-    })
+    });
   }
 
   private async handleSubmit() {
@@ -122,17 +136,17 @@ export class UpdateForm implements Component {
 
     try {
       this.setLoading(true);
-      
-      this.sessionStorage.delete()
+
+      this.sessionStorage.delete();
 
       const requestData = userUpdateRequestForm(
         email,
         username,
         password,
-        this.selectedFile,
+        this.selectedFile
       );
 
-      console.log(requestData)
+      console.log(requestData);
 
       const [_, err] = await to(putMe(requestData));
       if (err) {

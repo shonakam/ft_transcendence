@@ -12,6 +12,7 @@ import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import UserIdpId from '../../domain/user/vo/UserIdpId.ts';
 import { IdP } from '../../infra/idp/IdP.ts';
 import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 
 interface IdpConfig {
   redirect_uri: string;
@@ -84,6 +85,10 @@ export class LoginWithOIDCUseCase {
     const key = `session:refresh:${userId}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();
     await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);
+
+    // Mark user as online
+    await onlineStatusService.setOnline(userId);
+
     return {
       accessToken: access.token,
       refreshToken: refresh.token,

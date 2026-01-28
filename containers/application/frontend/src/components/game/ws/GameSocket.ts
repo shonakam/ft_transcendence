@@ -11,12 +11,18 @@ export type GameSocketCallbacks = {
   onRegistered?: (userId: string) => void;
   onGameGenerated?: (gameId: number, state: GameState) => void;
   onPlayerAdded?: (gameId: number, side: 'left' | 'right') => void;
-  onOpponentJoined?: (gameId: number, opponentId: string) => void;
+  onOpponentJoined?: (
+    gameId: number,
+    opponentId: string,
+    opponentAlias: string
+  ) => void;
   onGameReady?: (
     gameId: number,
     leftPlayer: string,
     rightPlayer: string,
-    yourSide: 'left' | 'right'
+    yourSide: 'left' | 'right',
+    leftAlias: string,
+    rightAlias: string
   ) => void;
   onGameStart?: (gameId: number) => void;
   onGameState?: (state: GameState) => void;
@@ -131,12 +137,13 @@ export class GameSocket {
         break;
       case 'opponentJoined':
         toaster.show(
-          `${message.payload.opponentId} がゲームに参加しました`,
+          `${message.payload.opponentAlias || message.payload.opponentId} がゲームに参加しました`,
           'info'
         );
         this.callbacks?.onOpponentJoined?.(
           message.payload.gameId,
-          message.payload.opponentId
+          message.payload.opponentId,
+          message.payload.opponentAlias || message.payload.opponentId
         );
         break;
       case 'gameReady':
@@ -145,7 +152,9 @@ export class GameSocket {
           message.payload.gameId,
           message.payload.leftPlayer,
           message.payload.rightPlayer,
-          message.payload.yourSide
+          message.payload.yourSide,
+          message.payload.leftAlias || message.payload.leftPlayer,
+          message.payload.rightAlias || message.payload.rightPlayer
         );
         break;
       case 'gameStart':

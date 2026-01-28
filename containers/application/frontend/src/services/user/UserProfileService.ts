@@ -2,13 +2,14 @@ import { api } from '../../lib/httpClient';
 import { PublicProfile } from '../../types/user';
 
 export class UserProfileService {
-  private cache = new Map<string, PublicProfile>();
-  private pendingRequests = new Map<string, Promise<PublicProfile>>();
+  private cache = new Map<string, PublicProfile | null>();
+  private pendingRequests = new Map<string, Promise<PublicProfile | null>>();
 
-  async getProfile(userId: string): Promise<PublicProfile> {
+  async getProfile(userId: string): Promise<PublicProfile | null> {
     // Check cache
-    const cached = this.getCachedProfile(userId);
-    if (cached) return cached;
+    if (this.cache.has(userId)) {
+      return this.cache.get(userId) ?? null;
+    }
 
     // Check if there is already a pending request for this user
     const pending = this.pendingRequests.get(userId);
@@ -20,6 +21,10 @@ export class UserProfileService {
         const profile = await api.get<PublicProfile>(`users/${userId}/profile`);
         this.cache.set(userId, profile);
         return profile;
+      } catch (error) {
+        console.error(`Failed to load profile for ${userId}`, error);
+        this.cache.set(userId, null);
+        return null;
       } finally {
         this.pendingRequests.delete(userId);
       }
@@ -29,7 +34,7 @@ export class UserProfileService {
     return request;
   }
 
-  getCachedProfile(userId: string): PublicProfile | undefined {
+  getCachedProfile(userId: string): PublicProfile | null | undefined {
     return this.cache.get(userId);
   }
 

@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { authenticate } from '../auth/authPreHandler.ts';
 import { chatWebSocketManager } from './ChatWebSocketManager.ts';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 import minilog from '../../utils/minilog.ts';
 
 export function registerChatWebSocket(fastify: FastifyInstance): void {
@@ -8,7 +9,7 @@ export function registerChatWebSocket(fastify: FastifyInstance): void {
     fastify.get(
       '/ws/chat',
       { websocket: true, preHandler: authenticate },
-      (connection: any, req: FastifyRequest) => {
+      async (connection: any, req: FastifyRequest) => {
         const socket = connection?.socket || connection;
         if (!socket || typeof socket.on !== 'function') {
           minilog.e('WebSocket/chat', 'Invalid socket object received');
@@ -25,13 +26,24 @@ export function registerChatWebSocket(fastify: FastifyInstance): void {
         minilog.i('WebSocket/chat', `User ${userId} connected to chat`);
         chatWebSocketManager.addConnection(userId, socket);
 
-        socket.on('message', (message: any) => {
-          // Message handling if needed
+        // Mark user as online
+        await onlineStatusService.setOnline(userId);
+
+        socket.on('message', async (message: any) => {
+          // Refresh online status on activity
+          await onlineStatusService.refreshOnline(userId);
         });
 
-        socket.on('close', () => {
+        socket.on('close', async () => {
           minilog.i('WebSocket/chat', `User ${userId} disconnected`);
           chatWebSocketManager.removeConnection(userId, socket);
+
+          // Only mark offline if no more connections for this user
+          const hasOtherConnections =
+            chatWebSocketManager.hasConnections(userId);
+          if (!hasOtherConnections) {
+            await onlineStatusService.setOffline(userId);
+          }
         });
 
         socket.on('error', (err: any) => {

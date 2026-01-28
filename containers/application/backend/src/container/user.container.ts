@@ -1,10 +1,12 @@
 import { UserRepositorySqlite } from '../infra/sqlite/repository/user/UserRepositorySqlite.ts';
+import { SQLiteUserRelationshipRepository } from '../infra/sqlite/repository/user/SQLiteUserRelationshipRepository.ts';
 
 import { CreateUserUseCase } from '../usecase/user/CreateUserUseCase.ts';
 import { GetUserUseCase } from '../usecase/user/GetUserUseCase.ts';
 import { ListUserUseCase } from '../usecase/user/ListUserUseCase.ts';
 import { UpdateUserUseCase } from '../usecase/user/UpdateUserUseCase.ts';
 import { DeleteUserUseCase } from '../usecase/user/DeleteUserUseCase.ts';
+import { UserRelationshipUseCase } from '../usecase/user/UserRelationshipUseCase.ts';
 import { User2faRepositorySqlite } from '../infra/sqlite/repository/user/User2faRepositorySqlite.ts';
 import { LocalFileStorage } from '../infra/storage/LocalFileStorage.ts';
 
@@ -14,18 +16,21 @@ export interface UserUseCases {
   listUsers: ListUserUseCase;
   updateUser: UpdateUserUseCase;
   deleteUser: DeleteUserUseCase;
+  userRelationship: UserRelationshipUseCase;
 }
 
 export async function initUserUseCases() {
   const userRepository = new UserRepositorySqlite();
   const user2faRepository = new User2faRepositorySqlite();
   const localFileStorage = new LocalFileStorage();
+  const userRelationshipRepo = new SQLiteUserRelationshipRepository();
 
   const createUser = new CreateUserUseCase(userRepository, user2faRepository);
   const getUser = new GetUserUseCase(userRepository, user2faRepository);
   const listUsers = new ListUserUseCase(userRepository);
   const updateUser = new UpdateUserUseCase(userRepository, localFileStorage);
   const deleteUser = new DeleteUserUseCase(userRepository);
+  const userRelationship = new UserRelationshipUseCase(userRelationshipRepo);
 
   return {
     createUser,
@@ -33,5 +38,6 @@ export async function initUserUseCases() {
     listUsers,
     updateUser,
     deleteUser,
+    userRelationship,
   };
 }

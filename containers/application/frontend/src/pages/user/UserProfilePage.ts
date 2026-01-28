@@ -85,9 +85,18 @@ export class UserProfilePage implements Component {
   private render() {
     if (!this.user) return;
 
-    const imageSrc = this.user.imagePath
-      ? `/api/${this.user.imagePath}`
-      : this.DEFAULT_IMAGE;
+    let imageSrc = this.DEFAULT_IMAGE;
+    if (this.user.imagePath) {
+      if (this.user.imagePath.startsWith('/assets/')) {
+        imageSrc = this.user.imagePath;
+      } else if (this.user.imagePath.startsWith('http')) {
+        imageSrc = this.user.imagePath;
+      } else if (this.user.imagePath.startsWith('/uploads/')) {
+        imageSrc = `/api${this.user.imagePath}`;
+      } else {
+        imageSrc = `/api/uploads/${this.user.imagePath}`;
+      }
+    }
 
     const joinDate = new Date(this.user.createdAt).toLocaleDateString('ja-JP', {
       year: 'numeric',

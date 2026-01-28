@@ -1,6 +1,7 @@
 import { Component } from '../../interface/Component';
 import { GameRecord, getGameStats } from '../../services/game/stats';
 import { design } from '../../conf';
+import { authStore } from '../../store/authStore';
 
 export class GameStatsPage implements Component {
   private el: HTMLElement;
@@ -13,7 +14,7 @@ export class GameStatsPage implements Component {
     this.el.className = design.bg;
 
     this.container = document.createElement('div');
-    this.container.className = design.container;
+    this.container.className = `${design.container} !w-full !max-w-4xl`;
 
     this.el.appendChild(this.container);
     this.init();
@@ -89,8 +90,7 @@ export class GameStatsPage implements Component {
     thead.innerHTML = `
       <tr>
         <th class="px-6 py-3">Date</th>
-        <th class="px-6 py-3">Alias</th>
-        <th class="px-6 py-3">Side</th>
+        <th class="px-6 py-3">Opponent</th>
         <th class="px-6 py-3">Score</th>
         <th class="px-6 py-3">Result</th>
       </tr>
@@ -105,18 +105,47 @@ export class GameStatsPage implements Component {
       const row = document.createElement('tr');
       row.className = 'hover:bg-white/5 transition-colors';
 
-      const date = new Date(record.endedAt).toLocaleString();
-      const resultText = record.isWinner ? 'Win' : 'Loss';
-      const resultClass = record.isWinner
+      // 日付のフォーマット
+      const dateObj = new Date(record.endedAt);
+      const date = dateObj.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      const time = dateObj.toLocaleTimeString('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const loggedInUserId = authStore.getUserId();
+      const loggedInUsername = authStore.getUsername();
+
+      // ユーザーIDまたはユーザー名で自分の位置を判定
+      const isLeft =
+        record.leftUserId === loggedInUserId ||
+        record.leftAlias === loggedInUsername;
+      const myScore = isLeft ? record.leftPoint : record.rightPoint;
+      const opponentScore = isLeft ? record.rightPoint : record.leftPoint;
+      const opponentAlias = isLeft ? record.rightAlias : record.leftAlias;
+      const isWinner =
+        record.winnerId === loggedInUserId ||
+        (isLeft && record.leftPoint > record.rightPoint) ||
+        (!isLeft && record.rightPoint > record.leftPoint);
+
+      const resultText = isWinner ? 'WIN' : 'LOSS';
+      const resultClass = isWinner
         ? 'text-green-400 font-bold'
         : 'text-red-400';
+      const resultIcon = isWinner ? '🏆' : '';
 
       row.innerHTML = `
-        <td class="px-6 py-4 text-slate-300">${date}</td>
-        <td class="px-6 py-4 text-white">${record.alias || 'Anonymous'}</td>
-        <td class="px-6 py-4 text-slate-300 uppercase">${record.side}</td>
-        <td class="px-6 py-4 text-white font-mono">${record.score}</td>
-        <td class="px-6 py-4 ${resultClass}">${resultText}</td>
+        <td class="px-6 py-4 text-slate-300">
+          <div>${date}</div>
+          <div class="text-xs text-slate-500">${time}</div>
+        </td>
+        <td class="px-6 py-4 text-white font-medium">${opponentAlias || 'Anonymous'}</td>
+        <td class="px-6 py-4 text-white font-mono text-lg">${myScore} - ${opponentScore}</td>
+        <td class="px-6 py-4 ${resultClass}">${resultIcon} ${resultText}</td>
       `;
 
       tbody.appendChild(row);

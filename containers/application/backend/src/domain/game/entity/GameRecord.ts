@@ -1,11 +1,14 @@
 export interface GameRecord {
   id?: number;
   gameId: string;
-  userId: string;
-  alias: string | null;
-  score: number;
-  isWinner: boolean;
-  side: 'left' | 'right';
+  leftUserId: string;
+  rightUserId: string;
+  leftPoint: number;
+  rightPoint: number;
+  leftAlias?: string | null;
+  rightAlias?: string | null;
+  winnerId?: string | null;
+  startedAt?: number;
   endedAt: number;
   createdAt: number;
 }

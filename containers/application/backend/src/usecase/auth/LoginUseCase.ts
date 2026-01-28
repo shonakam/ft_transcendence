@@ -5,6 +5,7 @@ import Password from '../../domain/user/vo/Password.ts';
 import { VolatileDataRepositoryRedis } from '../../infra/redis/repository/VolatileDataRepositoryRedis.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import { User2faRepository } from '../../domain/user/repository/User2faRepository.ts';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 
 export interface LoginResponse {
   accessToken: string | null;
@@ -38,6 +39,10 @@ export class LoginUseCase {
     const key = `session:refresh:${id}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();
     await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);
+
+    // Mark user as online
+    await onlineStatusService.setOnline(id);
+
     return {
       accessToken: access.token,
       refreshToken: refresh.token,

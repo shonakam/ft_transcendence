@@ -35,6 +35,14 @@ export class ChatWebSocketManager {
   }
 
   /**
+   * ユーザがまだ接続を持っているかチェック
+   */
+  public hasConnections(userId: string): boolean {
+    const userSockets = this.connections.get(userId);
+    return userSockets !== undefined && userSockets.size > 0;
+  }
+
+  /**
    * 指定したユーザにメッセージを送信する
    */
   public sendToUser(userId: string, message: any): void {
@@ -42,7 +50,8 @@ export class ChatWebSocketManager {
     if (userSockets) {
       const payload = JSON.stringify(message);
       for (const socket of userSockets) {
-        if (socket.readyState === 1) { // WebSocket.OPEN
+        if (socket.readyState === 1) {
+          // WebSocket.OPEN
           socket.send(payload);
         }
       }
@@ -56,7 +65,8 @@ export class ChatWebSocketManager {
     const payload = JSON.stringify(message);
     for (const [userId, userSockets] of this.connections) {
       for (const socket of userSockets) {
-        if (socket.readyState === 1) { // WebSocket.OPEN
+        if (socket.readyState === 1) {
+          // WebSocket.OPEN
           socket.send(payload);
         }
       }

@@ -19,34 +19,25 @@ export interface SaveGameResultInput {
 export class SaveGameResultUseCase {
   constructor(private repo: GameRecordRepository) {}
 
-  async execute(input: SaveGameResultInput): Promise<GameRecord[]> {
+  async execute(input: SaveGameResultInput): Promise<GameRecord> {
     const gameId = input.gameId ?? randomUUID();
     const endedAt = input.endedAt ?? Date.now();
     const createdAt = Date.now();
 
-    const leftRecord: GameRecord = {
+    const record: GameRecord = {
       gameId,
-      userId: input.leftUserId,
-      alias: input.leftAlias ?? null,
-      score: input.leftScore,
-      isWinner: input.winner === 'left',
-      side: 'left',
+      leftUserId: input.leftUserId,
+      rightUserId: input.rightUserId,
+      leftAlias: input.leftAlias ?? null,
+      rightAlias: input.rightAlias ?? null,
+      leftPoint: input.leftScore,
+      rightPoint: input.rightScore,
+      winnerId: input.winner === 'left' ? input.leftUserId : input.rightUserId,
       endedAt,
       createdAt,
     };
 
-    const rightRecord: GameRecord = {
-      gameId,
-      userId: input.rightUserId,
-      alias: input.rightAlias ?? null,
-      score: input.rightScore,
-      isWinner: input.winner === 'right',
-      side: 'right',
-      endedAt,
-      createdAt,
-    };
-
-    await this.repo.saveMany([leftRecord, rightRecord]);
-    return [leftRecord, rightRecord];
+    await this.repo.save(record);
+    return record;
   }
 }

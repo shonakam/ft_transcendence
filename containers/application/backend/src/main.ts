@@ -58,8 +58,22 @@ process.on('uncaughtException', (err) => {
  */
 async function server_conf(server: FastifyInstance, cookieSecret: string) {
   await server.register(cors, {
-    // origin: 'http://localhost:5173',
-    origin: 'https://transcendence.42.fr',
+    // Allows requests from the default domain and local IP addresses
+    origin: (origin, cb) => {
+      if (!origin) {
+        cb(null, true);
+        return;
+      }
+      const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+      const isDefaultDomain = origin === 'https://transcendence.42.fr';
+      const isLanIp = /^https?:\/\/(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(origin);
+
+      if (isLocalhost || isDefaultDomain || isLanIp) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });

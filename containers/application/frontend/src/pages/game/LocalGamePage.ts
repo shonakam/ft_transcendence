@@ -194,6 +194,11 @@ export class LocalGamePage implements Component {
       </div>
     `;
 
+    // 試合単体の保存（トーナメントモードでない場合、またはトーナメント内の各試合を即座に保存）
+    if (authStore.isLoggedIn()) {
+      this.saveSingleMatchResult(left, right).catch(console.error);
+    }
+
     // トーナメントモードの場合、結果を記録して次の試合へ
     if (this.isTournamentMode && this.currentMatch) {
       // 結果を記録
@@ -205,6 +210,55 @@ export class LocalGamePage implements Component {
         setTimeout(() => this.showTournamentResult(), 2000);
       }
       // 次の試合はコールバックで自動的に通知される
+    }
+  }
+
+  private async saveSingleMatchResult(
+    left: number,
+    right: number
+  ): Promise<void> {
+    const loggedInUser = await authStore.getMe();
+    const loggedInUserId = loggedInUser?.id;
+    const loggedInUsername = authStore.getUsername();
+
+    if (!loggedInUserId || !loggedInUsername) return;
+
+    let p1Alias = 'Left Player';
+    let p2Alias = 'Right Player';
+    let p1Id = `anon:left`;
+    let p2Id = `anon:right`;
+
+    if (this.currentMatch) {
+      p1Alias = this.currentMatch.p1Alias;
+      p2Alias = this.currentMatch.p2Alias;
+
+      // 現在の試合からIDを特定する試み
+      const p1IsMe = p1Alias === loggedInUsername;
+      const p2IsMe = p2Alias === loggedInUsername;
+
+      if (!p1IsMe && !p2IsMe) return; // 自分が参加していない試合は保存しない
+
+      p1Id = p1IsMe ? loggedInUserId : `anon:${p1Alias}`;
+      p2Id = p2IsMe ? loggedInUserId : `anon:${p2Alias}`;
+    } else {
+      // 非トーナメントのローカル対戦（通常は自分が左）
+      p1Id = loggedInUserId;
+      p1Alias = loggedInUsername;
+    }
+
+    try {
+      await saveGameResult({
+        leftUserId: p1Id,
+        rightUserId: p2Id,
+        leftAlias: p1Alias,
+        rightAlias: p2Alias,
+        leftScore: left,
+        rightScore: right,
+        winner: left > right ? 'left' : 'right',
+      });
+      console.log(`[LocalGamePage] Match saved successfully`);
+    } catch (err) {
+      console.error('[LocalGamePage] Failed to save single match:', err);
     }
   }
 
@@ -238,21 +292,40 @@ export class LocalGamePage implements Component {
 
     // ログインユーザーが参加している試合のみバックエンドに保存
     if (authStore.isLoggedIn()) {
-      const loggedInUserId = authStore.getUsername();
+      const loggedInUser = await authStore.getMe();
+      const loggedInUserId = loggedInUser?.id;
+
       if (loggedInUserId) {
         // ログインユーザーが参加した試合を抽出
         const userMatches = results.filter(
           (match) =>
             match.p1.userId === loggedInUserId ||
-            match.p2.userId === loggedInUserId
+            match.p2.userId === loggedInUserId ||
+            match.p1.alias === authStore.getUsername() ||
+            match.p2.alias === authStore.getUsername()
         );
 
         // 各試合を保存
         for (const match of userMatches) {
           try {
+            // ログインユーザーのIDを確実に紐付ける
+            const p1IsMe = match.p1.alias === authStore.getUsername();
+            const p2IsMe = match.p2.alias === authStore.getUsername();
+
+            const leftId = p1IsMe
+              ? loggedInUserId
+              : match.p1.userId || `anon:${match.p1.alias}`;
+            const rightId = p2IsMe
+              ? loggedInUserId
+              : match.p2.userId || `anon:${match.p2.alias}`;
+
+            console.log(
+              `[LocalGamePage] Saving match: ${match.p1.alias}(${leftId}) vs ${match.p2.alias}(${rightId})`
+            );
+
             await saveGameResult({
-              leftUserId: match.p1.userId || `anon:${match.p1.alias}`,
-              rightUserId: match.p2.userId || `anon:${match.p2.alias}`,
+              leftUserId: leftId,
+              rightUserId: rightId,
               leftAlias: match.p1.alias,
               rightAlias: match.p2.alias,
               leftScore: match.p1.score ?? 0,

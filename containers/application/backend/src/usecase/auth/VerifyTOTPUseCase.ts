@@ -6,6 +6,7 @@ import { User2faRepository } from '../../domain/user/repository/User2faRepositor
 import { VerifyTOTPForm } from '../../domain/auth/form/VerifyTOTPForm.ts';
 import { getUnixTimeMs } from '../../utils/unixtime.ts';
 import speakeasy from 'speakeasy';
+import { onlineStatusService } from '../../infra/redis/OnlineStatusService.ts';
 
 export class VerifyTOTPUseCase {
   constructor(
@@ -64,6 +65,9 @@ export class VerifyTOTPUseCase {
     const key = `session:refresh:${payload.sub}`;
     const ttl = refresh.expiredAt - getUnixTimeMs();
     await this.volatileDataRepositoryRedis.set(key, refresh.token, ttl);
+
+    // Mark user as online
+    await onlineStatusService.setOnline(payload.sub);
 
     return {
       accessToken: access.token,
