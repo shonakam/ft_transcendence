@@ -213,34 +213,50 @@ export class LocalGamePage implements Component {
         ? 'Left Player'
         : 'Right Player';
 
-    // 勝利メッセージを表示（glassmorphismスタイル）
-    this.el.querySelector('.canvas-stack')!.innerHTML += `
+    // トーナメントモードの場合、先にisFinishedを予測（recordMatchResult呼び出し前）
+    // recordMatchResult呼び出しを遅延させて、メッセージ表示後に次の試合へ進む
+    const wasInTournament = this.isTournamentMode && this.currentMatch !== null;
+
+    // 勝利メッセージを表示（既存のcanvasを壊さないようにinsertAdjacentHTMLを使用）
+    const canvasStack = this.el.querySelector('.canvas-stack')!;
+    let nextStepMessage: string;
+    if (this.isTournamentMode) {
+      // 一旦「次の試合へ」と表示、終了時は後で更新
+      nextStepMessage =
+        '<p class="text-lg text-gray-400 mt-6">Next match starting soon...</p>';
+    } else {
+      nextStepMessage =
+        '<p class="text-lg text-gray-400 mt-6">Press Space to play again</p>';
+    }
+    const winningMessageHTML = `
       <div class="winning-message absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-50">
         <div class="text-center">
           <p class="text-2xl text-gray-300 mb-2">🏆 Winner 🏆</p>
           <h2 class="text-6xl font-extrabold text-white mb-4 drop-shadow-lg">${winnerName}</h2>
           <p class="text-3xl font-bold text-gray-200">${left} : ${right}</p>
-          ${this.isTournamentMode ? '<p class="text-lg text-gray-400 mt-6">Next match starting soon...</p>' : '<p class="text-lg text-gray-400 mt-6">Press Space to play again</p>'}
+          ${nextStepMessage}
         </div>
       </div>
     `;
+    canvasStack.insertAdjacentHTML('beforeend', winningMessageHTML);
 
     // 試合単体の保存（トーナメントモードでない場合、またはトーナメント内の各試合を即座に保存）
     if (authStore.isLoggedIn()) {
       this.saveSingleMatchResult(left, right).catch(console.error);
     }
 
-    // トーナメントモードの場合、結果を記録して次の試合へ
-    if (this.isTournamentMode && this.currentMatch) {
-      // 結果を記録
-      this.tournament.recordMatchResult(left, right);
+    // トーナメントモードの場合、遅延後に結果を記録して次の試合へ
+    if (wasInTournament) {
       this.currentMatch = null;
+      setTimeout(() => {
+        this.tournament.recordMatchResult(left, right);
+        const isTournamentFinished = this.tournament.isFinished();
 
-      // トーナメント終了チェック
-      if (this.tournament.isFinished()) {
-        setTimeout(() => this.showTournamentResult(), 2000);
-      }
-      // 次の試合はコールバックで自動的に通知される
+        if (isTournamentFinished) {
+          this.showTournamentResult();
+        }
+        // 次の試合がある場合はonMatchReadyコールバックで自動的に処理される
+      }, 2000);
     }
   }
 
