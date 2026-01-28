@@ -6,12 +6,17 @@ export class Ball {
   position: Vector2;
   velocity: Vector2;
   radius: number;
+  speedMultiplier: number = 1;
 
   constructor() {
     this.position = { x: CONFIG.CANVAS_WIDTH / 2, y: CONFIG.CANVAS_HEIGHT / 2 };
     this.velocity = { x: 0, y: 0 };
     this.radius = CONFIG.BALL_RADIUS;
     this.reset();
+  }
+
+  setSpeedMultiplier(multiplier: number): void {
+    this.speedMultiplier = multiplier;
   }
 
   reset() {
@@ -28,9 +33,10 @@ export class Ball {
       Math.abs(Math.sin(randomAngle)) < 0.1
     );
 
+    const speed = CONFIG.BALL_SPEED * this.speedMultiplier;
     this.velocity = {
-      x: CONFIG.BALL_SPEED * Math.cos(randomAngle),
-      y: CONFIG.BALL_SPEED * Math.sin(randomAngle),
+      x: speed * Math.cos(randomAngle),
+      y: speed * Math.sin(randomAngle),
     };
   }
 

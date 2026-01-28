@@ -18,6 +18,7 @@ export class LocalGamePage implements Component {
   private inputHandler = new LocalInputHandler();
   private pongGame: LocalGame;
   private tournament: TournamentRender;
+  private currentSpeedMultiplier: number = 1;
 
   // 現在の試合情報
   private currentMatch: {
@@ -54,11 +55,41 @@ export class LocalGamePage implements Component {
     // Hide match info initially
     this.el.querySelector('#match-info')!.classList.add('hidden');
     this.updateWinningScore();
+    this.setupSpeedSelector();
 
     // トーナメントを表示（フォームから開始）
     this.el
       .querySelector('.tournament-section')!
       .appendChild(this.tournament.getElement());
+  }
+
+  private setupSpeedSelector(): void {
+    const speedButtons = this.el.querySelectorAll('.speed-btn');
+    const speedMap: { [key: string]: number } = {
+      'speed-1x': 1,
+      'speed-5x': 5,
+      'speed-10x': 10,
+    };
+
+    speedButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const multiplier = speedMap[btn.id];
+        if (multiplier !== undefined) {
+          this.currentSpeedMultiplier = multiplier;
+          this.pongGame.setBallSpeedMultiplier(multiplier);
+          this.pongGame.state.ball.reset();
+          this.pongGame.renderer.render();
+
+          // Update button styles
+          speedButtons.forEach((b) => {
+            b.classList.remove('bg-blue-600');
+            b.classList.add('bg-white/20');
+          });
+          btn.classList.remove('bg-white/20');
+          btn.classList.add('bg-blue-600');
+        }
+      });
+    });
   }
 
   private onTournamentStart(): void {
