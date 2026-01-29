@@ -18,7 +18,7 @@ export class MessageBoard implements Component {
   constructor() {
     this.el = document.createElement('div');
     this.el.className = 'flex-1 overflow-y-auto p-6 space-y-4 bg-slate-900/50';
-    this.init();
+    // init() is called from ChatPage.init() to ensure proper timing
   }
 
   public async init() {
