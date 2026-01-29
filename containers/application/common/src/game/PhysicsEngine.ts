@@ -16,7 +16,22 @@ export class PhysicsEngine {
   ): void {
     this.updatePaddles(dt, state, inputHandler);
     if (!paddleOnly) {
-      this.updateBall(dt, state.ball);
+      this.updateBallWithCollisions(dt, state);
+    }
+  }
+
+  // ボールの位置更新と衝突判定（サブステップで高速ボールのすり抜けを防ぐ）
+  static updateBallWithCollisions(dt: number, state: GameState): void {
+    const ball = state.ball;
+    const speed = Math.sqrt(ball.velocity.x ** 2 + ball.velocity.y ** 2);
+    const maxStep = ball.radius * 0.8; // ボール半径の80%以下で移動
+    const distance = speed * dt;
+    const steps = Math.max(1, Math.ceil(distance / maxStep));
+    const subDt = dt / steps;
+
+    for (let i = 0; i < steps; i++) {
+      ball.position.x += ball.velocity.x * subDt;
+      ball.position.y += ball.velocity.y * subDt;
       this.checkCollisions(state);
     }
   }
@@ -53,12 +68,6 @@ export class PhysicsEngine {
       paddle.position.y += paddle.speed * dt;
   }
 
-  // ボールの位置更新
-  static updateBall(dt: number, ball: Ball): void {
-    ball.position.x += ball.velocity.x * dt;
-    ball.position.y += ball.velocity.y * dt;
-  }
-
   // 衝突判定ラッパー
   static checkCollisions(state: GameState): void {
     const ball = state.ball;
@@ -77,13 +86,12 @@ export class PhysicsEngine {
     const topWallY = 0;
     const bottomWallY = canvasHeight;
 
-    if (ball.velocity.y < 0) {
-      if (ballTop > topWallY) return;
+    if (ball.velocity.y < 0 && ballTop <= topWallY) {
       ball.velocity.y *= -1;
-    } else {
-      // if (ball.velocity.y > 0)
-      if (ballBottom < bottomWallY) return;
+      ball.position.y = ball.radius; // 壁の外に押し出す
+    } else if (ball.velocity.y > 0 && ballBottom >= bottomWallY) {
       ball.velocity.y *= -1;
+      ball.position.y = canvasHeight - ball.radius; // 壁の外に押し出す
     }
   }
 
@@ -94,7 +102,7 @@ export class PhysicsEngine {
     side: GameSide
   ): void {
     if (side === 'right' && ball.velocity.x < 0) return;
-    else if (side === 'left' && 0 < ball.velocity.x) return;
+    else if (side === 'left' && ball.velocity.x > 0) return;
 
     const ballLeft = ball.position.x - ball.radius;
     const ballRight = ball.position.x + ball.radius;
@@ -111,10 +119,11 @@ export class PhysicsEngine {
     if (ballBottom < paddleTop || paddleBottom < ballTop) return;
 
     ball.velocity.x *= -1;
-    // if (side === 'left') {
-    //   ball.position.x = paddleRight + ball.radius;
-    // } else if (side === 'right') {
-    //   ball.position.x = paddleLeft - ball.radius;
-    // }
+    // パドルの外に押し出す
+    if (side === 'left') {
+      ball.position.x = paddleRight + ball.radius;
+    } else if (side === 'right') {
+      ball.position.x = paddleLeft - ball.radius;
+    }
   }
 }
