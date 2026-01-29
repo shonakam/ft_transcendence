@@ -25,6 +25,19 @@ prune:
 	@docker volume prune -f
 	@docker network prune -f
 
+# -----------------
+# PRODUCTION TARGET
+# -----------------
+prod: create-network init-app
+	@bash $(APP)/tools/certs.sh
+	@bash $(APP)/tools/gen-vault-cert.sh
+	@echo "Building frontend for production..."
+	@docker compose -f $(APP)/compose.prod.yml build frontend
+	@echo "Starting application in production mode..."
+	@docker compose --env-file $(DOCKER_APP_ENV) -f $(APP)/compose.prod.yml up -d --remove-orphans
+	@bash $(APP)/tools/auto-vault-init.sh
+	@bash $(APP)/tools/hosts.sh create
+	@ $(make) up-ops
 
 ## Application Recipes
 init-app:
