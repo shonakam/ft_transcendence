@@ -47,10 +47,17 @@ init-app:
 		JWT_REFRESH=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
 		JWT_TMP=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
 		COOKIE=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
-		sed -i '' "s|^JWT_ACCESS_SECRET=.*|JWT_ACCESS_SECRET=\"$$JWT_ACCESS\"|" $(APP)/.env.local; \
-		sed -i '' "s|^JWT_REFRESH_SECRET=.*|JWT_REFRESH_SECRET=\"$$JWT_REFRESH\"|" $(APP)/.env.local; \
-		sed -i '' "s|^JWT_TMP_AUTH_SECRET=.*|JWT_TMP_AUTH_SECRET=\"$$JWT_TMP\"|" $(APP)/.env.local; \
-		sed -i '' "s|^COOKIE_SECRET=.*|COOKIE_SECRET=\"$$COOKIE\"|" $(APP)/.env.local; \
+		if [ "$$(uname)" = "Darwin" ]; then \
+			sed -i '' "s|^JWT_ACCESS_SECRET=.*|JWT_ACCESS_SECRET=\"$$JWT_ACCESS\"|" $(APP)/.env.local; \
+			sed -i '' "s|^JWT_REFRESH_SECRET=.*|JWT_REFRESH_SECRET=\"$$JWT_REFRESH\"|" $(APP)/.env.local; \
+			sed -i '' "s|^JWT_TMP_AUTH_SECRET=.*|JWT_TMP_AUTH_SECRET=\"$$JWT_TMP\"|" $(APP)/.env.local; \
+			sed -i '' "s|^COOKIE_SECRET=.*|COOKIE_SECRET=\"$$COOKIE\"|" $(APP)/.env.local; \
+		else \
+			sed -i "s|^JWT_ACCESS_SECRET=.*|JWT_ACCESS_SECRET=\"$$JWT_ACCESS\"|" $(APP)/.env.local; \
+			sed -i "s|^JWT_REFRESH_SECRET=.*|JWT_REFRESH_SECRET=\"$$JWT_REFRESH\"|" $(APP)/.env.local; \
+			sed -i "s|^JWT_TMP_AUTH_SECRET=.*|JWT_TMP_AUTH_SECRET=\"$$JWT_TMP\"|" $(APP)/.env.local; \
+			sed -i "s|^COOKIE_SECRET=.*|COOKIE_SECRET=\"$$COOKIE\"|" $(APP)/.env.local; \
+		fi; \
 		echo "Generated JWT secrets in .env.local"; \
 	fi
 
