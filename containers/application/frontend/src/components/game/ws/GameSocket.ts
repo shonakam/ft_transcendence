@@ -187,10 +187,7 @@ export class GameSocket {
         this.callbacks?.onGameLeft?.(message.payload.gameId);
         break;
       case 'opponentDisconnected':
-        toaster.show(
-          `対戦相手が切断しました`,
-          'warning'
-        );
+        toaster.show(`対戦相手が切断しました`, 'warning');
         this.callbacks?.onOpponentDisconnected?.(
           message.payload.gameId,
           message.payload.opponentId

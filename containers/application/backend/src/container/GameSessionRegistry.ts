@@ -29,8 +29,8 @@ export class GameSessionRegistry {
     }
     const inputHandler = new RemoteInputHandler();
     inputHandler.setWebSocket('left', socket);
-    const gameServer = new GameServer(inputHandler);
     const gameId = this.gameIdCounter;
+    const gameServer = new GameServer(inputHandler, gameId);
     this.socketToGameEntry.set(socket, {
       gameId: gameId,
       gameServer: gameServer,

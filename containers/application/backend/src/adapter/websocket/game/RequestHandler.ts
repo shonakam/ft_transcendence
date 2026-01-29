@@ -73,16 +73,17 @@ export class RequestHandler {
             TAG.GAME,
             `RequestHandler: Notified opponent of disconnection in game ${gameId}`,
           );
+
+          // 相手のソケットもゲームから削除
+          gameRegistry.deleteUserFromGame(opponentSocket);
         }
 
-        // 誰もいなくなったらゲームを削除
-        if (!inputHandler.hasAnySocket()) {
-          gameRegistry.deleteGameByGameId(gameId);
-          minilog.i(
-            TAG.GAME,
-            `RequestHandler: Game ${gameId} deleted (no players remaining)`,
-          );
-        }
+        // ゲームルームを削除
+        gameRegistry.deleteGameByGameId(gameId);
+        minilog.i(
+          TAG.GAME,
+          `RequestHandler: Game ${gameId} deleted (player disconnected)`,
+        );
       }
     }
 

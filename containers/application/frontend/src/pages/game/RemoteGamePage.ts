@@ -193,7 +193,10 @@ export class RemoteGamePage implements Component {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private handleOpponentDisconnected(_gameId: number, _opponentId: string): void {
+  private handleOpponentDisconnected(
+    _gameId: number,
+    _opponentId: string
+  ): void {
     // 相手が切断した場合、ゲーム状態をリセット
     this.resetGameState();
   }
