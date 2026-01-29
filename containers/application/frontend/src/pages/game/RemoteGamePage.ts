@@ -10,6 +10,8 @@ import CONFIG from '@shonakam/common/game/GameConfig';
 import { GameSocket } from '../../components/game/ws/GameSocket';
 import type { GameState } from '@shonakam/common';
 import { authStore } from '../../store/authStore';
+import { chatService } from '../../services/chat/ChatService';
+import { toaster } from '../../components/common/Toaster';
 
 export class RemoteGamePage implements Component {
   el: HTMLElement = document.createElement('main');
@@ -27,6 +29,7 @@ export class RemoteGamePage implements Component {
   private leftPlayerAlias: string | null = null;
   private rightPlayerAlias: string | null = null;
   private pendingJoinGameId: number | null = null; // URLパラメータからの自動参加用
+  private pendingInviteUserId: string | null = null; // 招待送信先のユーザーID
 
   constructor() {
     this.el.innerHTML = remoteGameTemplate;
@@ -109,6 +112,13 @@ export class RemoteGamePage implements Component {
   // WebSocket コールバックハンドラ
   private handleRegistered(userId: string): void {
     this.userId = userId;
+    
+    // 招待モード: ゲームを作成して招待を送る
+    if (this.pendingInviteUserId !== null) {
+      this.socket.sendCreateGame();
+      return;
+    }
+    
     // URLパラメータからのゲームIDがあれば自動参加
     if (this.pendingJoinGameId !== null) {
       this.socket.sendJoinGame(this.pendingJoinGameId);
@@ -116,7 +126,7 @@ export class RemoteGamePage implements Component {
     }
   }
 
-  private handleGameGenerated(gameId: number, state: GameState): void {
+  private async handleGameGenerated(gameId: number, state: GameState): Promise<void> {
     this.currentGameId = gameId;
     this.mySide = 'left'; // ゲーム作成者は左
     this.leftPlayer = this.userId;
@@ -127,6 +137,20 @@ export class RemoteGamePage implements Component {
     this.disableGameControls();
     // 入力送信ループを開始
     this.pongGame.start();
+    
+    // 招待モード: ゲーム作成後に招待を送信
+    if (this.pendingInviteUserId !== null) {
+      try {
+        const room = await chatService.getOrCreateDMRoom(this.pendingInviteUserId);
+        const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
+        await chatService.sendMessage(room.id, inviteLink, 'invitation');
+        toaster.show('ゲーム招待を送信しました。相手を待っています...', 'success');
+      } catch (error) {
+        toaster.show('招待の送信に失敗しました', 'error');
+        console.error('Failed to send game invitation:', error);
+      }
+      this.pendingInviteUserId = null;
+    }
   }
 
   private handlePlayerAdded(gameId: number, side: 'left' | 'right'): void {
@@ -394,9 +418,20 @@ export class RemoteGamePage implements Component {
       `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
   }
 
-  // URLクエリパラメータからgameIdを取得して自動参加を準備
+  // URLクエリパラメータからgameIdまたはinviteUserIdを取得
   private checkUrlGameIdParam(): void {
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // 招待送信モード: inviteUserIdがある場合はゲーム作成後に招待を送る
+    const inviteUserId = urlParams.get('inviteUserId');
+    if (inviteUserId) {
+      this.pendingInviteUserId = inviteUserId;
+      // URLパラメータをクリア
+      this.clearUrlParams();
+      return;
+    }
+    
+    // ゲーム参加モード: gameIdがある場合は自動参加
     const gameIdStr = urlParams.get('gameId');
     if (gameIdStr) {
       const gameId = parseInt(gameIdStr, 10);
@@ -411,6 +446,14 @@ export class RemoteGamePage implements Component {
         }
       }
     }
+  }
+
+  // URLからパラメータを削除
+  private clearUrlParams(): void {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('gameId');
+    url.searchParams.delete('inviteUserId');
+    window.history.replaceState({}, '', url.pathname);
   }
 
   // URLからgameIdパラメータを削除

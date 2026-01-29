@@ -29,6 +29,9 @@ export class GameStatsPage implements Component {
     this.renderLoading();
 
     try {
+      // 認証状態を先に確認してからレコードを取得する
+      // ブラウザ更新時にauthStoreの状態が未初期化の場合があるため
+      await authStore.checkAuthStatus();
       this.records = await getGameStats({ limit: 50 });
       this.render();
     } catch (error) {
