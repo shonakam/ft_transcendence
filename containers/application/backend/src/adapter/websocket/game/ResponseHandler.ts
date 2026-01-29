@@ -88,4 +88,12 @@ export class ResponseHandler {
   static gameLeft(socket: WebSocket, gameId: number): void {
     this.sendMessage(socket, 'gameLeft', { gameId });
   }
+
+  static opponentDisconnected(
+    socket: WebSocket,
+    gameId: number,
+    opponentId: string,
+  ): void {
+    this.sendMessage(socket, 'opponentDisconnected', { gameId, opponentId });
+  }
 }

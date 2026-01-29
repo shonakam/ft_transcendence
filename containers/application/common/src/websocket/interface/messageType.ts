@@ -32,5 +32,9 @@ export type ServerMessage =
   | { type: 'gameState'; payload: GameState }
   | { type: 'playerLeft'; payload: { gameId: number; playerId: string } }
   | { type: 'gameLeft'; payload: { gameId: number } }
+  | {
+      type: 'opponentDisconnected';
+      payload: { gameId: number; opponentId: string };
+    }
   | { type: 'error'; payload: { message: string } }
   | { type: 'demoResponse'; payload: { message: string } };

@@ -9,16 +9,19 @@ import { GameSide } from '@shonakam/common';
 
 import { RemoteInputHandler } from './RemoteInputHandler.ts';
 import { ResponseHandler } from '../../../adapter/websocket/game/ResponseHandler.ts';
+import minilog, { TAG } from '../../../utils/minilog.ts';
 
 export class GameServer implements PongGame {
   input: RemoteInputHandler;
   state: GameState;
+  gameId: number;
   lastFrameTime: number | null = null;
   private readonly loopCallback: (time: number) => void;
   private isReadyLoopRunning = false;
 
-  constructor(inputHandler: RemoteInputHandler) {
+  constructor(inputHandler: RemoteInputHandler, gameId: number) {
     this.input = inputHandler;
+    this.gameId = gameId;
     this.state = new GameState();
     this.loopCallback = this.loop.bind(this);
     // send initial state to clients here if needed
@@ -130,6 +133,10 @@ export class GameServer implements PongGame {
 
       // Only save if both players have IDs
       if (!leftUserId || !rightUserId) {
+        minilog.w(
+          TAG.GAME,
+          `GameServer: Cannot save result - missing player IDs (left: ${leftUserId}, right: ${rightUserId})`,
+        );
         return;
       }
 
@@ -143,8 +150,37 @@ export class GameServer implements PongGame {
         winner: this.state.winner ?? 'left',
         endedAt: Date.now(),
       });
+
+      minilog.i(
+        TAG.GAME,
+        `GameServer: Game ${this.gameId} result saved successfully`,
+      );
     } catch (err) {
       console.error('RemotePongGameServer: Failed to save game result:', err);
+    } finally {
+      // ゲーム終了後、ルームをクリーンアップ
+      this.cleanupGameRoom();
+    }
+  }
+
+  private cleanupGameRoom(): void {
+    const gameRegistry = container.gameSessionRegistry;
+    const socketRegistry = container.gameSocketRegistry;
+
+    // 両プレイヤーのソケット登録を解除
+    const sockets = this.input.getSockets();
+    for (const socket of sockets) {
+      if (socket) {
+        gameRegistry.deleteUserFromGame(socket);
+      }
+    }
+
+    // ゲームルームを削除
+    if (gameRegistry.deleteGameByGameId(this.gameId)) {
+      minilog.i(
+        TAG.GAME,
+        `GameServer: Game ${this.gameId} room deleted after finish`,
+      );
     }
   }
 }

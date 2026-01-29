@@ -1,7 +1,6 @@
 import { Component } from '../../interface/Component';
 import { chatService } from '../../services/chat/ChatService';
 import { router } from '../../router/router';
-import { GameSocket } from '../../components/game/ws/GameSocket';
 import { getUserById } from '../../services/user/dashboard';
 import { getUserWinRate, UserWinRate } from '../../services/game/stats';
 import { userRelationshipService } from '../../services/user/UserRelationshipService';
@@ -183,51 +182,8 @@ export class UserMenu implements Component {
   }
 
   private async createGameAndInvite(targetUserId: string) {
-    const socket = new GameSocket();
-
-    const gameCreated = new Promise<number>((resolve, reject) => {
-      // Set timeout to avoid hanging
-      const timeout = setTimeout(() => {
-        socket.disconnect();
-        reject(new Error('Game creation timed out'));
-      }, 5000);
-
-      socket.connect({
-        onRegistered: () => {
-          // Once registered, create the game
-          socket.sendCreateGame();
-        },
-        onGameGenerated: (gameId: number) => {
-          clearTimeout(timeout);
-          resolve(gameId);
-        },
-        onError: (err) => {
-          clearTimeout(timeout);
-          reject(new Error(err));
-        },
-        // We need to implement other required methods of GameSocketCallbacks interface even if empty
-        onPlayerAdded: () => {},
-        onOpponentJoined: () => {},
-        onGameReady: () => {},
-        onGameStart: () => {},
-        onGameState: () => {},
-        onPlayerLeft: () => {},
-        onGameLeft: () => {},
-      });
-    });
-
-    try {
-      const gameId = await gameCreated;
-
-      // Send invitation
-      const room = await chatService.getOrCreateDMRoom(targetUserId);
-      const inviteLink = `${window.location.origin}/game/remote?gameId=${gameId}`;
-      await chatService.sendMessage(room.id, inviteLink, 'invitation');
-
-      socket.disconnect();
-    } catch (error) {
-      toaster.show('Failed to create game invitation', 'error');
-      socket.disconnect();
-    }
+    // ゲームページに遷移し、そこでゲームを作成して招待を送る
+    // これによりWebSocket接続が維持される
+    router.navigateTo(`/game/remote?inviteUserId=${targetUserId}`);
   }
 }

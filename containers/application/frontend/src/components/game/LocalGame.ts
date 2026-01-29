@@ -25,6 +25,10 @@ export class LocalGame implements PongGame {
     this.loopCallback = this.loop.bind(this);
   }
 
+  setBallSpeedMultiplier(multiplier: number): void {
+    this.state.ball.setSpeedMultiplier(multiplier);
+  }
+
   initRender(): void {
     this.renderer.renderStaticLayer();
     this.renderer.renderDynamicLayer();

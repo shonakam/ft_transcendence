@@ -41,7 +41,18 @@ prod: create-network init-app
 
 ## Application Recipes
 init-app:
-	@cp -n $(APP)/.env.example $(APP)/.env.local || true
+	@if [ ! -f $(APP)/.env.local ]; then \
+		cp $(APP)/.env.example $(APP)/.env.local; \
+		JWT_ACCESS=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
+		JWT_REFRESH=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
+		JWT_TMP=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
+		COOKIE=$$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"); \
+		sed -i '' "s|^JWT_ACCESS_SECRET=.*|JWT_ACCESS_SECRET=\"$$JWT_ACCESS\"|" $(APP)/.env.local; \
+		sed -i '' "s|^JWT_REFRESH_SECRET=.*|JWT_REFRESH_SECRET=\"$$JWT_REFRESH\"|" $(APP)/.env.local; \
+		sed -i '' "s|^JWT_TMP_AUTH_SECRET=.*|JWT_TMP_AUTH_SECRET=\"$$JWT_TMP\"|" $(APP)/.env.local; \
+		sed -i '' "s|^COOKIE_SECRET=.*|COOKIE_SECRET=\"$$COOKIE\"|" $(APP)/.env.local; \
+		echo "Generated JWT secrets in .env.local"; \
+	fi
 
 up-app: create-network init-app
 	@bash $(APP)/tools/certs.sh

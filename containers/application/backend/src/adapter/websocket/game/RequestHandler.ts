@@ -33,23 +33,68 @@ export class RequestHandler {
   // User un-registration
   static unRegisterUser(socket: WebSocket): void {
     if (this.checkRegistration(socket) === false) return;
+
+    const socketRegistry = container.gameSocketRegistry;
+    const disconnectedUserId = socketRegistry.getUserIdBySocket(socket);
+
+    // ゲームに参加中の場合、相手に通知を送る
     if (this.checkGameExistence(socket) === true) {
       const gameRegistry = container.gameSessionRegistry;
-      if (gameRegistry.deleteUserFromGame(socket) === false) {
-        this.errorLog(socket, 'Failed to remove user from the game.');
-        return;
+      const gameEntry = gameRegistry.getGameEntryBySocket(socket);
+
+      if (gameEntry) {
+        const inputHandler = gameEntry.inputHandler;
+        const gameId = gameEntry.gameId;
+        const gameServer = gameEntry.gameServer;
+
+        // 相手のソケットを取得（通知用）
+        const mySide = inputHandler.getSideBySocket(socket);
+        const opponentSide = mySide === 'left' ? 'right' : 'left';
+        const opponentSocket = inputHandler.getSocket(opponentSide);
+
+        // ゲームループを停止（ステータスをfinishedにしてループを終了させる）
+        gameServer.state.setStatus('finished');
+        gameServer.stopReadyLoop();
+
+        // ゲームからユーザーを削除
+        if (gameRegistry.deleteUserFromGame(socket) === false) {
+          this.errorLog(socket, 'Failed to remove user from the game.');
+          return;
+        }
+
+        // 相手プレイヤーに切断を通知
+        if (opponentSocket) {
+          ResponseHandler.opponentDisconnected(
+            opponentSocket,
+            gameId,
+            disconnectedUserId || '不明',
+          );
+          minilog.i(
+            TAG.GAME,
+            `RequestHandler: Notified opponent of disconnection in game ${gameId}`,
+          );
+
+          // 相手のソケットもゲームから削除
+          gameRegistry.deleteUserFromGame(opponentSocket);
+        }
+
+        // ゲームルームを削除
+        gameRegistry.deleteGameByGameId(gameId);
+        minilog.i(
+          TAG.GAME,
+          `RequestHandler: Game ${gameId} deleted (player disconnected)`,
+        );
       }
     }
-    const socketRegistry = container.gameSocketRegistry;
-    const userId = socketRegistry.getUserIdBySocket(socket);
+
     if (socketRegistry.deleteUserBySocket(socket) === false) {
-      this.errorLog(socket, `Failed to unregister user ${userId}`);
+      this.errorLog(socket, `Failed to unregister user ${disconnectedUserId}`);
       return;
     }
-    ResponseHandler.unregistered(socket, userId);
+    ResponseHandler.unregistered(socket, disconnectedUserId);
     minilog.i(
       TAG.GAME,
-      `RequestHandler: User ${userId} unregistered successfully`,
+      `RequestHandler: User ${disconnectedUserId} unregistered successfully`,
     );
   }
 
