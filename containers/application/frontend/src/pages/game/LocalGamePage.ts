@@ -171,7 +171,14 @@ export class LocalGamePage implements Component {
 
   private keydownHandler = (event: KeyboardEvent) => {
     if (event.code === 'Space') {
-      if (
+      if (this.pongGame.state.status === 'finished' && !this.isTournamentMode) {
+        // ゲーム終了後のリスタート
+        this.resetGameForNewMatch();
+        // 勝利メッセージを削除
+        const winningMessage = this.el.querySelector('.winning-message');
+        if (winningMessage) winningMessage.remove();
+        this.pongGame.start();
+      } else if (
         this.pongGame.state.status === 'ready' ||
         this.pongGame.state.status === 'paused'
       ) {
