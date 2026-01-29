@@ -27,6 +27,15 @@ export class IdP42Service {
       redirect_uri: config.auth.idp.redirect_uri,
     };
 
+    // Debug: リクエストデータを確認
+    console.log('IdP42Service.trade - Request data:', {
+      grant_type: data.grant_type,
+      client_id: data.client_id ? `${data.client_id.substring(0, 20)}...` : 'EMPTY',
+      client_secret: data.client_secret ? `${data.client_secret.substring(0, 20)}...` : 'EMPTY',
+      redirect_uri: data.redirect_uri,
+      code: data.code ? `${data.code.substring(0, 20)}...` : 'EMPTY',
+    });
+
     try {
       const response = await this.httpClient.postForm<IdP42Response>(
         config.auth.idp.providers.ft.path,
