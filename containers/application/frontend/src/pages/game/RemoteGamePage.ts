@@ -74,6 +74,8 @@ export class RemoteGamePage implements Component {
       onPlayerLeft: (gameId, playerId) =>
         this.handlePlayerLeft(gameId, playerId),
       onGameLeft: (gameId) => this.handleGameLeft(gameId),
+      onOpponentDisconnected: (gameId, opponentId) =>
+        this.handleOpponentDisconnected(gameId, opponentId),
       onError: (message) => this.handleError(message),
     });
   }
@@ -187,6 +189,12 @@ export class RemoteGamePage implements Component {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private handleGameLeft(_gameId: number): void {
     // 自分が退出した場合、状態をリセット
+    this.resetGameState();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private handleOpponentDisconnected(_gameId: number, _opponentId: string): void {
+    // 相手が切断した場合、ゲーム状態をリセット
     this.resetGameState();
   }
 

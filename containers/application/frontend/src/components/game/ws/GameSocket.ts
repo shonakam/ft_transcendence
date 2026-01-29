@@ -28,6 +28,7 @@ export type GameSocketCallbacks = {
   onGameState?: (state: GameState) => void;
   onPlayerLeft?: (gameId: number, playerId: string) => void;
   onGameLeft?: (gameId: number) => void;
+  onOpponentDisconnected?: (gameId: number, opponentId: string) => void;
   onError?: (message: string) => void;
 };
 
@@ -184,6 +185,16 @@ export class GameSocket {
       case 'gameLeft':
         toaster.show('ゲームから退出しました', 'info');
         this.callbacks?.onGameLeft?.(message.payload.gameId);
+        break;
+      case 'opponentDisconnected':
+        toaster.show(
+          `対戦相手が切断しました`,
+          'warning'
+        );
+        this.callbacks?.onOpponentDisconnected?.(
+          message.payload.gameId,
+          message.payload.opponentId
+        );
         break;
       case 'demoResponse':
         break;
